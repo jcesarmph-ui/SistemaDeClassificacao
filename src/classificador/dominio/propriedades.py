@@ -33,6 +33,11 @@ class Propriedade(StrEnum):
         return _NOMES[self]
 
     @property
+    def rotulo(self) -> str:
+        """Nome curto usado nos avisos, ex.: "alongamento Lo50" ou "Mn"."""
+        return _ROTULOS.get(self, self.value)
+
+    @property
     def unidade(self) -> str:
         return _UNIDADES.get(self, "%")
 
@@ -47,6 +52,12 @@ _MECANICAS = {
     Propriedade.AL_LO50,
     Propriedade.AL_LO80,
     Propriedade.EMBUTIMENTO,
+}
+
+_ROTULOS = {
+    Propriedade.AL_LO50: "alongamento Lo50",
+    Propriedade.AL_LO80: "alongamento Lo80",
+    Propriedade.EMBUTIMENTO: "embutimento",
 }
 
 _UNIDADES = {

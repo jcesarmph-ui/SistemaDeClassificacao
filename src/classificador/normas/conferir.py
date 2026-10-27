@@ -6,6 +6,7 @@ Uso:  python -m classificador.normas.conferir dados/normas/nbr-5915-2.yaml
 import sys
 from decimal import Decimal
 
+from classificador.dominio.formatacao import num as _num
 from classificador.dominio.modelos import FaixaEspessura, Limite, Norma
 from classificador.dominio.propriedades import Propriedade
 from classificador.normas.carregador import ErroNorma, carregar_norma
@@ -17,10 +18,6 @@ _MECANICAS = [
     Propriedade.AL_LO80,
     Propriedade.EMBUTIMENTO,
 ]
-
-
-def _num(valor: Decimal) -> str:
-    return str(valor).replace(".", ",")
 
 
 def _celula(limite: Limite | None, tipo_coluna: str) -> str:
