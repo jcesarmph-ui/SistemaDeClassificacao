@@ -9,7 +9,10 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). Em andamento: **Fase 0 – Fundação** (ver "Roteiro").
+- Arquitetura **decidida** (2026-10-27). **Fase 0 – Fundação concluída.** Próxima: **Fase 1 – Domínio +
+  formato YAML** (ver "Roteiro").
+- Ambiente: `.venv` criado; rodar sempre `.venv/Scripts/python -m pytest` / `-m ruff check .`.
+- Permissões em `.claude/settings.json` (testes, ruff, git status/diff/log/add/commit liberados; push pergunta).
 - Pendências restantes na seção "Pendências".
 
 ## Objetivo

@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/fase-0_funda%C3%A7%C3%A3o-blue?style=flat-square" alt="Fase"/>
+  <img src="https://img.shields.io/badge/fase-1_modelo_de_dados-blue?style=flat-square" alt="Fase"/>
   <img src="https://img.shields.io/badge/normas-ABNT-009739?style=flat-square" alt="Normas ABNT"/>
   <img src="https://img.shields.io/badge/idioma-pt--BR-green?style=flat-square" alt="Idioma"/>
 </p>
@@ -159,7 +159,7 @@ python -m venv .venv
 
 ## 🗺️ Roteiro
 
-- [ ] **Fase 0** — Fundação: repositório, ADRs, ambiente Python *(em andamento)*
+- [x] **Fase 0** — Fundação: repositório, ADRs, ambiente Python, permissões do Claude Code
 - [ ] **Fase 1** — Modelo de dados e formato YAML das normas
 - [ ] **Fase 2** — Motor de classificação (com testes primeiro)
 - [ ] **Fase 3** — Transcrição das demais normas
