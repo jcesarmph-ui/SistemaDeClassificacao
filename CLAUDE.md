@@ -134,7 +134,11 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   `docs/decisoes/` (ADRs), `dados/` (fora do Git).
 - **Repositório GitHub é PÚBLICO:** `normas_claude/` e `dados/` (normas transcritas, casos reais) nunca
   são versionados. Testes versionados usam uma **norma fictícia**; testes com normas reais rodam só localmente.
-- Sem VS Code: o usuário acompanha pelo terminal (diffs, `git diff`) e Bloco de Notas.
+- Sem VS Code: o usuário acompanha pelo terminal (diffs, `git diff`, `type arquivo`).
+- **Não abrir `.md` no Bloco de Notas:** o Bloco de Notas do Windows 11 reformata Markdown ao salvar e
+  insere escapes (`\_`, `\&`, `\[`, `\---`) que quebram links, badges, YAML e diagramas. Arquivos são
+  editados pelo Claude Code; se aparecer alteração externa com esses escapes, conferir com `git diff`
+  e restaurar.
 
 ## Roteiro (cada fase = branch + PR)
 0. Fundação: `.gitignore`, ADRs, `pyproject.toml`, estrutura de pastas, `.claude/settings.json`.
