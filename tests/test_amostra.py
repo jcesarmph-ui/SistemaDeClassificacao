@@ -52,3 +52,19 @@ def test_valor_negativo_e_recusado():
         Amostra(acabamento=Acabamento.FF, valores={Propriedade.LE: Decimal("-1")})
     with pytest.raises(ValueError, match="negativ"):
         Amostra(acabamento=Acabamento.FF, espessura_nominal=Decimal("-0.5"))
+
+
+def test_espessura_real_e_largura_para_a_tolerancia():
+    amostra = Amostra(
+        acabamento=Acabamento.FF,
+        espessura_nominal=Decimal("0.80"),
+        espessura_real=Decimal("0.82"),
+        largura=Decimal("1250"),
+    )
+    assert (amostra.espessura_real, amostra.largura) == (Decimal("0.82"), Decimal("1250"))
+    assert Amostra(acabamento=Acabamento.FF).espessura_real is None
+
+
+def test_largura_negativa_e_recusada():
+    with pytest.raises(ValueError, match="largura"):
+        Amostra(acabamento=Acabamento.FF, largura=Decimal("-1"))

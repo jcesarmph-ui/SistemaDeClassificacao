@@ -56,12 +56,14 @@ class Amostra:
     valores: Mapping[Propriedade, Decimal | None] = field(default_factory=dict)
     espessura_nominal: Decimal | None = None  # mm — usada nas notas de rodapé e no embutimento
     camada: Decimal | None = None  # g/m² (EG: por face); vazio ou zero = sem revestimento
+    espessura_real: Decimal | None = None  # mm medida — comparada com a nominal na tolerância
+    largura: Decimal | None = None  # mm — escolhe a coluna da tabela de tolerância
 
     def __post_init__(self) -> None:
         for prop, valor in self.valores.items():
             if valor is not None and valor < 0:
                 raise ValueError(f"{prop.nome_extenso} não pode ser negativo ({valor})")
-        for nome in ("espessura_nominal", "camada"):
+        for nome in ("espessura_nominal", "camada", "espessura_real", "largura"):
             valor = getattr(self, nome)
             if valor is not None and valor < 0:
                 raise ValueError(f"{nome.replace('_', ' ')} não pode ser negativa ({valor})")
