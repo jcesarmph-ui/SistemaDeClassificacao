@@ -9,8 +9,29 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas** (Fase 4: branch
-  `fase-4-tolerancia`, PR para a `main`). Próxima: **Fase 5 – Interface PySide6**.
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas.**
+  **Fase 5 – Interface PySide6 EM ANDAMENTO** (branch `fase-5-interface`, enviada ao GitHub, **sem
+  PR ainda**). Parada em 2026-10-27 a pedido do usuário ("por hoje está bom").
+- **Fase 5 — feito até agora** (etapas 1–6 do plano): `interface/entrada.py` (`ler_numero`,
+  `montar_amostra`, `ErroEntrada`), `interface/servico.py` (`Servico.carregar`, `classificar`,
+  `pesquisar`, autocompletar, `fabricante()` pelo prefixo; acrescenta grupos para graus sem
+  correlatas, ex. ZAR, para a pesquisa achá-los), `interface/janela.py` (`JanelaPrincipal`),
+  `interface/app.py` + `__main__.py` (abre com `.venv/Scripts/python -m classificador`, maximizada).
+  Logo copiado para `dados/logo_mg.png` (fora do Git; faixa escura atrás porque o texto do logo é
+  branco). Testes da janela em modo offscreen (`tests/test_janela.py`); fixture `pasta` em
+  `tests/conftest.py`. O usuário abriu o programa: **"Funcionou"**.
+- **Fase 5 — retomar amanhã:**
+  1. Perguntar ao usuário o retorno visual do layout (letras, posições, cores, espaço vazio na tela
+     dele — eu só testei em 1600×900) e se algum comportamento ficou diferente do esperado.
+  2. Ajustes pedidos; depois etapa 7: ADR 0009 (interface), README (como abrir + "foto" da tela,
+     tirada com o script de renderização sem mostrar a janela: `WA_DontShowOnScreen` + `grab()`),
+     roteiro, e abrir o PR da Fase 5.
+- Decisões da Fase 5: 7 acabamentos na lista; folha de siglas não aparece na tela; erros de
+  digitação em vermelho nos avisos (sem pop-up); "Limpar valores" mantém acabamento e camada,
+  "Nova classificação" apaga tudo; vírgula ou ponto decimal, "%" opcional, **sem separador de
+  milhar** (largura 1244); pesquisa reversa mostra faixas em cinza ao lado dos campos (lista para
+  escolher se achar mais de um grau); histórico/lixeira ficam para a Fase 6.
+- Ao rodar o programa pelo `!`, o terminal passa para segundo plano após 2 min (normal).
 - Fase 4 entregou: `Amostra.espessura_real/largura`; `NormaTolerancia` (`dominio/modelos.py`,
   `Faixa` genérica), `carregar_tolerancia(s)`; `tolerancia/verificar.py` (`verificar_tolerancia`);
   `Saida.tolerancia`; folha com `tolerancia:` por acabamento; NBR 11888 e NBR 7013 em

@@ -267,8 +267,14 @@ Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato
 .\.venv\Scripts\python.exe -m classificador.normas.conferir tests\dados\norma-ficticia.yaml
 ```
 
-> A interface ainda não está disponível — o motor de classificação já funciona e é testado
-> automaticamente; a tela chega na Fase 5.
+Para abrir o programa (precisa da pasta local `dados/` com as normas transcritas):
+
+```powershell
+.\.venv\Scripts\python.exe -m classificador
+```
+
+> Interface em desenvolvimento (Fase 5): classificação, tolerância, correlatas e pesquisa reversa
+> já funcionam na tela; histórico e lixeira chegam na Fase 6.
 
 ## 🗺️ Roteiro
 
@@ -280,7 +286,7 @@ Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato
   reversa por qualquer norma
 - [x] **Fase 4** — Tolerância de espessura: NBR 11888 (Tab. 11) e NBR 7013 (Tab. 1–4) transcritas e
   conferidas; dentro/fora com intervalo e norma
-- [ ] **Fase 5** — Interface PySide6
+- [ ] **Fase 5** — Interface PySide6 *(em andamento: tela principal pronta, faltam ajustes visuais)*
 - [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)
 - [ ] **Fase 7** — Executável `.exe`
 - [ ] **Fase 8** — Detecção de outliers com machine learning
