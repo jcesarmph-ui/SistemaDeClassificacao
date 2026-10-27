@@ -62,7 +62,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   | EG | NBR 5915-2 (EM…EEP G3) | — | `1006/08 EG _/_` (teórico) |
   | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZC…ZEE 4) | NBR 7008-3 (ZAR) | aviso "material mais duro que o último ZAR" (teórico) |
 - **EG (eletrolítico)** é classificado pela norma **sem revestimento** (NBR 5915-2, com NBR 16964 para o
-  revestimento), e a saída recebe `EG` + camada por face: ex. `EEP G3 EG 50/50`.
+  revestimento — **não é preciso transcrever a NBR 16964**), e a saída recebe `EG` + camada por face: ex. `EEP G3 EG 50/50`.
   Graus EG existentes na folha de classificações: EM, EP, EEP G1, EEP G2, EEP G3 (**não há EEP G4 EG**).
   EG que atende EEP G4 → resultado `EEP G3 EG` (mais nobre disponível para EG). EG que não atende nem
   EM → `1006/08 EG _/_` (caso teórico).
@@ -84,7 +84,19 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - O campo **RESULTADO** mostra **somente** a classificação NBR + camada (ex.: `EEP G2 - Z275`).
 - Em campos separados: "De acordo com a norma NBR …", **normas correlatas** (da planilha de
   equivalência), avisos (valores faltando, "quase passou", outlier) e tolerância de espessura.
-- Normas correlatas: ao passar o mouse, tooltip com o **fabricante** (HES → Honda, TSG → Toyota, …).
+- Normas correlatas: ao passar o mouse, tooltip com o **fabricante/emissor** (prefixo da norma):
+
+  | Prefixo | Fabricante / emissor | Confiança |
+  |---|---|---|
+  | HES | Honda (Honda Engineering Standard) | confirmado pelo usuário |
+  | TSG | Toyota | confirmado pelo usuário |
+  | GMW, GMW EMS ME | General Motors | alta |
+  | VW | Volkswagen | alta |
+  | MS 50002 | Stellantis (ex-Fiat Chrysler/FCA) | confirmado em pesquisa |
+  | FG 528xx | Fiat (Stellantis) | **provável — confirmar** |
+  | EN, DIN EN | Norma europeia (CEN/DIN) — não é montadora | alta |
+  | JIS | Norma japonesa (JSA) — não é montadora | alta |
+  | NBR | ABNT | alta |
 
 ### Pesquisa reversa
 - Botão de pesquisa reversa: o usuário digita **qualquer norma** (NBR ou correlata, com autocompletar
@@ -109,7 +121,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 ### Tolerância de espessura
 - **Zincados (EG, GA ZF, GI ZM, GI ZN):** NBR 7013 Tab. 1–4 — uma tabela para cada faixa de LE mín
   do grau; +0,01 mm para revestimento ≥ Z275.
-- **Laminado a frio (FF):** NBR 11888 Tab. 11.
+- **Sem revestimento (FF, FQ, FQ DO):** NBR 11888 Tab. 11 (FQ usa a mesma tabela do FF).
 
 ## Arquitetura (decidida em 2026-10-27)
 - **Python 3.12+**, interface **PySide6** (desktop Windows, `.exe` via PyInstaller), histórico em **SQLite**.
@@ -149,10 +161,11 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   tolerância nos 15 m das extremidades (NBR 11888).
 
 ## Pendências (decidir com o usuário)
-1. Dados faltantes: NBR 16964 (EG); tolerância para FQ.
-2. Tolerância padrão: normal ou restritiva?
-3. A "folha de siglas" do upload é a do `classificações.pdf`? Deve ser substituível sem mexer no programa?
-4. Fabricantes dos prefixos de normas correlatas além de HES/TSG (GMW, VW, MS, FG, EN…) — confirmar lista.
+1. Tolerância padrão: normal ou restritiva?
+2. Confirmar FG 528xx = Fiat (pesquisa não achou fonte pública).
+
+## Decisões menores já tomadas
+- Folha de siglas = `classificações.pdf` (é imagem escaneada → transcrita para `dados/siglas.yaml`).
 
 ## Versionamento
 - Git com repositório no GitHub (branch `main`), **público**.
