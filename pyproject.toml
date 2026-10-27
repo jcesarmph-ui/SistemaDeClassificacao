@@ -27,7 +27,8 @@ dev = [
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+# dados/testes/ = testes com valores das normas reais (fora do Git; ignorado se não existir)
+testpaths = ["tests", "dados/testes"]
 markers = [
     "normas_reais: usa as normas transcritas em dados/ (roda só localmente)",
 ]
