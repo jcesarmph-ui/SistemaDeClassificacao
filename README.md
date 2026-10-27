@@ -65,7 +65,10 @@ classificação no formato usado no dia a dia, por exemplo:
   identificação do fabricante ao passar o mouse.
 - ↩️ **Pesquisa reversa** — digite qualquer norma e veja os intervalos exigidos.
 - 🗂️ **Histórico** — classificações salvas e pesquisáveis, com **lixeira** (restaurar ou excluir de vez).
-- 🤖 **Detecção de outliers** *(planejado)* — machine learning sobre o histórico para apontar valores fora do comum.
+- 🔁 **Melhoria contínua** *(planejado)* — divergências apontadas pelo usuário viram correções de regra e
+  novos casos de teste.
+- 🤖 **Detecção de outliers** *(planejado)* — machine learning sobre o histórico para apontar valores
+  fora do comum (só alerta; a classificação continua sempre pela regra da norma).
 
 <details>
 <summary><b>📚 Normas cobertas</b> (clique para expandir)</summary>
@@ -236,7 +239,7 @@ Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato
 - [ ] **Fase 3** — Transcrição das demais normas
 - [ ] **Fase 4** — Tolerância de espessura
 - [ ] **Fase 5** — Interface PySide6
-- [ ] **Fase 6** — Histórico, lixeira e pesquisa
+- [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)
 - [ ] **Fase 7** — Executável `.exe`
 - [ ] **Fase 8** — Detecção de outliers com machine learning
 
