@@ -1,13 +1,16 @@
 """Pesquisa reversa: o que um grau exige de cada campo da tela, com ou sem espessura.
 
 Usa `limites_efetivos`, a mesma função do classificador — os dois nunca discordam.
+`pesquisar` aceita qualquer norma (NBR ou correlata, ex.: "DC04") via as normas correlatas.
 """
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from decimal import Decimal
 
+from classificador.dominio.amostra import Acabamento
 from classificador.dominio.formatacao import descrever_ajuste, num
-from classificador.dominio.modelos import Limite, Norma
+from classificador.dominio.modelos import Correlatas, GrupoCorrelatas, Limite, Norma
 from classificador.dominio.propriedades import Propriedade
 from classificador.motor.limites import limites_efetivos
 
@@ -40,9 +43,14 @@ class Requisitos:
     avisos: list[str] = field(default_factory=list)
 
 
-def requisitos(norma: Norma, sigla: str, espessura: Decimal | None = None) -> Requisitos:
+def requisitos(
+    norma: Norma,
+    sigla: str,
+    espessura: Decimal | None = None,
+    acabamento: Acabamento | None = None,
+) -> Requisitos:
     grau = norma.grau(sigla)
-    efetivos = limites_efetivos(norma, grau, espessura)
+    efetivos = limites_efetivos(norma, grau, espessura, acabamento)
     ordem = list(Propriedade)
     itens = [
         Requisito(prop, efetivos.limites[prop])
@@ -52,7 +60,7 @@ def requisitos(norma: Norma, sigla: str, espessura: Decimal | None = None) -> Re
         f"{' + '.join(e.rotulo for e in s.elementos)} ≤ {num(s.max)} %" for s in grau.somas
     ]
 
-    if espessura is None:
+    if espessura is None and acabamento is None:
         # Sem espessura: mostra as notas que valem para o grau, para o usuário saber que mudam
         notas = [
             f"{a.nota} — {descrever_ajuste(a)}"
@@ -86,3 +94,25 @@ def _explicar_embutimento(
     if linha is None:
         return f"Não exigido: espessura fora da tabela ({faixa})"
     return f"Linha de {num(linha)} mm da tabela"
+
+
+@dataclass(frozen=True)
+class ResultadoPesquisa:
+    grupo: GrupoCorrelatas  # grau NBR e suas equivalências
+    requisitos: Requisitos | None  # None quando o programa não tem a norma (fora do escopo)
+
+
+def pesquisar(
+    texto: str,
+    correlatas: Correlatas,
+    normas: Mapping[str, Norma],
+    espessura: Decimal | None = None,
+    acabamento: Acabamento | None = None,
+) -> list[ResultadoPesquisa]:
+    """Pesquisa reversa por qualquer norma (NBR ou correlata), ex.: "DC04" → EEP G2."""
+    resultados = []
+    for grupo in correlatas.buscar(texto):
+        norma = normas.get(grupo.norma) if grupo.norma else None
+        exigido = requisitos(norma, grupo.grau, espessura, acabamento) if norma else None
+        resultados.append(ResultadoPesquisa(grupo, exigido))
+    return resultados

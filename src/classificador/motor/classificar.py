@@ -48,7 +48,7 @@ def classificar_na_norma(
     avaliacoes = []
     notas: list[str] = []
     for grau in norma.graus:
-        efetivos = limites_efetivos(norma, grau, amostra.espessura_nominal)
+        efetivos = limites_efetivos(norma, grau, amostra.espessura_nominal, amostra.acabamento)
         avaliacoes.append(avaliar_grau(grau, efetivos, amostra))
         notas += [n for n in efetivos.notas_aplicadas if n not in notas]
 

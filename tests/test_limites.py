@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from classificador.dominio.amostra import Acabamento
 from classificador.dominio.modelos import Norma
 from classificador.dominio.propriedades import Propriedade
 from classificador.motor.limites import limites_efetivos
@@ -121,3 +122,60 @@ def test_embutimento_fora_da_faixa_nao_e_avaliado(norma, espessura):
 def test_grau_sem_coluna_de_embutimento(norma):
     efetivos = limites_efetivos(norma, norma.grau("AAA"), D("0.30"))
     assert Propriedade.EMBUTIMENTO not in efetivos.limites
+
+
+# --- Motivos, acabamento e remoção (Fase 3) ---------------------------------------
+
+def test_motivos_diferentes_se_somam():
+    norma = norma_com_notas(
+        [
+            {"nota": "b", "quando": {"max": "0.70", "max_inclusivo": False},
+             "efeito": {"AL_LO50": {"min": -2}}},
+            {"nota": "c", "motivo": "revestimento", "acabamentos": ["GA ZF"],
+             "efeito": {"AL_LO50": {"min": -2}}},
+        ]
+    )
+    ga = limites_efetivos(norma, norma.grau("BBB"), D("0.60"), Acabamento.GA_ZF)
+    gi = limites_efetivos(norma, norma.grau("BBB"), D("0.60"), Acabamento.GI_ZN)
+    assert lim(ga, Propriedade.AL_LO50) == (36, None)  # 40 − 2 − 2
+    assert ga.notas_aplicadas == ["b", "c"]
+    assert lim(gi, Propriedade.AL_LO50) == (38, None)  # só a de espessura
+
+
+def test_nota_por_acabamento_vale_sem_espessura():
+    norma = norma_com_notas(
+        [{"nota": "c", "motivo": "revestimento", "acabamentos": ["GA ZF"],
+          "efeito": {"AL_LO50": {"min": -2}}}]
+    )
+    efetivos = limites_efetivos(norma, norma.grau("BBB"), None, Acabamento.GA_ZF)
+    assert lim(efetivos, Propriedade.AL_LO50) == (38, None)
+    # sem acabamento informado, a nota de acabamento não vale
+    assert lim(limites_efetivos(norma, norma.grau("BBB"), None), Propriedade.AL_LO50) == (40, None)
+
+
+def test_nota_que_remove_uma_exigencia():
+    norma = Norma.model_validate(
+        {
+            "codigo": "NBR 0000-4",
+            "titulo": "Remoção",
+            "graus": [
+                {"sigla": "AAA", "nome_na_norma": "AAA",
+                 "limites": {"AL_LO50": {"min": 28}, "AL_LO80": {"min": 26}}},
+                {"sigla": "BBB", "nome_na_norma": "BBB", "limites": {"AL_LO50": {"min": 30}}},
+            ],
+            "ajustes": [
+                {"nota": "coluna e ≥ 3,0", "quando": {"min": "3.0"},
+                 "efeito": {"AL_LO50": {"min": 2}}, "remover": ["AL_LO80"]},
+            ],
+        }
+    )
+    grosso = limites_efetivos(norma, norma.grau("AAA"), D("3.0"))
+    assert lim(grosso, Propriedade.AL_LO50) == (30, None)
+    assert Propriedade.AL_LO80 not in grosso.limites
+    assert grosso.notas_aplicadas == ["coluna e ≥ 3,0"]
+    fino = limites_efetivos(norma, norma.grau("AAA"), D("2.5"))
+    assert lim(fino, Propriedade.AL_LO80) == (26, None)
+    # remover algo que o grau não tem não conta como nota aplicada
+    assert limites_efetivos(norma, norma.grau("BBB"), D("3.0")).notas_aplicadas == [
+        "coluna e ≥ 3,0"
+    ]  # aplicada pelo efeito no Lo50

@@ -118,3 +118,14 @@ def test_tabela_embutimento_com_grau_inexistente_e_recusada():
     tabela = {"linhas": [{"espessura": "0.30", "minimos": {"ZZZ": "9.4"}}]}
     with pytest.raises(ValidationError, match="ZZZ"):
         Norma.model_validate(norma_valida(tabela_embutimento=tabela))
+
+
+def test_ajuste_precisa_de_condicao_e_de_efeito():
+    def com_ajustes(ajustes):
+        graus = [{"sigla": "AAA", "nome_na_norma": "AAA", "limites": {}}]
+        return norma_valida(graus=graus, ajustes=ajustes, tabela_embutimento=None)
+
+    with pytest.raises(ValidationError, match="espessura.*acabamento"):
+        Norma.model_validate(com_ajustes([{"nota": "x", "efeito": {"LE": {"max": 20}}}]))
+    with pytest.raises(ValidationError, match="efeito.*remover"):
+        Norma.model_validate(com_ajustes([{"nota": "x", "quando": {"max": 1}}]))

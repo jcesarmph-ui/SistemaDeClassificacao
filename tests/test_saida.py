@@ -181,5 +181,5 @@ def test_notas_aplicadas_e_aviso_do_grau():
     assert "CCC exige autorização." in resultado.avisos
 
 
-def test_correlatas_vazias_ate_a_fase_3():
+def test_sem_arquivo_de_correlatas_a_lista_fica_vazia():
     assert saida(Acabamento.FF).correlatas == []

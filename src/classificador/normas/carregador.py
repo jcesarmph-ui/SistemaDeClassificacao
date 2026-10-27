@@ -12,7 +12,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ValidationError
 
-from classificador.dominio.modelos import FolhaClassificacoes, Norma
+from classificador.dominio.modelos import Correlatas, FolhaClassificacoes, Norma
 
 
 class ErroNorma(Exception):
@@ -80,6 +80,10 @@ def carregar_normas(pasta: str | Path) -> dict[str, Norma]:
 
 def carregar_folha(caminho: str | Path) -> FolhaClassificacoes:
     return _carregar(Path(caminho), FolhaClassificacoes)
+
+
+def carregar_correlatas(caminho: str | Path) -> Correlatas:
+    return _carregar(Path(caminho), Correlatas)
 
 
 def _carregar[M: BaseModel](caminho: Path, modelo: type[M]) -> M:

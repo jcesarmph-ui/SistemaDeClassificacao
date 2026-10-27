@@ -16,21 +16,30 @@ def sinal(valor: Decimal | int) -> str:
 
 
 def descrever_faixa(faixa: FaixaEspessura) -> str:
-    """Faixa de espessura em texto: "e < 0,50 mm", "0,50 ≤ e ≤ 0,70 mm"."""
+    """Faixa de espessura em texto: "e < 0,50 mm", "0,50 ≤ e ≤ 0,70 mm", "e ≥ 3,0 mm"."""
+    if faixa.max is None:
+        return f"e {'≥' if faixa.min_inclusivo else '>'} {num(faixa.min)} mm"
     texto = "e"
     if faixa.min is not None:
         texto = f"{num(faixa.min)} {'≤' if faixa.min_inclusivo else '<'} e"
-    if faixa.max is not None:
-        texto += f" {'≤' if faixa.max_inclusivo else '<'} {num(faixa.max)}"
-    return f"{texto} mm"
+    return f"{texto} {'≤' if faixa.max_inclusivo else '<'} {num(faixa.max)} mm"
 
 
 def descrever_ajuste(ajuste: Ajuste) -> str:
     """Nota de rodapé em texto: "e < 0,50 mm: LE máx +40, alongamento Lo50 mín -4"."""
+    condicoes = []
+    if ajuste.quando is not None:
+        condicoes.append(descrever_faixa(ajuste.quando))
+    if ajuste.acabamentos:
+        condicoes.append(f"acabamento {', '.join(ajuste.acabamentos)}")
     efeitos = []
     for prop, variacao in ajuste.efeito.items():
         if variacao.min is not None:
             efeitos.append(f"{prop.rotulo} mín {sinal(variacao.min)}")
         if variacao.max is not None:
             efeitos.append(f"{prop.rotulo} máx {sinal(variacao.max)}")
-    return f"{descrever_faixa(ajuste.quando)}: {', '.join(efeitos)}"
+    texto = f"{' e '.join(condicoes)}: {', '.join(efeitos)}"
+    if ajuste.remover:
+        sem = ", ".join(p.rotulo for p in ajuste.remover)
+        texto += f"{'; ' if efeitos else ''}sem exigência de {sem}"
+    return texto

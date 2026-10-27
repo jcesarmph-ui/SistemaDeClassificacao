@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from classificador.dominio.amostra import Amostra
 from classificador.dominio.formatacao import num
+from classificador.dominio.modelos import Correlatas
 from classificador.motor.sequencia import Classificacao
 
 
@@ -13,10 +14,12 @@ class Saida:
     resultado: str | None  # ex.: "ZEE G2 - Z275"; None quando não há grau nem resultado padrão
     norma: str | None  # ex.: "De acordo com a norma NBR 5915-2:2013"
     avisos: list[str] = field(default_factory=list)
-    correlatas: list[str] = field(default_factory=list)  # preenchidas a partir da Fase 3
+    correlatas: list[str] = field(default_factory=list)  # na tela: separadas por vírgula
 
 
-def formatar(classificacao: Classificacao, amostra: Amostra) -> Saida:
+def formatar(
+    classificacao: Classificacao, amostra: Amostra, correlatas: Correlatas | None = None
+) -> Saida:
     detalhe = classificacao.detalhe
     grau = classificacao.grau
     base = grau.sigla if grau else classificacao.resultado_padrao
@@ -53,7 +56,10 @@ def formatar(classificacao: Classificacao, amostra: Amostra) -> Saida:
     if grau:
         avisos += grau.avisos
 
-    return Saida(resultado, norma, avisos)
+    lista = []
+    if grau and correlatas is not None:
+        lista = correlatas.de(classificacao.norma.codigo, grau.sigla, amostra.acabamento)
+    return Saida(resultado, norma, avisos, lista)
 
 
 def _com_camada(base: str, amostra: Amostra) -> str:
