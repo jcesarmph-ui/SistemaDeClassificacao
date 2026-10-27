@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/fase-1_modelo_de_dados-blue?style=flat-square" alt="Fase"/>
+  <img src="https://img.shields.io/badge/fase-2_motor_de_classificação-blue?style=flat-square" alt="Fase"/>
   <img src="https://img.shields.io/badge/normas-ABNT-009739?style=flat-square" alt="Normas ABNT"/>
   <img src="https://img.shields.io/badge/idioma-pt--BR-green?style=flat-square" alt="Idioma"/>
 </p>
@@ -109,6 +109,64 @@ flowchart LR
     UI --> H[(🗄️ Histórico<br/>SQLite)]
 ```
 
+<details>
+<summary><b>🧩 Modelo de dados de uma norma</b></summary>
+
+Cada norma é um arquivo YAML validado ao carregar — exemplo completo em
+[`tests/dados/norma-ficticia.yaml`](tests/dados/norma-ficticia.yaml).
+
+```mermaid
+classDiagram
+    direction LR
+    Norma "1" *-- "1..*" Grau : graus (último = mais nobre)
+    Norma "1" *-- "0..*" Ajuste : notas de rodapé
+    Norma "1" *-- "0..1" TabelaEmbutimento
+    Grau "1" *-- "0..*" Limite : por propriedade
+    Grau "1" *-- "0..*" Soma : ex. Ti + Nb
+    Ajuste "1" *-- "1" FaixaEspessura : quando
+    Ajuste "1" *-- "1..*" Variacao : efeito
+    class Norma {
+        codigo
+        titulo
+    }
+    class Grau {
+        sigla
+        nome_na_norma
+        avisos
+    }
+    class Limite {
+        min
+        max
+    }
+    class Soma {
+        elementos
+        max
+    }
+    class FaixaEspessura {
+        min
+        max
+        min_inclusivo
+        max_inclusivo
+    }
+    class Variacao {
+        soma ao min
+        soma ao max
+    }
+    class TabelaEmbutimento {
+        linhas por espessura
+        minimo por grau
+    }
+```
+
+Erros de transcrição (campo com nome errado, chave repetida, `min > max`, grau inexistente…) são
+apontados com **arquivo, linha e campo**:
+
+```text
+nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior que o máximo (140)
+```
+
+</details>
+
 | Tecnologia | Aplicação no projeto |
 |---|---|
 | Python | Motor de regras, validação e lógica da aplicação. |
@@ -129,6 +187,7 @@ flowchart LR
 | [0002](docs/decisoes/0002-sqlite-historico.md) | SQLite para o histórico (com lixeira) |
 | [0003](docs/decisoes/0003-repositorio-publico-dados-fora-do-git.md) | Repositório público com dados das normas fora do Git |
 | [0004](docs/decisoes/0004-normas-em-yaml.md) | Base de normas em arquivos YAML |
+| [0005](docs/decisoes/0005-formato-yaml-normas.md) | Formato detalhado do YAML e regras de interpretação |
 
 </details>
 
@@ -136,10 +195,15 @@ flowchart LR
 
 ```text
 SistemaDeClassificacao/
-├── src/classificador/   # código: domínio, normas, motor, tolerância, histórico, interface
-├── tests/               # testes automáticos (usam uma norma fictícia)
+├── src/classificador/
+│   ├── dominio/         # propriedades e modelos (norma, grau, limite, ajuste)
+│   └── normas/          # carregador do YAML e comando de conferência
+├── tests/               # testes automáticos
+│   └── dados/           # norma fictícia usada nos testes
 ├── docs/decisoes/       # registros de decisões de arquitetura (ADRs)
-├── dados/               # normas transcritas e casos reais — NÃO versionado
+├── dados/               # NÃO versionado
+│   ├── normas/          # normas transcritas (YAML)
+│   └── testes/          # testes com valores das normas reais
 ├── pyproject.toml       # dependências e configuração das ferramentas
 ├── CLAUDE.md            # instruções do projeto para o Claude Code
 └── README.md
@@ -155,12 +219,19 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-> A interface ainda não está disponível — por enquanto o projeto contém a base e os testes.
+Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato das tabelas):
+
+```powershell
+.\.venv\Scripts\python.exe -m classificador.normas.conferir tests\dados\norma-ficticia.yaml
+```
+
+> A interface ainda não está disponível — por enquanto o projeto contém o modelo de dados, o
+> carregador das normas e os testes.
 
 ## 🗺️ Roteiro
 
 - [x] **Fase 0** — Fundação: repositório, ADRs, ambiente Python, permissões do Claude Code
-- [ ] **Fase 1** — Modelo de dados e formato YAML das normas
+- [x] **Fase 1** — Modelo de dados, formato YAML validado e NBR 5915-2 transcrita e conferida
 - [ ] **Fase 2** — Motor de classificação (com testes primeiro)
 - [ ] **Fase 3** — Transcrição das demais normas
 - [ ] **Fase 4** — Tolerância de espessura
