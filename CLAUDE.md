@@ -161,10 +161,10 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   tolerância nos 15 m das extremidades (NBR 11888).
 
 ## Pendências (decidir com o usuário)
-1. Tolerância padrão: normal ou restritiva?
-2. Confirmar FG 528xx = Fiat (pesquisa não achou fonte pública).
+1. Confirmar FG 528xx = Fiat (pesquisa não achou fonte pública).
 
 ## Decisões menores já tomadas
+- Tolerância de espessura: usar sempre a coluna **normal** (não a restritiva).
 - Folha de siglas = `classificações.pdf` (é imagem escaneada → transcrita para `dados/siglas.yaml`).
 
 ## Versionamento
