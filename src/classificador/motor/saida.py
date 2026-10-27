@@ -41,7 +41,7 @@ def formatar(classificacao: Classificacao, amostra: Amostra) -> Saida:
     avaliacao = next((a for a in detalhe.avaliacoes if a.grau == grau), None)
     if avaliacao and avaliacao.nao_avaliados:
         nomes = ", ".join(p.rotulo for p in avaliacao.nao_avaliados)
-        avisos.append(f"Não avaliado (outro campo preenchido / vazio): {nomes}")
+        avisos.append(f"Valores não informados (não avaliados): {nomes}")
     if amostra.espessura_nominal is None and (
         detalhe.norma.ajustes or detalhe.norma.tabela_embutimento
     ):

@@ -193,7 +193,10 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - Embutimento: linha de espessura **mais próxima** (empate → linha maior); fora da faixa da tabela →
   não avaliado; **embutimento vazio → não avaliado** (com aviso), exceção à regra "vazio = zero".
   EM (5915-2) não tem exigência de embutimento.
-- Lo50 e Lo80: se a norma define os dois, **avaliar ambos**; se só um foi preenchido, o outro não é avaliado.
+- Lo50 e Lo80: se a norma define os dois, **avaliar ambos**; se só um foi preenchido, o outro não é
+  avaliado, mas **gera aviso de que faltou** ("Valores não informados (não avaliados)"). Na prática:
+  NBR 5915-2 (FF e EG) e sem revestimento exigem Lo50 e Lo80; 7008-2/-3 (GI/GA) só têm Lo50, então
+  Lo80 vazio nunca gera aviso. Embutimento vazio entra no mesmo aviso.
 - Notas sobrepostas na mesma propriedade: vale a **maior redução**, sem acumular.
 - Testes com valores de normas reais ficam em `dados/testes/` (fora do Git); `tests/` só usa a norma
   fictícia `tests/dados/norma-ficticia.yaml`.

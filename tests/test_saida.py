@@ -158,7 +158,8 @@ def test_eg_rebaixado_por_nao_existir_o_grau():
 
 def test_valores_faltando_e_nao_avaliados():
     resultado = saida(Acabamento.FF, {P.LE: D("180"), P.AL_LO50: D("40")})
-    assert "Não avaliado (outro campo preenchido / vazio): alongamento Lo80" in resultado.avisos
+    # Lo80 vazio: a norma define Lo80, então avisa que faltou (classifica pelo Lo50)
+    assert "Valores não informados (não avaliados): alongamento Lo80" in resultado.avisos
 
     resultado = saida(Acabamento.FF, {P.LE: D("180")})
     assert "Valores não informados (considerados zero): alongamento Lo50, alongamento Lo80" in (
