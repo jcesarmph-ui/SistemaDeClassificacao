@@ -228,6 +228,10 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - Na tela: lista simples separada por vírgula junto do resultado. EN 10152 só no EG.
 - Graus sem revestimento recebem as colunas "sem" + "com ou sem revestimento" da planilha; zincados,
   "com" + "com ou sem". ZAR (7008-3) não têm correlatas. NBR 6656 (LNE) não tem equivalências.
+- **Revestimentos nunca se misturam num grupo:** grau sem revestimento e seu equivalente revestido
+  (ex.: BH-180 e ZARBH-180) ficam em grupos separados; colunas "com ou sem" entram nos dois.
+  Exceção decidida pelo usuário: o **EG** mostra as correlatas do grau FF + EN 10152 (igual à
+  caixa da folha de classificações).
 - Fora do escopo (IF, BH, ARBL): só equivalências na pesquisa reversa, sem valores exigidos.
 - ARBL: a aba 1 tem "LAC420480T" e "LAC550Y620Y" (erros); usada a forma da aba 2.
 - Arquivo mantido como YAML (`dados/correlatas.yaml`), gerado uma vez a partir das duas fontes — o
