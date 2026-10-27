@@ -116,7 +116,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 ### Histórico e lixeira
 - Aba de **histórico**: salvar classificações e pesquisar antigas.
 - **Excluir** move para a aba **Lixeira** (exclusão lógica). Na lixeira o registro aparece igual ao do
-  histórico e pode ser **restaurado** de volta.
+  histórico e pode ser **restaurado** de volta ou **excluído permanentemente**.
 
 ### Tolerância de espessura
 - **Zincados (EG, GA ZF, GI ZM, GI ZN):** NBR 7013 Tab. 1–4 — uma tabela para cada faixa de LE mín
