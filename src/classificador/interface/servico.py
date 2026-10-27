@@ -16,6 +16,7 @@ from pathlib import Path
 from classificador.dominio.modelos import (
     Correlatas,
     FolhaClassificacoes,
+    GrupoCorrelatas,
     Norma,
     NormaTolerancia,
 )
@@ -67,7 +68,7 @@ def pasta_dados_padrao() -> Path:
 class Servico:
     folha: FolhaClassificacoes
     normas: Mapping[str, Norma]
-    correlatas: Correlatas | None = None
+    correlatas: Correlatas = field(default_factory=lambda: Correlatas(grupos=[]))
     tolerancias: Mapping[str, NormaTolerancia] = field(default_factory=dict)
     logo: Path | None = None
 
@@ -77,12 +78,14 @@ class Servico:
         arquivo_correlatas = pasta / "correlatas.yaml"
         pasta_tolerancias = pasta / "tolerancias"
         logo = pasta / "logo_mg.png"
+        normas = carregar_normas(pasta / "normas")
+        correlatas = (
+            carregar_correlatas(arquivo_correlatas) if arquivo_correlatas.is_file() else None
+        )
         return cls(
             folha=carregar_folha(pasta / "folha-classificacoes.yaml"),
-            normas=carregar_normas(pasta / "normas"),
-            correlatas=(
-                carregar_correlatas(arquivo_correlatas) if arquivo_correlatas.is_file() else None
-            ),
+            normas=normas,
+            correlatas=_com_todos_os_graus(correlatas, normas),
             tolerancias=(
                 carregar_tolerancias(pasta_tolerancias) if pasta_tolerancias.is_dir() else {}
             ),
@@ -96,9 +99,23 @@ class Servico:
         return formatar(classificacao, amostra, self.correlatas, self.tolerancias)
 
     def pesquisar(self, texto: str, espessura: str = "") -> list[ResultadoPesquisa]:
-        if self.correlatas is None:
-            return []
         return pesquisar(texto, self.correlatas, self.normas, ler_numero(espessura))
 
     def nomes_para_autocompletar(self) -> list[str]:
-        return self.correlatas.todos_os_nomes() if self.correlatas else []
+        return self.correlatas.todos_os_nomes()
+
+
+def _com_todos_os_graus(correlatas: Correlatas | None, normas: Mapping[str, Norma]) -> Correlatas:
+    """Acrescenta um grupo (sem correlatas) para cada grau transcrito que não tem grupo.
+
+    Assim a pesquisa reversa acha qualquer grau das normas (ex.: os ZAR, que não têm correlatas).
+    Rótulo: código sem o ano + sigla, ex.: "NBR 7008-3 ZAR-250".
+    """
+    grupos = list(correlatas.grupos) if correlatas else []
+    ligados = {(g.norma, g.grau) for g in grupos}
+    for norma in normas.values():
+        for grau in norma.graus:
+            if (norma.codigo, grau.sigla) not in ligados:
+                rotulo = f"{norma.codigo.split(':')[0]} {grau.sigla}"
+                grupos.append(GrupoCorrelatas(nbr=rotulo, norma=norma.codigo, grau=grau.sigla))
+    return Correlatas(grupos=grupos)

@@ -1,7 +1,6 @@
 """Testes do serviço da aplicação (carrega os dados e atende a tela), com dados fictícios."""
 
 import shutil
-from pathlib import Path
 
 import pytest
 
@@ -9,24 +8,6 @@ from classificador.interface.entrada import ErroEntrada
 from classificador.interface.servico import Servico, fabricante
 from classificador.motor.sequencia import ErroClassificacao
 from classificador.normas.carregador import ErroNorma
-
-FICTICIOS = Path(__file__).parent / "dados"
-
-
-@pytest.fixture
-def pasta(tmp_path):
-    """Monta uma pasta dados/ fictícia com a mesma estrutura da real."""
-    (tmp_path / "normas").mkdir()
-    (tmp_path / "tolerancias").mkdir()
-    shutil.copy(FICTICIOS / "norma-ficticia.yaml", tmp_path / "normas")
-    shutil.copy(FICTICIOS / "tolerancia-ficticia.yaml", tmp_path / "tolerancias")
-    shutil.copy(FICTICIOS / "correlatas-ficticias.yaml", tmp_path / "correlatas.yaml")
-    folha = (FICTICIOS / "folha-ficticia.yaml").read_text(encoding="utf-8")
-    fim = 'se_nenhum: {resultado: "1006/08"}\n'
-    folha = folha.replace(fim, fim + '    tolerancia: "NBR 0000-T"\n')
-    (tmp_path / "folha-classificacoes.yaml").write_text(folha, encoding="utf-8")
-    return tmp_path
-
 
 CAMPOS = {
     "C": "0,10", "Al": "0,02", "LE": "200", "AL_LO50": "35",
@@ -71,7 +52,8 @@ def test_sem_correlatas_nem_tolerancias_ainda_classifica(pasta):
     # a folha pede uma norma de tolerância que não está na pasta: avisa em vez de esconder
     assert saida.tolerancia.dentro is None
     assert "ainda não foi transcrita" in saida.tolerancia.texto
-    assert servico.nomes_para_autocompletar() == []
+    # sem correlatas, o autocompletar ainda traz os graus das normas transcritas
+    assert servico.nomes_para_autocompletar() == ["NBR 0000-1 AAA", "NBR 0000-1 BBB G1"]
 
 
 def test_logo_opcional(pasta):
@@ -103,3 +85,23 @@ def test_pasta_sem_folha_e_erro_claro(tmp_path):
 )
 def test_fabricante_pelo_prefixo(norma, esperado):
     assert fabricante(norma) == esperado
+
+
+def test_pesquisa_acha_grau_sem_correlatas(pasta):
+    # Na correlata fictícia só há AAA e BBB G1; tirando o BBB G1, ele precisa continuar achável
+    texto = (pasta / "correlatas.yaml").read_text(encoding="utf-8")
+    inicio = texto.index("  - nbr: NBR 0000-1 BBB G1")
+    fim = texto.index("  # Fora do escopo")
+    (pasta / "correlatas.yaml").write_text(texto[:inicio] + texto[fim:], encoding="utf-8")
+    servico = Servico.carregar(pasta)
+    [achado] = servico.pesquisar("BBB G1")
+    assert achado.grupo.nbr == "NBR 0000-1 BBB G1"
+    assert achado.grupo.correlatas == []
+    assert achado.requisitos is not None
+    assert "NBR 0000-1 BBB G1" in servico.nomes_para_autocompletar()
+
+
+def test_pesquisa_funciona_sem_arquivo_de_correlatas(pasta):
+    (pasta / "correlatas.yaml").unlink()
+    [achado] = Servico.carregar(pasta).pesquisar("AAA")
+    assert achado.grupo.nbr == "NBR 0000-1 AAA"
