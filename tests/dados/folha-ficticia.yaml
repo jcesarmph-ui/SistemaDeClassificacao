@@ -1,0 +1,15 @@
+# Folha de classificações FICTÍCIA para os testes — exemplo do formato de dados/folha-classificacoes.yaml.
+# Para cada acabamento: as tabelas testadas em ordem e os graus que podem ser resultado.
+
+acabamentos:
+  FF:
+    tabelas:
+      - norma: "NBR 0000-1:2026"
+        graus: [AAA, BBB G1]
+    se_nenhum: {resultado: "1006/08"}
+
+  EG:
+    tabelas:
+      - norma: "NBR 0000-1:2026"
+        graus: [AAA]          # BBB G1 não existe para EG
+    se_nenhum: {resultado: "1006/08"}

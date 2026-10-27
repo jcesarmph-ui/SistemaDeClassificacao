@@ -20,9 +20,9 @@ def test_tabelas_no_formato_da_norma():
     assert "–" in texto
     # somas, notas e avisos
     assert "Ti + Nb ≤ 0,20" in texto
-    assert "e < 0,50" in texto
+    assert "(todos os graus) e < 0,50 mm" in texto
     assert "LE máx +40" in texto
-    assert "AL_LO50 mín -4" in texto
+    assert "alongamento Lo50 mín -4" in texto
     assert "não substitui AAA" in texto
     # embutimento
     assert "9,5" in texto

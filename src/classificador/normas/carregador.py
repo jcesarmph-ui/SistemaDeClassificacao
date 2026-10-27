@@ -1,4 +1,5 @@
-"""Lê um arquivo YAML de norma e devolve a `Norma` validada, ou um erro claro com a linha.
+"""Lê os arquivos YAML (normas e folha de classificações) e devolve os modelos validados,
+ou um erro claro com arquivo, linha e campo.
 
 Cuidados em relação ao leitor padrão do PyYAML:
 - números com ponto viram `Decimal` direto do texto (nunca passam por `float`);
@@ -9,13 +10,13 @@ from decimal import Decimal
 from pathlib import Path
 
 import yaml
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
-from classificador.dominio.modelos import Norma
+from classificador.dominio.modelos import FolhaClassificacoes, Norma
 
 
 class ErroNorma(Exception):
-    """Arquivo de norma ausente, mal escrito ou com valores inválidos."""
+    """Arquivo de norma (ou da folha de classificações) ausente, mal escrito ou inválido."""
 
 
 class _Leitor(yaml.SafeLoader):
@@ -45,7 +46,6 @@ _Leitor.add_constructor("tag:yaml.org,2002:map", _ler_bloco)
 _MENSAGENS = {
     "extra_forbidden": "campo não reconhecido (nome escrito errado?)",
     "missing": "campo obrigatório faltando",
-    "enum": "propriedade desconhecida",
     "decimal_parsing": "não é um número",
     "decimal_type": "não é um número",
     "too_short": "lista com itens de menos",
@@ -57,9 +57,34 @@ _MENSAGENS = {
 
 
 def carregar_norma(caminho: str | Path) -> Norma:
-    caminho = Path(caminho)
+    return _carregar(Path(caminho), Norma)
+
+
+def carregar_normas(pasta: str | Path) -> dict[str, Norma]:
+    """Todas as normas `*.yaml` da pasta, por código. Junta os erros de todos os arquivos."""
+    normas: dict[str, Norma] = {}
+    erros: list[str] = []
+    for caminho in sorted(Path(pasta).glob("*.yaml")):
+        try:
+            norma = carregar_norma(caminho)
+        except ErroNorma as erro:
+            erros.append(str(erro))
+            continue
+        if norma.codigo in normas:
+            erros.append(f"{caminho.name}: código '{norma.codigo}' repetido em outro arquivo")
+        normas[norma.codigo] = norma
+    if erros:
+        raise ErroNorma("\n".join(erros))
+    return normas
+
+
+def carregar_folha(caminho: str | Path) -> FolhaClassificacoes:
+    return _carregar(Path(caminho), FolhaClassificacoes)
+
+
+def _carregar[M: BaseModel](caminho: Path, modelo: type[M]) -> M:
     if not caminho.is_file():
-        raise ErroNorma(f"Arquivo de norma não encontrado: {caminho}")
+        raise ErroNorma(f"Arquivo não encontrado: {caminho}")
 
     texto = caminho.read_text(encoding="utf-8")
     try:
@@ -72,7 +97,7 @@ def carregar_norma(caminho: str | Path) -> Norma:
         raise ErroNorma(f"{caminho.name}{linha}: YAML mal escrito — {problema}") from erro
 
     try:
-        return Norma.model_validate(dados)
+        return modelo.model_validate(dados)
     except ValidationError as erro:
         linhas = [_descrever(caminho.name, raiz, e) for e in erro.errors()]
         raise ErroNorma("\n".join(linhas)) from erro
@@ -91,6 +116,8 @@ def _descrever(arquivo: str, raiz: yaml.Node | None, erro: dict) -> str:
 
     if erro["type"] == "value_error":
         mensagem = str(erro["ctx"]["error"])
+    elif erro["type"] == "enum":
+        mensagem = f"nome desconhecido '{erro['input']}'"
     else:
         mensagem = _MENSAGENS.get(erro["type"], erro["msg"])
     if erro["type"] == "missing" and existentes < len(caminho):

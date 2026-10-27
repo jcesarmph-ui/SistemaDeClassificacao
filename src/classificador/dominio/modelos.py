@@ -9,6 +9,7 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from classificador.dominio.amostra import Acabamento
 from classificador.dominio.propriedades import Propriedade
 
 
@@ -148,3 +149,39 @@ class Norma(_Modelo):
             if g.sigla == sigla:
                 return g
         raise KeyError(f"grau '{sigla}' não existe na {self.codigo}")
+
+
+# --- Folha de classificações: quais tabelas e graus valem para cada acabamento ---------------
+
+
+class TabelaDoAcabamento(_Modelo):
+    norma: str  # código da norma, igual ao campo `codigo` do YAML dela
+    # Graus que podem ser resultado, na folha de classificações. None = todos os da norma.
+    graus: list[str] | None = Field(default=None, min_length=1)
+
+
+class SemGrau(_Modelo):
+    """O que fazer quando nenhuma tabela do acabamento é atendida: um resultado fixo OU um aviso."""
+
+    resultado: str | None = None  # ex.: "1006/08"
+    aviso: str | None = None  # ex.: "Material mais duro que o último ZAR"
+
+    @model_validator(mode="after")
+    def _conferir(self) -> Self:
+        if (self.resultado is None) == (self.aviso is None):
+            raise ValueError("informe 'resultado' ou 'aviso' (um dos dois, não ambos)")
+        return self
+
+
+class RegraAcabamento(_Modelo):
+    tabelas: list[TabelaDoAcabamento] = Field(min_length=1)  # na ordem em que são testadas
+    se_nenhum: SemGrau
+
+
+class FolhaClassificacoes(_Modelo):
+    acabamentos: dict[Acabamento, RegraAcabamento]
+
+    def regra(self, acabamento: Acabamento) -> RegraAcabamento:
+        if acabamento not in self.acabamentos:
+            raise KeyError(f"acabamento '{acabamento}' não está na folha de classificações")
+        return self.acabamentos[acabamento]

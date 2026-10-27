@@ -5,8 +5,14 @@ from pathlib import Path
 
 import pytest
 
+from classificador.dominio.amostra import Acabamento
 from classificador.dominio.propriedades import Propriedade
-from classificador.normas.carregador import ErroNorma, carregar_norma
+from classificador.normas.carregador import (
+    ErroNorma,
+    carregar_folha,
+    carregar_norma,
+    carregar_normas,
+)
 
 NORMA_FICTICIA = Path(__file__).parent / "dados" / "norma-ficticia.yaml"
 
@@ -90,5 +96,56 @@ graus:
     with pytest.raises(ErroNorma) as erro:
         carregar_norma(escrever(tmp_path, texto))
     mensagem = str(erro.value)
-    assert "propriedade desconhecida" in mensagem
+    assert "nome desconhecido 'Mb'" in mensagem
     assert "campo não reconhecido" in mensagem
+
+
+# --- Várias normas e folha de classificações ------------------------------------
+
+FOLHA_FICTICIA = Path(__file__).parent / "dados" / "folha-ficticia.yaml"
+
+
+def test_carrega_todas_as_normas_da_pasta_por_codigo(tmp_path):
+    (tmp_path / "a.yaml").write_text(NORMA_FICTICIA.read_text(encoding="utf-8"), encoding="utf-8")
+    normas = carregar_normas(tmp_path)
+    assert list(normas) == ["NBR 0000-1:2026"]
+
+
+def test_codigo_repetido_entre_arquivos_e_erro(tmp_path):
+    texto = NORMA_FICTICIA.read_text(encoding="utf-8")
+    (tmp_path / "a.yaml").write_text(texto, encoding="utf-8")
+    (tmp_path / "b.yaml").write_text(texto, encoding="utf-8")
+    with pytest.raises(ErroNorma, match=r"b\.yaml.*repetido"):
+        carregar_normas(tmp_path)
+
+
+def test_carrega_folha_ficticia():
+    folha = carregar_folha(FOLHA_FICTICIA)
+    regra = folha.regra(Acabamento.EG)
+    assert regra.tabelas[0].norma == "NBR 0000-1:2026"
+    assert regra.tabelas[0].graus == ["AAA"]
+    assert regra.se_nenhum.resultado == "1006/08"
+    with pytest.raises(KeyError, match="GI ZN"):
+        folha.regra(Acabamento.GI_ZN)
+
+
+def test_folha_com_resultado_e_aviso_ao_mesmo_tempo(tmp_path):
+    texto = """\
+acabamentos:
+  FF:
+    tabelas: [{norma: X}]
+    se_nenhum: {resultado: "1006/08", aviso: teste}
+"""
+    with pytest.raises(ErroNorma, match="um dos dois"):
+        carregar_folha(escrever(tmp_path, texto))
+
+
+def test_folha_com_acabamento_desconhecido(tmp_path):
+    texto = """\
+acabamentos:
+  XX:
+    tabelas: [{norma: X}]
+    se_nenhum: {resultado: "1006/08"}
+"""
+    with pytest.raises(ErroNorma, match="nome desconhecido 'XX'"):
+        carregar_folha(escrever(tmp_path, texto))

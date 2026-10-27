@@ -9,8 +9,18 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 e 1 concluídas** (branch `fase-1-dominio-yaml`).
-  Próxima: **Fase 2 – Motor (TDD)** (ver "Roteiro").
+- Arquitetura **decidida** (2026-10-27). **Fases 0, 1 e 2 concluídas** (Fase 2: branch `fase-2-motor`,
+  PR para a `main`). Próxima: **Fase 3 – Demais normas** (5906, 7008-2, 7008-3) + planilha de
+  equivalência (normas correlatas e pesquisa reversa por correlata).
+- Fase 2 entregou o motor (`src/classificador/motor/`): `limites.py` (`limites_efetivos`),
+  `avaliacao.py` (`avaliar_grau`), `classificar.py` (`classificar_na_norma` + recorte de graus
+  disponíveis), `sequencia.py` (`classificar` por acabamento), `saida.py` (`formatar`) e `reversa.py`
+  (`requisitos`); `dominio/amostra.py` (`Acabamento`, `Amostra`); folha de classificações em
+  `dados/folha-classificacoes.yaml` (conferida pelo usuário). Regras: ADR 0006.
+- Casos reais em `dados/casos/*.yaml`, rodados por `dados/testes/test_casos_reais.py` (pulam enquanto
+  a norma não estiver transcrita). Só 1 caso (GI → ZAR-250 - Z100); usuário não tem mais certificados
+  à mão — não pedir de novo.
+- Na Fase 3: acertar o código `NBR 5906` (ano) na folha quando a norma for transcrita.
 - Fase 1 entregou: `dominio/propriedades.py` (enum `Propriedade`), `dominio/modelos.py` (pydantic),
   `normas/carregador.py` (`carregar_norma`, `ErroNorma`), `normas/conferir.py` (imprime a norma no
   formato das tabelas ABNT) e `dados/normas/nbr-5915-2.yaml` **conferida pelo usuário** (2026-10-27).
@@ -51,14 +61,19 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   normais/minimizados), GA ZF (zinco-ferro, Galvanew), EG (eletrolítico).
 - Camada: GI → `Z___` (g/m², duas faces, ex. Z100); GA → `ZF___` (ex. ZF100); EG → `_/_` (g/m² por face, ex. 50/50).
 - Formato da saída: sigla + camada, ex. `ZEE G2 - Z275` (GI), `EEP G1 EG 50/50`. Sem camada → só a sigla.
+- A camada sai **exatamente como digitada** (113 → `Z113`); o usuário é instruído a usar o nominal
+  (100 ou 275), não o medido do certificado. EG: digita um número só (por face) → `50` sai `50/50`.
 
 ## Requisitos do usuário
 
 ### Regras de classificação
 - **Grau mais nobre:** se o material atende a vários graus, mostrar **sempre o mais nobre**.
   Regra: **ordem das linhas da tabela da norma — quanto mais para baixo, mais nobre**
-  (ex.: NBR 5915-2: EEP 4 > … > EP > EM; NBR 5906: EPA > EP > EM; NBR 7008-2: ZEE 4 > … > ZE > ZC). A ordem fica **explícita na base de normas** (lista por norma, na mesma
+  (ex.: NBR 5915-2: EEP 4 > … > EP > EM; NBR 5906: EPA > EP > EM; NBR 7008-2: ZEE 4 > … > ZE). A ordem fica **explícita na base de normas** (lista por norma, na mesma
   sequência da tabela) e é conferida pelo usuário na transcrição.
+  GI/GA: **todos os ZAR (7008-3) são mais nobres que os graus da 7008-2** (ZE < ZEE 1…4 < ZAR-230 … ZAR-550).
+- **ZC nunca é resultado** (decisão do usuário, 2026-10-27): se o material não atende pelo menos ZE na
+  7008-2, vai direto para a 7008-3.
 - **Sequência de tabelas por acabamento** (passa para a próxima só se não atender nenhum grau da anterior;
   reprovação pode ser **mecânica ou química**):
 
@@ -67,7 +82,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   | FF | NBR 5915-2 | — | `1006/08` |
   | FQ / FQ DO | NBR 5906 | — | `1006/08` |
   | EG | NBR 5915-2 (EM…EEP G3) | — | `1006/08 EG _/_` (teórico) |
-  | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZC…ZEE 4) | NBR 7008-3 (ZAR) | aviso "material mais duro que o último ZAR" (teórico) |
+  | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZE…ZEE 4) | NBR 7008-3 (ZAR) | aviso "material mais duro que o último ZAR" (teórico) |
 - **EG (eletrolítico)** é classificado pela norma **sem revestimento** (NBR 5915-2, com NBR 16964 para o
   revestimento — **não é preciso transcrever a NBR 16964**), e a saída recebe `EG` + camada por face: ex. `EEP G3 EG 50/50`.
   Graus EG existentes na folha de classificações: EM, EP, EEP G1, EEP G2, EEP G3 (**não há EEP G4 EG**).
@@ -78,14 +93,24 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - **Os candidatos de cada acabamento vêm da folha de classificações** (`classificações.pdf`): só pode
   ser resultado um grau que exista ali para aquele acabamento (FF, FQ, GI, GA, EG). Exceção: ZAR
   (não está na folha), com saída no formato `ZAR-230 - Z275` / `ZAR-230 - ZF100`.
-- **Valores vazios:** classificar mesmo assim, **avisando quais valores estavam faltando**. Vazio é
+- **Comparação exata**, sem arredondar o valor digitado às casas da norma (0,0074 > 0,007 → reprova).
+- **Valores vazios:** classificar mesmo assim, **avisando quais valores estavam faltando** — só os campos
+  que a norma usada **exige** (Ni vazio não gera aviso na 5915-2): os exigidos pelo **grau do resultado**
+  + os vazios que, valendo zero, **barraram um grau mais nobre**. Vazio é
   tratado como **zero** em todas as comparações (inclusive mínimos — ex.: Al vazio reprova Al mín).
 - **Ignorar** propriedades que estão na norma mas não na interface (anisotropia r90/ΔR, encruamento n90,
   BH etc.) e entradas do usuário que a norma não exige (ex.: Lo80 % quando a norma só define Lo50).
 - **Aviso de "quase passou" (fase 1, por regra):** se um grau mais nobre falhou por **uma única variável**,
   classificar no grau atendido mas avisar, ex.: "Seria EEP 3, mas o alongamento (32 < 34 mín) rebaixou".
-- **Aviso por histórico (fase 2, machine learning):** quando houver registros suficientes, comparar com
-  classificações parecidas já salvas e avisar se algum valor está fora do comum (outlier).
+  Avisa **só o mais nobre** desses graus, **dentro da tabela que deu o resultado**; Lo50 e Lo80 contam
+  como **variáveis separadas**; vale também quando o resultado é `1006/08`.
+- **Aviso por histórico (machine learning, Fase 8):** quando houver registros suficientes, comparar com
+  classificações parecidas já salvas e avisar se algum valor está fora do comum (outlier). **Só alerta —
+  nunca muda a classificação**, que é sempre por regra da norma (explicável e determinística).
+- **Casos reais** (certificados já classificados pela empresa) ficam em `dados/casos/` e viram testes
+  locais (nunca no Git nem em arquivo versionado). 1º caso: certificado GI em `normas_claude/` (PDF
+  "CQ …"), classificado pela empresa como ZAR-250 — confirma ZC fora, ZE reprovado por LE e queda
+  para a 7008-3. Testável ao fim da Fase 3.
 
 ### Resultado
 - O campo **RESULTADO** mostra **somente** a classificação NBR + camada (ex.: `EEP G2 - Z275`).
@@ -124,6 +149,9 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - Aba de **histórico**: salvar classificações e pesquisar antigas.
 - **Excluir** move para a aba **Lixeira** (exclusão lógica). Na lixeira o registro aparece igual ao do
   histórico e pode ser **restaurado** de volta ou **excluído permanentemente**.
+- **Registro de divergências** (melhoria contínua): no histórico, o usuário pode marcar "a classificação
+  correta era outra" e escrever o motivo. As divergências formam uma lista para revisão — cada uma vira
+  correção no YAML/regra + caso de teste.
 
 ### Tolerância de espessura
 - **Zincados (EG, GA ZF, GI ZM, GI ZN):** NBR 7013 Tab. 1–4 — uma tabela para cada faixa de LE mín
@@ -154,7 +182,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 3. Demais normas (uma por commit, conferidas pelo usuário).
 4. Tolerância (NBR 11888, NBR 7013).
 5. Interface PySide6.
-6. Histórico SQLite + lixeira + pesquisa.
+6. Histórico SQLite + lixeira + pesquisa + registro de divergências.
 7. Empacotamento `.exe`.
 8. Aviso de outlier por machine learning (quando houver histórico suficiente).
 
@@ -175,7 +203,10 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - Embutimento: linha de espessura **mais próxima** (empate → linha maior); fora da faixa da tabela →
   não avaliado; **embutimento vazio → não avaliado** (com aviso), exceção à regra "vazio = zero".
   EM (5915-2) não tem exigência de embutimento.
-- Lo50 e Lo80: se a norma define os dois, **avaliar ambos**; se só um foi preenchido, o outro não é avaliado.
+- Lo50 e Lo80: se a norma define os dois, **avaliar ambos**; se só um foi preenchido, o outro não é
+  avaliado, mas **gera aviso de que faltou** ("Valores não informados (não avaliados)"). Na prática:
+  NBR 5915-2 (FF e EG) e sem revestimento exigem Lo50 e Lo80; 7008-2/-3 (GI/GA) só têm Lo50, então
+  Lo80 vazio nunca gera aviso. Embutimento vazio entra no mesmo aviso.
 - Notas sobrepostas na mesma propriedade: vale a **maior redução**, sem acumular.
 - Testes com valores de normas reais ficam em `dados/testes/` (fora do Git); `tests/` só usa a norma
   fictícia `tests/dados/norma-ficticia.yaml`.

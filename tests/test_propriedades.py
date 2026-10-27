@@ -15,6 +15,13 @@ def test_lista_de_quimicas_na_ordem_da_tela():
     ]
 
 
+def test_rotulo_curto_usado_nos_avisos():
+    assert Propriedade.LE.rotulo == "LE"
+    assert Propriedade.AL_LO50.rotulo == "alongamento Lo50"
+    assert Propriedade.EMBUTIMENTO.rotulo == "embutimento"
+    assert Propriedade.Mn.rotulo == "Mn"
+
+
 def test_mecanicas_e_unidades():
     assert Propriedade.LE.unidade == "MPa"
     assert Propriedade.AL_LO50.unidade == "%"
