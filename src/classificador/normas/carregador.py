@@ -12,7 +12,12 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ValidationError
 
-from classificador.dominio.modelos import Correlatas, FolhaClassificacoes, Norma
+from classificador.dominio.modelos import (
+    Correlatas,
+    FolhaClassificacoes,
+    Norma,
+    NormaTolerancia,
+)
 
 
 class ErroNorma(Exception):
@@ -62,20 +67,29 @@ def carregar_norma(caminho: str | Path) -> Norma:
 
 def carregar_normas(pasta: str | Path) -> dict[str, Norma]:
     """Todas as normas `*.yaml` da pasta, por código. Junta os erros de todos os arquivos."""
-    normas: dict[str, Norma] = {}
+    return _carregar_pasta(Path(pasta), Norma)
+
+
+def carregar_tolerancias(pasta: str | Path) -> dict[str, NormaTolerancia]:
+    """Todas as normas de tolerância `*.yaml` da pasta (ex.: dados/tolerancias/), por código."""
+    return _carregar_pasta(Path(pasta), NormaTolerancia)
+
+
+def _carregar_pasta[M: Norma | NormaTolerancia](pasta: Path, modelo: type[M]) -> dict[str, M]:
+    itens: dict[str, M] = {}
     erros: list[str] = []
-    for caminho in sorted(Path(pasta).glob("*.yaml")):
+    for caminho in sorted(pasta.glob("*.yaml")):
         try:
-            norma = carregar_norma(caminho)
+            item = _carregar(caminho, modelo)
         except ErroNorma as erro:
             erros.append(str(erro))
             continue
-        if norma.codigo in normas:
-            erros.append(f"{caminho.name}: código '{norma.codigo}' repetido em outro arquivo")
-        normas[norma.codigo] = norma
+        if item.codigo in itens:
+            erros.append(f"{caminho.name}: código '{item.codigo}' repetido em outro arquivo")
+        itens[item.codigo] = item
     if erros:
         raise ErroNorma("\n".join(erros))
-    return normas
+    return itens
 
 
 def carregar_folha(caminho: str | Path) -> FolhaClassificacoes:

@@ -56,8 +56,8 @@ class Grau(_Modelo):
     avisos: list[str] = []  # avisos informativos mostrados quando o resultado é este grau
 
 
-class FaixaEspessura(_Modelo):
-    """Faixa de espessura (mm) em que uma nota de rodapé vale. Limites inclusivos por padrão."""
+class Faixa(_Modelo):
+    """Faixa de valores (espessura em mm, LE em MPa…). Limites inclusivos por padrão."""
 
     min: Decimal | None = None
     max: Decimal | None = None
@@ -67,17 +67,17 @@ class FaixaEspessura(_Modelo):
     @model_validator(mode="after")
     def _conferir(self) -> Self:
         if self.min is None and self.max is None:
-            raise ValueError("a faixa de espessura precisa ter pelo menos 'min' ou 'max'")
+            raise ValueError("a faixa precisa ter pelo menos 'min' ou 'max'")
         if self.min is not None and self.max is not None and self.min > self.max:
-            raise ValueError(f"espessura mínima ({self.min}) maior que a máxima ({self.max})")
+            raise ValueError(f"início da faixa ({self.min}) maior que o fim ({self.max})")
         return self
 
-    def contem(self, espessura: Decimal) -> bool:
+    def contem(self, valor: Decimal) -> bool:
         if self.min is not None:
-            if espessura < self.min or (espessura == self.min and not self.min_inclusivo):
+            if valor < self.min or (valor == self.min and not self.min_inclusivo):
                 return False
         if self.max is not None:
-            if espessura > self.max or (espessura == self.max and not self.max_inclusivo):
+            if valor > self.max or (valor == self.max and not self.max_inclusivo):
                 return False
         return True
 
@@ -92,7 +92,7 @@ class Ajuste(_Modelo):
     nota: str  # referência na norma, ex.: "Tabela 2, nota d"
     motivo: str = "espessura"  # ex.: "espessura", "revestimento"
     graus: list[str] | None = None  # None = vale para todos os graus
-    quando: FaixaEspessura | None = None
+    quando: Faixa | None = None
     acabamentos: list[Acabamento] | None = Field(default=None, min_length=1)
     efeito: dict[Propriedade, Variacao] = {}
     remover: list[Propriedade] = []  # exigências que deixam de valer (ex.: Lo80 se e ≥ 3,0)
@@ -191,6 +191,7 @@ class SemGrau(_Modelo):
 class RegraAcabamento(_Modelo):
     tabelas: list[TabelaDoAcabamento] = Field(min_length=1)  # na ordem em que são testadas
     se_nenhum: SemGrau
+    tolerancia: str | None = None  # código da norma de tolerância de espessura (ex.: "NBR 11888")
 
 
 class FolhaClassificacoes(_Modelo):
@@ -257,3 +258,57 @@ class Correlatas(_Modelo):
         """Todos os nomes de norma conhecidos (para o autocompletar da pesquisa reversa)."""
         nomes = [n for g in self.grupos for n in [g.nbr, *g.correlatas, *g.so_eg]]
         return sorted(set(nomes))
+
+
+# --- Tolerância de espessura: grades espessura × largura → ± valor (NBR 11888, NBR 7013) ------
+
+
+class LinhaTolerancia(_Modelo):
+    espessura: Faixa  # mm
+    tolerancias: list[Decimal | None]  # ± mm, uma por faixa de largura; None = "–" na norma
+
+
+class TabelaTolerancia(_Modelo):
+    nome: str  # ex.: "Tabela 11"
+    le_min: Faixa | None = None  # faixa de LE mínimo do grau (MPa) em que vale; None = sempre
+    linhas: list[LinhaTolerancia] = Field(min_length=1)
+
+
+class Acrescimo(_Modelo):
+    """Acréscimo à tolerância, ex.: revestimento ≥ Z275 → +0,01 mm (NBR 7013)."""
+
+    acabamentos: list[Acabamento] = Field(min_length=1)
+    camada_min: Decimal  # g/m²
+    valor: Decimal  # mm
+
+
+class NormaTolerancia(_Modelo):
+    codigo: str  # ex.: "NBR 11888"
+    titulo: str
+    # Limites superiores (inclusivos) das faixas de largura, em mm: [1200, 1500] →
+    # L ≤ 1200 | 1200 < L ≤ 1500 | L > 1500 (decisão do usuário, igual em todas as tabelas).
+    larguras: list[Decimal] = Field(min_length=1)
+    tabelas: list[TabelaTolerancia] = Field(min_length=1)
+    acrescimos: list[Acrescimo] = []
+
+    @model_validator(mode="after")
+    def _conferir(self) -> Self:
+        if any(b <= a for a, b in zip(self.larguras, self.larguras[1:], strict=False)):
+            raise ValueError("as larguras devem estar em ordem crescente")
+        colunas = len(self.larguras) + 1
+        for tabela in self.tabelas:
+            for linha in tabela.linhas:
+                if len(linha.tolerancias) != colunas:
+                    raise ValueError(
+                        f"{tabela.nome}: a linha de espessura {linha.espessura.min}–"
+                        f"{linha.espessura.max} tem {len(linha.tolerancias)} tolerâncias; "
+                        f"esperadas {colunas} (uma por faixa de largura)"
+                    )
+        return self
+
+    def coluna(self, largura: Decimal) -> int:
+        """Índice da faixa de largura: L ≤ 1º limite → 0, …, acima do último → última."""
+        for indice, limite in enumerate(self.larguras):
+            if largura <= limite:
+                return indice
+        return len(self.larguras)

@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from classificador.dominio.modelos import Ajuste, FaixaEspessura
+from classificador.dominio.modelos import Ajuste, Faixa
 
 
 def num(valor: Decimal | int) -> str:
@@ -15,7 +15,7 @@ def sinal(valor: Decimal | int) -> str:
     return ("+" if valor > 0 else "") + num(valor)
 
 
-def descrever_faixa(faixa: FaixaEspessura) -> str:
+def descrever_faixa(faixa: Faixa) -> str:
     """Faixa de espessura em texto: "e < 0,50 mm", "0,50 ≤ e ≤ 0,70 mm", "e ≥ 3,0 mm"."""
     if faixa.max is None:
         return f"e {'≥' if faixa.min_inclusivo else '>'} {num(faixa.min)} mm"
