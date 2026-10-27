@@ -4,12 +4,13 @@ Uso:  python -m classificador.normas.conferir dados/normas/nbr-5915-2.yaml
 """
 
 import sys
+from pathlib import Path
 
-from classificador.dominio.formatacao import descrever_ajuste
+from classificador.dominio.formatacao import descrever_ajuste, descrever_faixa
 from classificador.dominio.formatacao import num as _num
-from classificador.dominio.modelos import Limite, Norma
+from classificador.dominio.modelos import Limite, Norma, NormaTolerancia
 from classificador.dominio.propriedades import Propriedade
-from classificador.normas.carregador import ErroNorma, carregar_norma
+from classificador.normas.carregador import ErroNorma, carregar_norma, carregar_tolerancia
 
 _MECANICAS = [
     Propriedade.LE,
@@ -111,6 +112,42 @@ def formatar_norma(norma: Norma) -> str:
     return "\n\n".join(blocos)
 
 
+def formatar_tolerancia(norma: NormaTolerancia) -> str:
+    larguras = [_num(x) for x in norma.larguras]
+    colunas = [f"L ≤ {larguras[0]}"]
+    colunas += [f"{a} < L ≤ {b}" for a, b in zip(larguras, larguras[1:], strict=False)]
+    colunas.append(f"L > {larguras[-1]}")
+
+    blocos = [f"{norma.codigo} — {norma.titulo}", "Tolerâncias normais (± mm)."]
+    for tabela in norma.tabelas:
+        faixa_le = (
+            f" — LE mínimo do grau: {descrever_faixa(tabela.le_min, 'LE', 'MPa')}"
+            if tabela.le_min
+            else ""
+        )
+        linhas = [
+            [descrever_faixa(ln.espessura)]
+            + [f"± {_num(t)}" if t is not None else "–" for t in ln.tolerancias]
+            for ln in tabela.linhas
+        ]
+        grade = _desenhar(["Espessura", *colunas], linhas)
+        blocos.append(f"{tabela.nome.upper()}{faixa_le}\n{grade}")
+    for acrescimo in norma.acrescimos:
+        blocos.append(
+            f"ACRÉSCIMO: +{_num(acrescimo.valor)} mm para {', '.join(acrescimo.acabamentos)} "
+            f"com camada ≥ {_num(acrescimo.camada_min)} g/m²"
+        )
+    return "\n\n".join(blocos)
+
+
+def _e_tolerancia(caminho: Path) -> bool:
+    """Arquivo de norma de tolerância (tem o campo `larguras:` no topo)?"""
+    if not caminho.is_file():
+        return False
+    linhas = caminho.read_text(encoding="utf-8").splitlines()
+    return any(ln.startswith("larguras:") for ln in linhas)
+
+
 def main(argumentos: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")  # acentos corretos também no Git Bash
@@ -118,8 +155,12 @@ def main(argumentos: list[str] | None = None) -> int:
     if len(argumentos) != 1:
         print("Uso: python -m classificador.normas.conferir <arquivo.yaml>")
         return 2
+    caminho = Path(argumentos[0])
     try:
-        print(formatar_norma(carregar_norma(argumentos[0])))
+        if _e_tolerancia(caminho):
+            print(formatar_tolerancia(carregar_tolerancia(caminho)))
+        else:
+            print(formatar_norma(carregar_norma(caminho)))
     except ErroNorma as erro:
         print(f"ERRO ao carregar a norma:\n{erro}")
         return 1

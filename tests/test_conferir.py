@@ -36,3 +36,13 @@ def test_main_imprime_e_retorna_zero(capsys):
 def test_main_com_arquivo_invalido_retorna_um(tmp_path, capsys):
     assert main([str(tmp_path / "nao-existe.yaml")]) == 1
     assert "não encontrado" in capsys.readouterr().out
+
+
+def test_imprime_norma_de_tolerancia(capsys):
+    assert main([str(Path(__file__).parent / "dados" / "tolerancia-ficticia.yaml")]) == 0
+    texto = capsys.readouterr().out
+    assert "TABELA 1 — LE mínimo do grau: LE ≤ 260 MPa" in texto
+    assert "1200 < L ≤ 1500" in texto
+    assert "0,40 < e ≤ 0,80 mm" in texto
+    assert "± 0,05" in texto and "–" in texto
+    assert "ACRÉSCIMO: +0,01 mm para GI ZN, GI ZM, GA ZF com camada ≥ 275 g/m²" in texto

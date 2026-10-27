@@ -70,6 +70,10 @@ def carregar_normas(pasta: str | Path) -> dict[str, Norma]:
     return _carregar_pasta(Path(pasta), Norma)
 
 
+def carregar_tolerancia(caminho: str | Path) -> NormaTolerancia:
+    return _carregar(Path(caminho), NormaTolerancia)
+
+
 def carregar_tolerancias(pasta: str | Path) -> dict[str, NormaTolerancia]:
     """Todas as normas de tolerância `*.yaml` da pasta (ex.: dados/tolerancias/), por código."""
     return _carregar_pasta(Path(pasta), NormaTolerancia)
