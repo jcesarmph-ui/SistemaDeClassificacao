@@ -1,0 +1,27 @@
+# Material e dados das normas ABNT — repositório é PÚBLICO, nunca versionar
+normas_claude/
+dados/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Empacotamento (PyInstaller)
+build/
+dist/
+*.spec
+
+# Banco do histórico (dados locais)
+*.db
+*.sqlite
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Configurações pessoais do Claude Code (não versionar)
+.claude/settings.local.json
