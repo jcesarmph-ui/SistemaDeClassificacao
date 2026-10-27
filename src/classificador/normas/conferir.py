@@ -4,10 +4,10 @@ Uso:  python -m classificador.normas.conferir dados/normas/nbr-5915-2.yaml
 """
 
 import sys
-from decimal import Decimal
 
+from classificador.dominio.formatacao import descrever_ajuste
 from classificador.dominio.formatacao import num as _num
-from classificador.dominio.modelos import FaixaEspessura, Limite, Norma
+from classificador.dominio.modelos import Limite, Norma
 from classificador.dominio.propriedades import Propriedade
 from classificador.normas.carregador import ErroNorma, carregar_norma
 
@@ -66,23 +66,6 @@ def _tabela_propriedades(norma: Norma, titulo: str, propriedades: list[Proprieda
     return f"{titulo}\n{_desenhar(cabecalho, linhas)}"
 
 
-def _faixa(faixa: FaixaEspessura) -> str:
-    partes = []
-    if faixa.min is not None:
-        partes.append(f"{_num(faixa.min)} {'≤' if faixa.min_inclusivo else '<'} e")
-    if faixa.max is not None:
-        operador = "≤" if faixa.max_inclusivo else "<"
-        if partes:
-            partes[0] += f" {operador} {_num(faixa.max)}"
-        else:
-            partes.append(f"e {operador} {_num(faixa.max)}")
-    return partes[0] + " mm"
-
-
-def _sinal(valor: Decimal) -> str:
-    return ("+" if valor > 0 else "") + _num(valor)
-
-
 def formatar_norma(norma: Norma) -> str:
     blocos = [
         f"{norma.codigo} — {norma.titulo}",
@@ -104,16 +87,8 @@ def formatar_norma(norma: Norma) -> str:
     if norma.ajustes:
         linhas = []
         for ajuste in norma.ajustes:
-            efeitos = []
-            for prop, var in ajuste.efeito.items():
-                if var.min is not None:
-                    efeitos.append(f"{prop.value} mín {_sinal(var.min)}")
-                if var.max is not None:
-                    efeitos.append(f"{prop.value} máx {_sinal(var.max)}")
             graus = ", ".join(ajuste.graus) if ajuste.graus else "todos os graus"
-            linhas.append(
-                f"  [{ajuste.nota}] {_faixa(ajuste.quando)} ({graus}): {', '.join(efeitos)}"
-            )
+            linhas.append(f"  [{ajuste.nota}] ({graus}) {descrever_ajuste(ajuste)}")
         blocos.append("NOTAS DE RODAPÉ (AJUSTES)\n" + "\n".join(linhas))
 
     avisos = [f"  {g.nome_na_norma}: {aviso}" for g in norma.graus for aviso in g.avisos]
