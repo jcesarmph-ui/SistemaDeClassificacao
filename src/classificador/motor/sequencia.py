@@ -25,6 +25,7 @@ class Classificacao:
     aviso_sem_grau: str | None  # ex.: "Material mais duro que o último ZAR"
     detalhe: ResultadoNorma  # tabela do resultado; se não houve, a última testada
     tentativas: list[ResultadoNorma]  # todas as tabelas testadas, em ordem
+    norma_tolerancia: str | None = None  # código da norma de tolerância do acabamento
 
 
 def classificar(
@@ -50,7 +51,8 @@ def classificar(
         tentativas.append(resultado)
         if resultado.grau is not None:
             return Classificacao(
-                amostra.acabamento, norma, resultado.grau, None, None, resultado, tentativas
+                amostra.acabamento, norma, resultado.grau, None, None, resultado, tentativas,
+                regra.tolerancia,
             )
 
     return Classificacao(
@@ -61,4 +63,5 @@ def classificar(
         aviso_sem_grau=regra.se_nenhum.aviso,
         detalhe=tentativas[-1],
         tentativas=tentativas,
+        norma_tolerancia=regra.tolerancia,
     )

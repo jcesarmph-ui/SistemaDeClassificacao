@@ -1,12 +1,14 @@
 """Transforma a classificação nos textos da tela: RESULTADO (sigla + camada), norma e avisos."""
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from decimal import Decimal
 
 from classificador.dominio.amostra import Amostra
 from classificador.dominio.formatacao import num
-from classificador.dominio.modelos import Correlatas
+from classificador.dominio.modelos import Correlatas, NormaTolerancia
 from classificador.motor.sequencia import Classificacao
+from classificador.tolerancia.verificar import ResultadoTolerancia, verificar_tolerancia
 
 
 @dataclass(frozen=True)
@@ -15,10 +17,14 @@ class Saida:
     norma: str | None  # ex.: "De acordo com a norma NBR 5915-2:2013"
     avisos: list[str] = field(default_factory=list)
     correlatas: list[str] = field(default_factory=list)  # na tela: separadas por vírgula
+    tolerancia: ResultadoTolerancia | None = None  # None = acabamento sem norma de tolerância
 
 
 def formatar(
-    classificacao: Classificacao, amostra: Amostra, correlatas: Correlatas | None = None
+    classificacao: Classificacao,
+    amostra: Amostra,
+    correlatas: Correlatas | None = None,
+    tolerancias: Mapping[str, NormaTolerancia] | None = None,
 ) -> Saida:
     detalhe = classificacao.detalhe
     grau = classificacao.grau
@@ -59,7 +65,16 @@ def formatar(
     lista = []
     if grau and correlatas is not None:
         lista = correlatas.de(classificacao.norma.codigo, grau.sigla, amostra.acabamento)
-    return Saida(resultado, norma, avisos, lista)
+    tolerancia = None
+    codigo = classificacao.norma_tolerancia
+    if codigo and tolerancias is not None:
+        if codigo in tolerancias:
+            tolerancia = verificar_tolerancia(amostra, grau, tolerancias[codigo])
+        else:
+            tolerancia = ResultadoTolerancia(
+                None, f"Tolerância não avaliada: a {codigo} ainda não foi transcrita"
+            )
+    return Saida(resultado, norma, avisos, lista, tolerancia)
 
 
 def _com_camada(base: str, amostra: Amostra) -> str:

@@ -1,6 +1,7 @@
 """Testes da saída formatada: RESULTADO com camada, norma e avisos."""
 
 from decimal import Decimal
+from pathlib import Path
 
 from classificador.dominio.amostra import Acabamento, Amostra
 from classificador.dominio.modelos import FolhaClassificacoes, Norma
@@ -183,3 +184,31 @@ def test_notas_aplicadas_e_aviso_do_grau():
 
 def test_sem_arquivo_de_correlatas_a_lista_fica_vazia():
     assert saida(Acabamento.FF).correlatas == []
+
+
+def test_tolerancia_no_resultado(tmp_path):
+    from classificador.normas.carregador import carregar_tolerancias
+
+    texto = (Path(__file__).parent / "dados" / "tolerancia-ficticia.yaml").read_text(
+        encoding="utf-8"
+    )
+    (tmp_path / "t.yaml").write_text(texto, encoding="utf-8")
+    tolerancias = carregar_tolerancias(tmp_path)
+    folha = FolhaClassificacoes.model_validate(
+        {
+            "acabamentos": {
+                "GI ZN": ZINCADO | {"tolerancia": "NBR 0000-T"},
+                "GA ZF": ZINCADO | {"tolerancia": "NBR 9999-T"},  # não transcrita
+                "FF": {"tabelas": [{"norma": "NBR 0000-1:2026"}], "se_nenhum": {"resultado": "X"}},
+            }
+        }
+    )
+
+    def tolerancia(acabamento):
+        amostra = Amostra(acabamento, OK, D("0.60"), espessura_real=D("0.62"), largura=D("1000"))
+        return formatar(classificar(amostra, folha, NORMAS), amostra, tolerancias=tolerancias)
+
+    gi = tolerancia(Acabamento.GI_ZN).tolerancia  # XEE: LE mín 100 → Tabela 1
+    assert gi.dentro is True and gi.texto.endswith("NBR 0000-T, Tabela 1")
+    assert "ainda não foi transcrita" in tolerancia(Acabamento.GA_ZF).tolerancia.texto
+    assert tolerancia(Acabamento.FF).tolerancia is None  # FF sem norma de tolerância na folha

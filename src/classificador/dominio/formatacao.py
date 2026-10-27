@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from classificador.dominio.modelos import Ajuste, FaixaEspessura
+from classificador.dominio.modelos import Ajuste, Faixa
 
 
 def num(valor: Decimal | int) -> str:
@@ -15,14 +15,14 @@ def sinal(valor: Decimal | int) -> str:
     return ("+" if valor > 0 else "") + num(valor)
 
 
-def descrever_faixa(faixa: FaixaEspessura) -> str:
-    """Faixa de espessura em texto: "e < 0,50 mm", "0,50 ≤ e ≤ 0,70 mm", "e ≥ 3,0 mm"."""
+def descrever_faixa(faixa: Faixa, variavel: str = "e", unidade: str = "mm") -> str:
+    """Faixa em texto: "e < 0,50 mm", "0,50 ≤ e ≤ 0,70 mm", "e ≥ 3,0 mm", "LE ≤ 260 MPa"."""
     if faixa.max is None:
-        return f"e {'≥' if faixa.min_inclusivo else '>'} {num(faixa.min)} mm"
-    texto = "e"
+        return f"{variavel} {'≥' if faixa.min_inclusivo else '>'} {num(faixa.min)} {unidade}"
+    texto = variavel
     if faixa.min is not None:
-        texto = f"{num(faixa.min)} {'≤' if faixa.min_inclusivo else '<'} e"
-    return f"{texto} {'≤' if faixa.max_inclusivo else '<'} {num(faixa.max)} mm"
+        texto = f"{num(faixa.min)} {'≤' if faixa.min_inclusivo else '<'} {variavel}"
+    return f"{texto} {'≤' if faixa.max_inclusivo else '<'} {num(faixa.max)} {unidade}"
 
 
 def descrever_ajuste(ajuste: Ajuste) -> str:

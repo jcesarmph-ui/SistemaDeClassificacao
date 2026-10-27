@@ -5,7 +5,7 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from classificador.dominio.modelos import FaixaEspessura, Limite, Norma
+from classificador.dominio.modelos import Faixa, Limite, Norma
 from classificador.dominio.propriedades import Propriedade
 
 
@@ -62,12 +62,12 @@ def test_limite_recusa_campo_com_nome_errado():
 # --- Faixa de espessura (condição das notas de rodapé) -----------------------
 
 def test_faixa_com_limites_inclusivos_e_exclusivos():
-    faixa = FaixaEspessura(min="0.50", max="0.70")  # 0,50 ≤ e ≤ 0,70
+    faixa = Faixa(min="0.50", max="0.70")  # 0,50 ≤ e ≤ 0,70
     assert faixa.contem(Decimal("0.50"))
     assert faixa.contem(Decimal("0.70"))
     assert not faixa.contem(Decimal("0.71"))
 
-    menor = FaixaEspessura(max="0.50", max_inclusivo=False)  # e < 0,50
+    menor = Faixa(max="0.50", max_inclusivo=False)  # e < 0,50
     assert menor.contem(Decimal("0.49"))
     assert not menor.contem(Decimal("0.50"))
 
