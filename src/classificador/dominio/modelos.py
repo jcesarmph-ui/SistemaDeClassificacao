@@ -83,12 +83,27 @@ class FaixaEspessura(_Modelo):
 
 
 class Ajuste(_Modelo):
-    """Nota de rodapé: quando a espessura está na faixa, os limites mudam conforme `efeito`."""
+    """Nota de rodapé: se a condição vale, os limites mudam conforme `efeito` e `remover`.
+
+    Condição: faixa de espessura (`quando`) e/ou acabamento (`acabamentos`) — ambas, se dadas.
+    Notas do mesmo `motivo` valem pela maior variação; motivos diferentes se somam.
+    """
 
     nota: str  # referência na norma, ex.: "Tabela 2, nota d"
+    motivo: str = "espessura"  # ex.: "espessura", "revestimento"
     graus: list[str] | None = None  # None = vale para todos os graus
-    quando: FaixaEspessura
-    efeito: dict[Propriedade, Variacao]
+    quando: FaixaEspessura | None = None
+    acabamentos: list[Acabamento] | None = Field(default=None, min_length=1)
+    efeito: dict[Propriedade, Variacao] = {}
+    remover: list[Propriedade] = []  # exigências que deixam de valer (ex.: Lo80 se e ≥ 3,0)
+
+    @model_validator(mode="after")
+    def _conferir(self) -> Self:
+        if self.quando is None and self.acabamentos is None:
+            raise ValueError(f"a nota '{self.nota}' precisa de condição: espessura ou acabamento")
+        if not self.efeito and not self.remover:
+            raise ValueError(f"a nota '{self.nota}' precisa de 'efeito' ou 'remover'")
+        return self
 
 
 class LinhaEmbutimento(_Modelo):

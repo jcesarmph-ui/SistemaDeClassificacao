@@ -6,6 +6,7 @@ Usa `limites_efetivos`, a mesma função do classificador — os dois nunca disc
 from dataclasses import dataclass, field
 from decimal import Decimal
 
+from classificador.dominio.amostra import Acabamento
 from classificador.dominio.formatacao import descrever_ajuste, num
 from classificador.dominio.modelos import Limite, Norma
 from classificador.dominio.propriedades import Propriedade
@@ -40,9 +41,14 @@ class Requisitos:
     avisos: list[str] = field(default_factory=list)
 
 
-def requisitos(norma: Norma, sigla: str, espessura: Decimal | None = None) -> Requisitos:
+def requisitos(
+    norma: Norma,
+    sigla: str,
+    espessura: Decimal | None = None,
+    acabamento: Acabamento | None = None,
+) -> Requisitos:
     grau = norma.grau(sigla)
-    efetivos = limites_efetivos(norma, grau, espessura)
+    efetivos = limites_efetivos(norma, grau, espessura, acabamento)
     ordem = list(Propriedade)
     itens = [
         Requisito(prop, efetivos.limites[prop])
@@ -52,7 +58,7 @@ def requisitos(norma: Norma, sigla: str, espessura: Decimal | None = None) -> Re
         f"{' + '.join(e.rotulo for e in s.elementos)} ≤ {num(s.max)} %" for s in grau.somas
     ]
 
-    if espessura is None:
+    if espessura is None and acabamento is None:
         # Sem espessura: mostra as notas que valem para o grau, para o usuário saber que mudam
         notas = [
             f"{a.nota} — {descrever_ajuste(a)}"
