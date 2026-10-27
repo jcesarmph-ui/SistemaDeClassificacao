@@ -1,6 +1,7 @@
 # Material e dados das normas ABNT — repositório é PÚBLICO, nunca versionar
 normas_claude/
-dados/
+# "/" no início = só a pasta dados/ da raiz (tests/dados/ tem a norma fictícia e é versionada)
+/dados/
 
 # Python
 __pycache__/
