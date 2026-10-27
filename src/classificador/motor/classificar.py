@@ -1,7 +1,8 @@
 """Classifica uma amostra numa norma: grau mais nobre atendido, "quase passou" e valores faltando.
 
-Avalia todos os graus da norma; o recorte por acabamento (ex.: EG até EEP G3, ZC nunca é
-resultado) é feito depois, na sequência de tabelas por acabamento.
+Avalia todos os graus da norma. `disponiveis` (da folha de classificações) recorta os graus que
+podem ser resultado: se o melhor atendido não está disponível, desce para o mais nobre disponível
+abaixo dele (EG: EEP G4 → EEP G3); se não há nenhum abaixo, a norma não dá resultado (ZC).
 """
 
 from dataclasses import dataclass
@@ -31,9 +32,19 @@ class ResultadoNorma:
     quase_passou: QuasePassou | None
     faltando: list[Propriedade]
     notas_aplicadas: list[str]
+    rebaixado_de: Grau | None = None  # grau atendido que não está disponível (EG: EEP G4)
 
 
-def classificar_na_norma(norma: Norma, amostra: Amostra) -> ResultadoNorma:
+def classificar_na_norma(
+    norma: Norma, amostra: Amostra, disponiveis: list[str] | None = None
+) -> ResultadoNorma:
+    siglas = [g.sigla for g in norma.graus]
+    if disponiveis is None:
+        disponiveis = siglas
+    inexistentes = [s for s in disponiveis if s not in siglas]
+    if inexistentes:
+        raise ValueError(f"grau(s) {', '.join(inexistentes)} não existe(m) na {norma.codigo}")
+
     avaliacoes = []
     notas: list[str] = []
     for grau in norma.graus:
@@ -42,9 +53,13 @@ def classificar_na_norma(norma: Norma, amostra: Amostra) -> ResultadoNorma:
         notas += [n for n in efetivos.notas_aplicadas if n not in notas]
 
     atendidos = [i for i, a in enumerate(avaliacoes) if a.atende]
-    posicao = atendidos[-1] if atendidos else -1
-    resultado = avaliacoes[posicao] if atendidos else None
-    acima = avaliacoes[posicao + 1 :]  # graus mais nobres que o resultado
+    melhor = atendidos[-1] if atendidos else -1
+    # Mais nobre disponível até o melhor atendido (-1 = nenhum)
+    posicao = max((i for i in range(melhor + 1) if siglas[i] in disponiveis), default=-1)
+    resultado = avaliacoes[posicao] if posicao >= 0 else None
+    rebaixado_de = avaliacoes[melhor].grau if 0 <= posicao < melhor else None
+    # graus disponíveis mais nobres que o resultado
+    acima = [a for a in avaliacoes[posicao + 1 :] if a.grau.sigla in disponiveis]
 
     return ResultadoNorma(
         norma=norma,
@@ -53,6 +68,7 @@ def classificar_na_norma(norma: Norma, amostra: Amostra) -> ResultadoNorma:
         quase_passou=_quase_passou(acima),
         faltando=_faltando(resultado, acima),
         notas_aplicadas=notas,
+        rebaixado_de=rebaixado_de,
     )
 
 
