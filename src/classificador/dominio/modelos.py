@@ -290,11 +290,18 @@ class NormaTolerancia(_Modelo):
     larguras: list[Decimal] = Field(min_length=1)
     tabelas: list[TabelaTolerancia] = Field(min_length=1)
     acrescimos: list[Acrescimo] = []
+    # Tabela para grau SEM LE mínimo definido (NBR 7013: ZC → Tabela 2). Sem grau não usa.
+    tabela_sem_le: str | None = None
 
     @model_validator(mode="after")
     def _conferir(self) -> Self:
         if any(b <= a for a, b in zip(self.larguras, self.larguras[1:], strict=False)):
             raise ValueError("as larguras devem estar em ordem crescente")
+        nomes = [t.nome for t in self.tabelas]
+        if self.tabela_sem_le is not None and self.tabela_sem_le not in nomes:
+            raise ValueError(
+                f"tabela_sem_le '{self.tabela_sem_le}' não existe ({', '.join(nomes)})"
+            )
         colunas = len(self.larguras) + 1
         for tabela in self.tabelas:
             for linha in tabela.linhas:

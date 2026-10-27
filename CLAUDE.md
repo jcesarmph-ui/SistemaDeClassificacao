@@ -159,6 +159,13 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - **Zincados (EG, GA ZF, GI ZM, GI ZN):** NBR 7013 Tab. 1–4 — uma tabela para cada faixa de LE mín
   do grau; +0,01 mm para revestimento ≥ Z275.
 - **Sem revestimento (FF, FQ, FQ DO):** NBR 11888 Tab. 11 (FQ usa a mesma tabela do FF).
+- **Grau sem limite de escoamento definido → NBR 7013 Tabela 2** (regra do usuário; a própria norma
+  diz isso para o ZC). **Sem grau no resultado** (EG 1006/08, GI sem ZAR) → **não avalia** e avisa.
+- Regras decididas na Fase 4: largura **L ≤ 1200 · 1200 < L ≤ 1500 · L > 1500** em todas as tabelas;
+  limite **inclusive** (real no limite = dentro); espessura fora da tabela ou "–" na norma → não
+  avalia e avisa; espessura real/largura vazia → não avalia e avisa; **+0,01 mm só para GI e GA**
+  com camada ≥ 275; 7013 Tab. 3 (2,50–3,00, L > 1500) = **0,23 como impresso**; solda (dobro nos
+  15 m) ignorada.
 
 ## Arquitetura (decidida em 2026-10-27)
 - **Python 3.12+**, interface **PySide6** (desktop Windows, `.exe` via PyInstaller), histórico em **SQLite**.

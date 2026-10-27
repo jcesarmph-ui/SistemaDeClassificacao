@@ -88,7 +88,6 @@ def test_acrescimo_do_revestimento_z275(norma):
         ({"largura": None}, "informe a largura"),
         ({"real": None}, "informe a espessura real"),
         ({"nominal": None, "real": None}, "informe a espessura nominal, a espessura real"),
-        ({"le_min": None}, "o grau não tem LE mínimo"),
         ({"le_min": 400}, "LE mínimo 400 MPa fora das tabelas"),
         ({"nominal": "0.90", "real": "0.90"}, "espessura nominal 0,90 mm fora da Tabela 1"),
         ({"nominal": "0.40", "real": "0.40", "largura": "1600"}, "não definida na norma"),
@@ -107,3 +106,19 @@ def test_sem_grau_nao_avalia_quando_a_tabela_depende_do_le(norma):
     resultado = verificar_tolerancia(amostra, None, norma)
     assert resultado.dentro is None
     assert "sem grau no resultado" in resultado.texto
+
+
+def test_grau_sem_le_minimo_usa_a_tabela_indicada_pela_norma(norma):
+    resultado = verificar(norma, le_min=None)  # ex.: ZC na NBR 7013 → Tabela 2
+    assert resultado.dentro is True
+    assert resultado.tolerancia == D("0.06")
+    assert resultado.texto.endswith("Tabela 2")
+
+
+def test_grau_sem_le_e_norma_sem_tabela_indicada_nao_avalia(norma):
+    sem_indicacao = norma.model_copy(update={"tabela_sem_le": None})
+    amostra = Amostra(Acabamento.GI_ZN, espessura_nominal=D("0.60"),
+                      espessura_real=D("0.60"), largura=D("1000"))
+    resultado = verificar_tolerancia(amostra, grau(None), sem_indicacao)
+    assert resultado.dentro is None
+    assert "o grau não tem LE mínimo" in resultado.texto

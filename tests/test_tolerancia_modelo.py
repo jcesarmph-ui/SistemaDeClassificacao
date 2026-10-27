@@ -42,3 +42,19 @@ def test_linha_com_numero_errado_de_colunas(tmp_path):
     )
     with pytest.raises(ErroNorma, match="Tabela 9.*esperadas 3"):
         carregar_tolerancias(tmp_path)
+
+
+def test_tabela_sem_le_inexistente(tmp_path):
+    texto = """\
+codigo: X
+titulo: X
+larguras: [1200]
+tabela_sem_le: Tabela 5
+tabelas:
+  - nome: Tabela 1
+    linhas:
+      - {espessura: {max: 1}, tolerancias: [0.1, 0.2]}
+"""
+    (tmp_path / "t.yaml").write_text(texto, encoding="utf-8")
+    with pytest.raises(ErroNorma, match="Tabela 5.*não existe"):
+        carregar_tolerancias(tmp_path)

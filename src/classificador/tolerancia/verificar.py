@@ -51,13 +51,21 @@ def verificar_tolerancia(
             )
         limite_le = grau.limites.get(Propriedade.LE)
         if limite_le is None or limite_le.min is None:
-            return _nao_avaliada(
-                f"o grau não tem LE mínimo para escolher a tabela da {norma.codigo}"
+            # Grau sem LE definido: a norma indica a tabela (NBR 7013 → Tabela 2)
+            if norma.tabela_sem_le is None:
+                return _nao_avaliada(
+                    f"o grau não tem LE mínimo para escolher a tabela da {norma.codigo}"
+                )
+            tabela = next(t for t in norma.tabelas if t.nome == norma.tabela_sem_le)
+        else:
+            le_min = limite_le.min
+            tabela = next(
+                (t for t in norma.tabelas if t.le_min and t.le_min.contem(le_min)), None
             )
-        le_min = limite_le.min
-        tabela = next((t for t in norma.tabelas if t.le_min and t.le_min.contem(le_min)), None)
-        if tabela is None:
-            return _nao_avaliada(f"LE mínimo {num(le_min)} MPa fora das tabelas da {norma.codigo}")
+            if tabela is None:
+                return _nao_avaliada(
+                    f"LE mínimo {num(le_min)} MPa fora das tabelas da {norma.codigo}"
+                )
 
     nominal = amostra.espessura_nominal
     linha = next((ln for ln in tabela.linhas if ln.espessura.contem(nominal)), None)

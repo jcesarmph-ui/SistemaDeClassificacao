@@ -17,5 +17,8 @@ tabelas:
       - {espessura: {max: 0.40}, tolerancias: [0.05, 0.06, 0.07]}
       - {espessura: {min: 0.40, min_inclusivo: false, max: 0.80}, tolerancias: [0.06, 0.07, 0.08]}
 
+# Grau sem LE mínimo definido usa a Tabela 2 (como o ZC na NBR 7013)
+tabela_sem_le: Tabela 2
+
 acrescimos:
   - {acabamentos: [GI ZN, GI ZM, GA ZF], camada_min: 275, valor: 0.01}
