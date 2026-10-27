@@ -1,0 +1,41 @@
+# Ficha do projeto: nome, versão do Python, bibliotecas e configuração das ferramentas.
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "classificador"
+version = "0.1.0"
+description = "Classificação automática de aços planos conforme normas ABNT (MG Centro de Serviço)"
+requires-python = ">=3.12"
+dependencies = [
+    "PySide6>=6.8",     # interface gráfica
+    "PyYAML>=6.0",      # leitura das normas em YAML
+    "pydantic>=2.0",    # validação das normas ao carregar
+]
+
+[project.optional-dependencies]
+# Ferramentas só de desenvolvimento (não vão para o .exe)
+dev = [
+    "pytest>=8.0",      # testes automáticos
+    "ruff>=0.6",        # verificação de estilo e erros
+    "pyinstaller>=6.0", # geração do .exe
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "normas_reais: usa as normas transcritas em dados/ (roda só localmente)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/F = erros básicos, I = ordem dos imports, B = armadilhas comuns, UP = sintaxe moderna
+select = ["E", "F", "I", "B", "UP"]
