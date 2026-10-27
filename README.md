@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/fase-2_motor_de_classificação-blue?style=flat-square" alt="Fase"/>
+  <img src="https://img.shields.io/badge/fase-3_demais_normas-blue?style=flat-square" alt="Fase"/>
   <img src="https://img.shields.io/badge/normas-ABNT-009739?style=flat-square" alt="Normas ABNT"/>
   <img src="https://img.shields.io/badge/idioma-pt--BR-green?style=flat-square" alt="Idioma"/>
 </p>
@@ -92,13 +92,37 @@ flowchart TD
     B -->|FF| C[NBR 5915-2]
     B -->|FQ / FQ DO| D[NBR 5906]
     B -->|EG| E[NBR 5915-2<br/>EM a EEP G3]
-    B -->|GI / GA| F[NBR 7008-2]
+    B -->|GI / GA| F[NBR 7008-2<br/>ZE a ZEE G4]
     F -->|nenhum grau atende| G[NBR 7008-3 · ZAR]
     C & D & E & F & G --> H[Testa todos os graus<br/>e aplica as notas de rodapé]
     H --> I[Escolhe o grau mais nobre<br/>= linha mais abaixo na tabela]
     I --> J[Resultado + camada<br/>ex.: ZEE G2 - Z275]
     C & D & E -->|nenhum grau atende| K[1006/08]
 ```
+
+<details>
+<summary><b>⚠️ Avisos que acompanham o resultado</b></summary>
+
+```text
+RESULTADO: EEP G1
+De acordo com a norma NBR 5915-2:2013
+⚠ Seria EEP G2, mas o S (0,025 > 0,020 máx) rebaixou
+⚠ Valores não informados (não avaliados): alongamento Lo80
+⚠ Limites ajustados pela espessura: Tabela 2, nota d
+```
+
+| Aviso | Quando aparece |
+|---|---|
+| **Quase passou** | Um grau mais nobre falhou por uma única variável |
+| **Valores não informados** | Campo exigido ficou vazio (vale zero, ou não é avaliado no caso de embutimento/alongamento) |
+| **Grau inexistente no acabamento** | Ex.: atende EEP G4, mas não existe EEP G4 EG → sai EEP G3 EG |
+| **Limites ajustados** | Uma nota de rodapé mudou os limites pela espessura |
+| **Aviso do grau** | Observação da norma, ex.: EEP G4 não substitui EEP G3 sem autorização |
+
+A **pesquisa reversa** faz o caminho inverso: escolhida a norma e o grau (e, se quiser, a
+espessura), mostra o que cada campo da tela precisa ter — usando os mesmos limites do classificador.
+
+</details>
 
 ## 🏛️ Arquitetura
 
@@ -191,6 +215,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 | [0003](docs/decisoes/0003-repositorio-publico-dados-fora-do-git.md) | Repositório público com dados das normas fora do Git |
 | [0004](docs/decisoes/0004-normas-em-yaml.md) | Base de normas em arquivos YAML |
 | [0005](docs/decisoes/0005-formato-yaml-normas.md) | Formato detalhado do YAML e regras de interpretação |
+| [0006](docs/decisoes/0006-motor-de-classificacao.md) | Motor de classificação: etapas e regras |
 
 </details>
 
@@ -199,14 +224,17 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 ```text
 SistemaDeClassificacao/
 ├── src/classificador/
-│   ├── dominio/         # propriedades e modelos (norma, grau, limite, ajuste)
-│   └── normas/          # carregador do YAML e comando de conferência
+│   ├── dominio/         # propriedades, amostra, modelos (norma, grau, folha de classificações)
+│   ├── normas/          # carregador do YAML e comando de conferência
+│   └── motor/           # limites, avaliação, classificação, sequência, saída, pesquisa reversa
 ├── tests/               # testes automáticos
-│   └── dados/           # norma fictícia usada nos testes
+│   └── dados/           # norma e folha fictícias usadas nos testes
 ├── docs/decisoes/       # registros de decisões de arquitetura (ADRs)
 ├── dados/               # NÃO versionado
 │   ├── normas/          # normas transcritas (YAML)
-│   └── testes/          # testes com valores das normas reais
+│   ├── casos/           # certificados reais com a classificação esperada
+│   ├── testes/          # testes com valores das normas reais
+│   └── folha-classificacoes.yaml
 ├── pyproject.toml       # dependências e configuração das ferramentas
 ├── CLAUDE.md            # instruções do projeto para o Claude Code
 └── README.md
@@ -228,15 +256,16 @@ Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato
 .\.venv\Scripts\python.exe -m classificador.normas.conferir tests\dados\norma-ficticia.yaml
 ```
 
-> A interface ainda não está disponível — por enquanto o projeto contém o modelo de dados, o
-> carregador das normas e os testes.
+> A interface ainda não está disponível — o motor de classificação já funciona e é testado
+> automaticamente; a tela chega na Fase 5.
 
 ## 🗺️ Roteiro
 
 - [x] **Fase 0** — Fundação: repositório, ADRs, ambiente Python, permissões do Claude Code
 - [x] **Fase 1** — Modelo de dados, formato YAML validado e NBR 5915-2 transcrita e conferida
-- [ ] **Fase 2** — Motor de classificação (com testes primeiro)
-- [ ] **Fase 3** — Transcrição das demais normas
+- [x] **Fase 2** — Motor de classificação (com testes primeiro): sequência por acabamento,
+  "quase passou", valores faltando, saída formatada e pesquisa reversa
+- [ ] **Fase 3** — Transcrição das demais normas e da planilha de equivalência (normas correlatas)
 - [ ] **Fase 4** — Tolerância de espessura
 - [ ] **Fase 5** — Interface PySide6
 - [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)

@@ -9,8 +9,18 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 e 1 concluídas** (branch `fase-1-dominio-yaml`).
-  **Fase 2 – Motor (TDD) em andamento** (branch `fase-2-motor`, ver "Roteiro").
+- Arquitetura **decidida** (2026-10-27). **Fases 0, 1 e 2 concluídas** (Fase 2: branch `fase-2-motor`,
+  PR para a `main`). Próxima: **Fase 3 – Demais normas** (5906, 7008-2, 7008-3) + planilha de
+  equivalência (normas correlatas e pesquisa reversa por correlata).
+- Fase 2 entregou o motor (`src/classificador/motor/`): `limites.py` (`limites_efetivos`),
+  `avaliacao.py` (`avaliar_grau`), `classificar.py` (`classificar_na_norma` + recorte de graus
+  disponíveis), `sequencia.py` (`classificar` por acabamento), `saida.py` (`formatar`) e `reversa.py`
+  (`requisitos`); `dominio/amostra.py` (`Acabamento`, `Amostra`); folha de classificações em
+  `dados/folha-classificacoes.yaml` (conferida pelo usuário). Regras: ADR 0006.
+- Casos reais em `dados/casos/*.yaml`, rodados por `dados/testes/test_casos_reais.py` (pulam enquanto
+  a norma não estiver transcrita). Só 1 caso (GI → ZAR-250 - Z100); usuário não tem mais certificados
+  à mão — não pedir de novo.
+- Na Fase 3: acertar o código `NBR 5906` (ano) na folha quando a norma for transcrita.
 - Fase 1 entregou: `dominio/propriedades.py` (enum `Propriedade`), `dominio/modelos.py` (pydantic),
   `normas/carregador.py` (`carregar_norma`, `ErroNorma`), `normas/conferir.py` (imprime a norma no
   formato das tabelas ABNT) e `dados/normas/nbr-5915-2.yaml` **conferida pelo usuário** (2026-10-27).
