@@ -171,5 +171,9 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - Git com repositório no GitHub (branch `main`), **público**.
 - Fazer commits pequenos a cada etapa concluída, com mensagens em português.
 - Commits locais e atualização do `README.md` podem ser feitos **sem pedir permissão**.
+- **Manter o `README.md` atualizado a cada etapa**, no estilo dos outros repositórios do usuário
+  (ex.: `jcesarmph-ui/SistemaCalibracao`): badges shields.io `for-the-badge` centralizados no topo,
+  descrição centralizada, seções com emoji, tabela "Tecnologia | Aplicação no projeto", diagramas
+  mermaid, `<details>` recolhíveis, roteiro com checkboxes e frase de fechamento em negrito.
 - Sempre confirmar com o usuário antes de `git push`.
 - Nunca versionar dados sensíveis, senhas, chaves de API, `normas_claude/` ou `dados/`.
