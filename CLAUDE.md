@@ -9,8 +9,12 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fase 0 – Fundação concluída.** Próxima: **Fase 1 – Domínio +
-  formato YAML** (ver "Roteiro").
+- Arquitetura **decidida** (2026-10-27). **Fases 0 e 1 concluídas** (branch `fase-1-dominio-yaml`).
+  Próxima: **Fase 2 – Motor (TDD)** (ver "Roteiro").
+- Fase 1 entregou: `dominio/propriedades.py` (enum `Propriedade`), `dominio/modelos.py` (pydantic),
+  `normas/carregador.py` (`carregar_norma`, `ErroNorma`), `normas/conferir.py` (imprime a norma no
+  formato das tabelas ABNT) e `dados/normas/nbr-5915-2.yaml` **conferida pelo usuário** (2026-10-27).
+  Formato e regras de interpretação: ADR 0005.
 - Ambiente: `.venv` criado; rodar sempre `.venv/Scripts/python -m pytest` / `-m ruff check .`.
 - Permissões em `.claude/settings.json` (testes, ruff, git status/diff/log/add/commit liberados; push pergunta).
 - Pendências restantes na seção "Pendências".
@@ -112,7 +116,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - **Centro – mecânicas:** LE (MPa), LR (MPa), alongamento Lo50 % e Lo80 % (aceitar com ou sem "%",
   limpar após Enter), embutimento (mm); espessura nominal e real (mm) + largura (mm) → dentro/fora da
   tolerância (verde/vermelho), mostrando intervalo e norma usada.
-- **Direita – químicas (%):** C, Mn, P, S, Al, Ni, Ti, V, Nb, Cr, Si, B. Ao passar o mouse sobre o
+- **Direita – químicas (%):** C, Mn, P, S, Al, Ni, Ti, V, Nb, Cr, Si, B, Mo. Ao passar o mouse sobre o
   símbolo, tooltip com o nome por extenso (C → Carbono, Mn → Manganês…).
 - Botões: CLASSIFICAR, nova classificação, limpar valores, pesquisa reversa.
 
@@ -156,9 +160,25 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 
 ## Regras das normas já identificadas (notas de rodapé)
 - LE não definido → usar valor a 0,2 % de deformação.
-- Espessura < 0,70 mm e/ou planicidade especial → alongamento pode ser 2 unidades abaixo.
-- NBR 5915-2 nota d: espessura < 0,5 mm → LE máx +40 MPa e alongamento −4; 0,50 ≤ e ≤ 0,70 → LE máx +20 MPa e alongamento −2.
-- NBR 5915-2: Nb pode substituir Ti (Ti+Nb ≤ 0,20 %); B máx 0,0005 % se o comprador exigir; EEP 4 não substitui EEP 3 sem autorização.
+- NBR 5915-2 nota b: espessura ≤ 0,70 mm e/ou planicidade especial → alongamento pode ser 2 unidades
+  abaixo. **Não aplicada:** usuário decidiu usar a maior redução entre b e d (= sempre a nota d).
+- NBR 5915-2 nota d: espessura < 0,5 mm → LE máx +40 MPa e alongamento −4; 0,50 ≤ e ≤ 0,70 → LE máx +20 MPa e alongamento −2
+  (redução vale para Lo50 e Lo80).
+- NBR 5915-2: Nb pode substituir Ti → **Ti+Nb ≤ 0,20 % só em EEP 3/4** (nos demais, Ti/Nb sem limite);
+  B máx 0,0005 % se o comprador exigir (**não aplicado**); EEP 4 não substitui EEP 3 sem autorização
+  (**aviso informativo** do grau).
+- NBR 5915-2: LE do EEP 4 impresso "120 – 160 (5)" → o "(5)" é ignorado. Tab. 3 em 0,90 mm (EEP 3/4)
+  transcrita como impressa, embora fuja da progressão.
+
+## Regras de interpretação decididas (ver ADR 0005)
+- Notas de rodapé e tabela de embutimento usam a **espessura nominal**.
+- Embutimento: linha de espessura **mais próxima** (empate → linha maior); fora da faixa da tabela →
+  não avaliado; **embutimento vazio → não avaliado** (com aviso), exceção à regra "vazio = zero".
+  EM (5915-2) não tem exigência de embutimento.
+- Lo50 e Lo80: se a norma define os dois, **avaliar ambos**; se só um foi preenchido, o outro não é avaliado.
+- Notas sobrepostas na mesma propriedade: vale a **maior redução**, sem acumular.
+- Testes com valores de normas reais ficam em `dados/testes/` (fora do Git); `tests/` só usa a norma
+  fictícia `tests/dados/norma-ficticia.yaml`.
 - NBR 5906: e ≤ 2,0 mm → LE/LR máx +20 MPa e alongamento −3; decapado contínuo/laminação de
   acabamento → alongamento −1; EPA com 2,0 < e < 3,0 → LE máx +10 MPa; Lo = 50 mm é o padrão.
 - NBR 7008-2/-3: revestimento zinco-ferro (GA) → alongamento −2.

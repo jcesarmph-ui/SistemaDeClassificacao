@@ -1,0 +1,42 @@
+# Norma FICTÍCIA para os testes versionados — valores inventados, não é uma norma real.
+# Serve também de exemplo do formato dos arquivos em dados/normas/.
+
+codigo: NBR 0000-1:2026
+titulo: Norma fictícia de testes
+
+# Graus na ordem das linhas da tabela: o último é o mais nobre.
+graus:
+  - sigla: AAA
+    nome_na_norma: AAA
+    limites:
+      C:   {max: 0.12}
+      Al:  {min: 0.010}
+      LE:  {min: 140, max: 280}
+      AL_LO50: {min: 30}
+
+  - sigla: BBB G1
+    nome_na_norma: BBB grau 1
+    limites:
+      C:   {max: 0.007}
+      Ti:  {max: 0.200}
+      LE:  {min: 120, max: 160}
+      AL_LO50: {min: 42}
+      AL_LO80: {min: 40}
+    somas:
+      - {elementos: [Ti, Nb], max: 0.20}
+    avisos:
+      - BBB G1 não substitui AAA sem autorização.
+
+# Notas de rodapé
+ajustes:
+  - nota: Tabela 2, nota a
+    quando: {max: 0.50, max_inclusivo: false}   # e < 0,50 mm
+    efeito:
+      LE:      {max: +40}
+      AL_LO50: {min: -4}
+
+# Embutimento: espessura nominal (mm) → mínimo por grau (mm)
+tabela_embutimento:
+  linhas:
+    - {espessura: 0.30, minimos: {BBB G1: 9.5}}
+    - {espessura: 0.35, minimos: {BBB G1: 9.6}}
