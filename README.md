@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/fase-3_demais_normas-blue?style=flat-square" alt="Fase"/>
+  <img src="https://img.shields.io/badge/fase-4_tolerância_de_espessura-blue?style=flat-square" alt="Fase"/>
   <img src="https://img.shields.io/badge/normas-ABNT-009739?style=flat-square" alt="Normas ABNT"/>
   <img src="https://img.shields.io/badge/idioma-pt--BR-green?style=flat-square" alt="Idioma"/>
 </p>
@@ -77,7 +77,7 @@ classificação no formato usado no dia a dia, por exemplo:
 |---|---|---|
 | NBR 5915-2 | Laminado a frio — estampagem | EM, EP, EEP G1–G4 |
 | NBR 5906 | Laminado a quente | EM, EP, EPA |
-| NBR 7008-2 | Zincado por imersão — estampagem | ZC, ZE, ZEE G1–G4 |
+| NBR 7008-2 | Zincado por imersão — estampagem | ZE, ZEE G1–G4 (ZC na norma, nunca é resultado) |
 | NBR 7008-3 | Zincado por imersão — estrutural | ZAR |
 | NBR 11888 | Tolerâncias — sem revestimento | — |
 | NBR 7013 | Tolerâncias — zincados | — |
@@ -104,9 +104,10 @@ flowchart TD
 <summary><b>⚠️ Avisos que acompanham o resultado</b></summary>
 
 ```text
-RESULTADO: EEP G1
-De acordo com a norma NBR 5915-2:2013
-⚠ Seria EEP G2, mas o S (0,025 > 0,020 máx) rebaixou
+RESULTADO: ZEE G2 - Z275
+De acordo com a norma NBR 7008-2:2021
+Normas correlatas: EN 10346 DX54D, EN 10327 DX54D, GMW 2M CR2, FG 52806 FEP02, MS 50002 CR02, …
+⚠ Seria ZEE G3, mas o C (0,04 > 0,01 máx) rebaixou
 ⚠ Valores não informados (não avaliados): alongamento Lo80
 ⚠ Limites ajustados pela espessura: Tabela 2, nota d
 ```
@@ -116,11 +117,15 @@ De acordo com a norma NBR 5915-2:2013
 | **Quase passou** | Um grau mais nobre falhou por uma única variável |
 | **Valores não informados** | Campo exigido ficou vazio (vale zero, ou não é avaliado no caso de embutimento/alongamento) |
 | **Grau inexistente no acabamento** | Ex.: atende EEP G4, mas não existe EEP G4 EG → sai EEP G3 EG |
-| **Limites ajustados** | Uma nota de rodapé mudou os limites pela espessura |
+| **Limites ajustados** | Uma nota de rodapé mudou os limites (espessura ou zinco-ferro) |
 | **Aviso do grau** | Observação da norma, ex.: EEP G4 não substitui EEP G3 sem autorização |
 
-A **pesquisa reversa** faz o caminho inverso: escolhida a norma e o grau (e, se quiser, a
-espessura), mostra o que cada campo da tela precisa ter — usando os mesmos limites do classificador.
+As **normas correlatas** (folha de classificações + planilha de equivalência) aparecem numa
+lista simples junto do resultado.
+
+A **pesquisa reversa** faz o caminho inverso: digitada qualquer norma — NBR ou correlata, como
+`DC04` ou `GMW 2M CR3` — e, se quiser, a espessura, mostra o que cada campo da tela precisa ter,
+usando os mesmos limites do classificador.
 
 </details>
 
@@ -216,6 +221,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 | [0004](docs/decisoes/0004-normas-em-yaml.md) | Base de normas em arquivos YAML |
 | [0005](docs/decisoes/0005-formato-yaml-normas.md) | Formato detalhado do YAML e regras de interpretação |
 | [0006](docs/decisoes/0006-motor-de-classificacao.md) | Motor de classificação: etapas e regras |
+| [0007](docs/decisoes/0007-notas-por-motivo-e-correlatas.md) | Notas por motivo/acabamento e normas correlatas |
 
 </details>
 
@@ -234,7 +240,8 @@ SistemaDeClassificacao/
 │   ├── normas/          # normas transcritas (YAML)
 │   ├── casos/           # certificados reais com a classificação esperada
 │   ├── testes/          # testes com valores das normas reais
-│   └── folha-classificacoes.yaml
+│   ├── folha-classificacoes.yaml
+│   └── correlatas.yaml
 ├── pyproject.toml       # dependências e configuração das ferramentas
 ├── CLAUDE.md            # instruções do projeto para o Claude Code
 └── README.md
@@ -265,7 +272,8 @@ Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato
 - [x] **Fase 1** — Modelo de dados, formato YAML validado e NBR 5915-2 transcrita e conferida
 - [x] **Fase 2** — Motor de classificação (com testes primeiro): sequência por acabamento,
   "quase passou", valores faltando, saída formatada e pesquisa reversa
-- [ ] **Fase 3** — Transcrição das demais normas e da planilha de equivalência (normas correlatas)
+- [x] **Fase 3** — NBR 5906, 7008-2 e 7008-3 transcritas e conferidas; normas correlatas e pesquisa
+  reversa por qualquer norma
 - [ ] **Fase 4** — Tolerância de espessura
 - [ ] **Fase 5** — Interface PySide6
 - [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)

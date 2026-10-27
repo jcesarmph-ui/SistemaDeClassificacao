@@ -9,9 +9,12 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0, 1 e 2 concluídas** (Fase 2: branch `fase-2-motor`,
-  PR para a `main`). Próxima: **Fase 3 – Demais normas** (5906, 7008-2, 7008-3) + planilha de
-  equivalência (normas correlatas e pesquisa reversa por correlata).
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 3 concluídas** (Fase 3: branch `fase-3-normas`,
+  PR para a `main`). Próxima: **Fase 4 – Tolerância de espessura** (NBR 11888, NBR 7013).
+- Fase 3 entregou: NBR 7008-2, 7008-3 e 5906 em `dados/normas/` (**conferidas pelo usuário**);
+  notas com `motivo`, `acabamentos` e `remover` (ADR 0007); `dados/correlatas.yaml` (união folha +
+  planilha, **conferida pelo usuário**), `Correlatas`, `carregar_correlatas`, correlatas no
+  `formatar()` e `pesquisar()` (pesquisa reversa por qualquer norma). O caso real GI → ZAR-250 passa.
 - Fase 2 entregou o motor (`src/classificador/motor/`): `limites.py` (`limites_efetivos`),
   `avaliacao.py` (`avaliar_grau`), `classificar.py` (`classificar_na_norma` + recorte de graus
   disponíveis), `sequencia.py` (`classificar` por acabamento), `saida.py` (`formatar`) e `reversa.py`
@@ -20,7 +23,6 @@
 - Casos reais em `dados/casos/*.yaml`, rodados por `dados/testes/test_casos_reais.py` (pulam enquanto
   a norma não estiver transcrita). Só 1 caso (GI → ZAR-250 - Z100); usuário não tem mais certificados
   à mão — não pedir de novo.
-- Na Fase 3: acertar o código `NBR 5906` (ano) na folha quando a norma for transcrita.
 - Fase 1 entregou: `dominio/propriedades.py` (enum `Propriedade`), `dominio/modelos.py` (pydantic),
   `normas/carregador.py` (`carregar_norma`, `ErroNorma`), `normas/conferir.py` (imprime a norma no
   formato das tabelas ABNT) e `dados/normas/nbr-5915-2.yaml` **conferida pelo usuário** (2026-10-27).
@@ -207,14 +209,29 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   avaliado, mas **gera aviso de que faltou** ("Valores não informados (não avaliados)"). Na prática:
   NBR 5915-2 (FF e EG) e sem revestimento exigem Lo50 e Lo80; 7008-2/-3 (GI/GA) só têm Lo50, então
   Lo80 vazio nunca gera aviso. Embutimento vazio entra no mesmo aviso.
-- Notas sobrepostas na mesma propriedade: vale a **maior redução**, sem acumular.
+- Notas sobrepostas na mesma propriedade: do **mesmo motivo** (ex.: espessura) vale a **maior
+  redução**, sem acumular; de **motivos diferentes** (espessura + zinco-ferro) **somam**.
 - Testes com valores de normas reais ficam em `dados/testes/` (fora do Git); `tests/` só usa a norma
   fictícia `tests/dados/norma-ficticia.yaml`.
-- NBR 5906: e ≤ 2,0 mm → LE/LR máx +20 MPa e alongamento −3; decapado contínuo/laminação de
-  acabamento → alongamento −1; EPA com 2,0 < e < 3,0 → LE máx +10 MPa; Lo = 50 mm é o padrão.
-- NBR 7008-2/-3: revestimento zinco-ferro (GA) → alongamento −2.
-- NBR 7008-2: ZC sem limites mecânicos; NBR 7013 considera para ZC o LE de ZE (260/360 MPa).
-- Microligantes (Nb, Ti, V, Zr, Ta, B) — somatório máx 0,25 % (7008-3).
+- NBR 5906 (código **sem ano**: `NBR 5906`): nota a e ≤ 2,0 mm → LE/LR máx +20 MPa e alongamento −3;
+  nota c EPA com 2,0 < e < 3,0 → LE máx +10 MPa; e ≥ 3,0 mm → Lo50 da 3ª coluna (EM 30, EP 34,
+  EPA 35) e **Lo80 ignorado**; nota b (decapado contínuo −1) **não aplicada**; Lo = 50 mm é o padrão.
+- NBR 7008-2/-3: nota b e < 0,70 mm → alongamento −2 (planicidade ignorada); nota c GA ZF →
+  alongamento −2 (**soma** com a b).
+- NBR 7008-2: ZC sem limites mecânicos (e nunca é resultado). LR só máximo.
+- NBR 7008-3: microligantes Nb + Ti + V + B ≤ 0,25 % (Zr e Ta da nota não estão na tela). ZAR-550 sem
+  alongamento. LE e LR só mínimo.
+
+## Normas correlatas (decididas na Fase 3)
+- Fonte: **união** da folha de classificações e da planilha (aba 2, mais completa), sem indicar a
+  origem; divergências aparecem as duas (5906: DD11 e DD12, HR0 e HR1, FG 52806 e FG 52807).
+- Na tela: lista simples separada por vírgula junto do resultado. EN 10152 só no EG.
+- Graus sem revestimento recebem as colunas "sem" + "com ou sem revestimento" da planilha; zincados,
+  "com" + "com ou sem". ZAR (7008-3) não têm correlatas. NBR 6656 (LNE) não tem equivalências.
+- Fora do escopo (IF, BH, ARBL): só equivalências na pesquisa reversa, sem valores exigidos.
+- ARBL: a aba 1 tem "LAC420480T" e "LAC550Y620Y" (erros); usada a forma da aba 2.
+- Arquivo mantido como YAML (`dados/correlatas.yaml`), gerado uma vez a partir das duas fontes — o
+  usuário pediu simplicidade; se quiser que o programa leia o .xlsx direto, rever.
 - Tolerância de espessura: +0,01 mm para revestimento ≥ Z275 (NBR 7013); bobinas com solda: dobro da
   tolerância nos 15 m das extremidades (NBR 11888).
 
