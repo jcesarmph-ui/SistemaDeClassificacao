@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/fase-4_tolerância_de_espessura-blue?style=flat-square" alt="Fase"/>
+  <img src="https://img.shields.io/badge/fase-5_interface-blue?style=flat-square" alt="Fase"/>
   <img src="https://img.shields.io/badge/normas-ABNT-009739?style=flat-square" alt="Normas ABNT"/>
   <img src="https://img.shields.io/badge/idioma-pt--BR-green?style=flat-square" alt="Idioma"/>
 </p>
@@ -107,6 +107,7 @@ flowchart TD
 RESULTADO: ZEE G2 - Z275
 De acordo com a norma NBR 7008-2:2021
 Normas correlatas: EN 10346 DX54D, EN 10327 DX54D, GMW 2M CR2, FG 52806 FEP02, MS 50002 CR02, …
+🟢 Dentro da tolerância: 0,74 a 0,86 mm (± 0,06, com +0,01 do revestimento ≥ 275 g/m²) — NBR 7013, Tabela 1
 ⚠ Seria ZEE G3, mas o C (0,04 > 0,01 máx) rebaixou
 ⚠ Valores não informados (não avaliados): alongamento Lo80
 ⚠ Limites ajustados pela espessura: Tabela 2, nota d
@@ -222,6 +223,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 | [0005](docs/decisoes/0005-formato-yaml-normas.md) | Formato detalhado do YAML e regras de interpretação |
 | [0006](docs/decisoes/0006-motor-de-classificacao.md) | Motor de classificação: etapas e regras |
 | [0007](docs/decisoes/0007-notas-por-motivo-e-correlatas.md) | Notas por motivo/acabamento e normas correlatas |
+| [0008](docs/decisoes/0008-tolerancia-de-espessura.md) | Tolerância de espessura (NBR 11888 e NBR 7013) |
 
 </details>
 
@@ -232,12 +234,14 @@ SistemaDeClassificacao/
 ├── src/classificador/
 │   ├── dominio/         # propriedades, amostra, modelos (norma, grau, folha de classificações)
 │   ├── normas/          # carregador do YAML e comando de conferência
-│   └── motor/           # limites, avaliação, classificação, sequência, saída, pesquisa reversa
+│   ├── motor/           # limites, avaliação, classificação, sequência, saída, pesquisa reversa
+│   └── tolerancia/      # tolerância de espessura (real × nominal)
 ├── tests/               # testes automáticos
-│   └── dados/           # norma e folha fictícias usadas nos testes
+│   └── dados/           # norma, folha, correlatas e tolerância fictícias usadas nos testes
 ├── docs/decisoes/       # registros de decisões de arquitetura (ADRs)
 ├── dados/               # NÃO versionado
 │   ├── normas/          # normas transcritas (YAML)
+│   ├── tolerancias/     # NBR 11888 e NBR 7013 transcritas (YAML)
 │   ├── casos/           # certificados reais com a classificação esperada
 │   ├── testes/          # testes com valores das normas reais
 │   ├── folha-classificacoes.yaml
@@ -274,7 +278,8 @@ Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato
   "quase passou", valores faltando, saída formatada e pesquisa reversa
 - [x] **Fase 3** — NBR 5906, 7008-2 e 7008-3 transcritas e conferidas; normas correlatas e pesquisa
   reversa por qualquer norma
-- [ ] **Fase 4** — Tolerância de espessura
+- [x] **Fase 4** — Tolerância de espessura: NBR 11888 (Tab. 11) e NBR 7013 (Tab. 1–4) transcritas e
+  conferidas; dentro/fora com intervalo e norma
 - [ ] **Fase 5** — Interface PySide6
 - [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)
 - [ ] **Fase 7** — Executável `.exe`

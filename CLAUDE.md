@@ -9,8 +9,12 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 3 concluídas** (Fase 3: branch `fase-3-normas`,
-  PR para a `main`). Próxima: **Fase 4 – Tolerância de espessura** (NBR 11888, NBR 7013).
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas** (Fase 4: branch
+  `fase-4-tolerancia`, PR para a `main`). Próxima: **Fase 5 – Interface PySide6**.
+- Fase 4 entregou: `Amostra.espessura_real/largura`; `NormaTolerancia` (`dominio/modelos.py`,
+  `Faixa` genérica), `carregar_tolerancia(s)`; `tolerancia/verificar.py` (`verificar_tolerancia`);
+  `Saida.tolerancia`; folha com `tolerancia:` por acabamento; NBR 11888 e NBR 7013 em
+  `dados/tolerancias/` (**conferidas pelo usuário**). Regras: ADR 0008.
 - Fase 3 entregou: NBR 7008-2, 7008-3 e 5906 em `dados/normas/` (**conferidas pelo usuário**);
   notas com `motivo`, `acabamentos` e `remover` (ADR 0007); `dados/correlatas.yaml` (união folha +
   planilha, **conferida pelo usuário**), `Correlatas`, `carregar_correlatas`, correlatas no
