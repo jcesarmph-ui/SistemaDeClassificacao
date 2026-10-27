@@ -27,6 +27,7 @@ class Falha:
     limite: Decimal
     lado: Literal["min", "max"]
     vazio: bool = False
+    propriedade: Propriedade | None = None  # None quando a falha é de uma soma
 
     @property
     def texto(self) -> str:
@@ -61,9 +62,9 @@ def avaliar_grau(grau: Grau, efetivos: LimitesEfetivos, amostra: Amostra) -> Ava
         valor = amostra.valor(prop) or Decimal(0)
         vazio = not amostra.preenchido(prop)
         if limite.min is not None and valor < limite.min:
-            falhas.append(Falha(prop.rotulo, valor, limite.min, "min", vazio))
+            falhas.append(Falha(prop.rotulo, valor, limite.min, "min", vazio, prop))
         if limite.max is not None and valor > limite.max:
-            falhas.append(Falha(prop.rotulo, valor, limite.max, "max", vazio))
+            falhas.append(Falha(prop.rotulo, valor, limite.max, "max", vazio, prop))
 
     for soma in grau.somas:
         for elemento in soma.elementos:

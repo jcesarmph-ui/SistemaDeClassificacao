@@ -85,7 +85,8 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   (não está na folha), com saída no formato `ZAR-230 - Z275` / `ZAR-230 - ZF100`.
 - **Comparação exata**, sem arredondar o valor digitado às casas da norma (0,0074 > 0,007 → reprova).
 - **Valores vazios:** classificar mesmo assim, **avisando quais valores estavam faltando** — só os campos
-  que a norma usada **exige** (Ni vazio não gera aviso na 5915-2). Vazio é
+  que a norma usada **exige** (Ni vazio não gera aviso na 5915-2): os exigidos pelo **grau do resultado**
+  + os vazios que, valendo zero, **barraram um grau mais nobre**. Vazio é
   tratado como **zero** em todas as comparações (inclusive mínimos — ex.: Al vazio reprova Al mín).
 - **Ignorar** propriedades que estão na norma mas não na interface (anisotropia r90/ΔR, encruamento n90,
   BH etc.) e entradas do usuário que a norma não exige (ex.: Lo80 % quando a norma só define Lo50).
