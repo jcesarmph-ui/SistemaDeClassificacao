@@ -1,0 +1,16 @@
+# Correlatas FICTÍCIAS para os testes — exemplo do formato de dados/correlatas.yaml.
+grupos:
+  - nbr: NBR 0000-1 AAA
+    norma: "NBR 0000-1:2026"
+    grau: AAA
+    correlatas: [EN 10130 DC01, GMW 2M CR1]
+    so_eg: [EN 10152 DC01]
+
+  - nbr: NBR 0000-1 BBB G1
+    norma: "NBR 0000-1:2026"
+    grau: BBB G1
+    correlatas: [EN 10130 DC04, HES-C052 JSC270D]
+
+  # Fora do escopo: só equivalências (o programa não classifica esse grau)
+  - nbr: NBR 5915-4 BH-180
+    correlatas: [GMW 3032M CR180B2, MS 50002 BHC180Y290T]

@@ -200,3 +200,60 @@ class FolhaClassificacoes(_Modelo):
         if acabamento not in self.acabamentos:
             raise KeyError(f"acabamento '{acabamento}' não está na folha de classificações")
         return self.acabamentos[acabamento]
+
+
+# --- Normas correlatas: equivalências entre um grau NBR e normas de montadoras/europeias -----
+
+
+def _chave(texto: str) -> str:
+    """Forma de comparar nomes de norma ignorando maiúsculas, espaços e hífens."""
+    return "".join(c for c in texto.upper() if c.isalnum())
+
+
+class GrupoCorrelatas(_Modelo):
+    nbr: str  # rótulo do grau NBR, ex.: "NBR 5915-2 EEP G2" (fora do escopo: "NBR 5915-4 BH-180")
+    norma: str | None = None  # código do YAML da norma, quando o programa classifica esse grau
+    grau: str | None = None  # sigla do grau nesse YAML
+    correlatas: list[str] = []  # ex.: ["EN 10130 DC04", "GMW 2M CR3"]
+    so_eg: list[str] = []  # correlatas que valem só para o acabamento EG (ex.: EN 10152)
+
+    @model_validator(mode="after")
+    def _conferir(self) -> Self:
+        if (self.norma is None) != (self.grau is None):
+            raise ValueError(f"grupo '{self.nbr}': informe 'norma' e 'grau' juntos")
+        return self
+
+
+class Correlatas(_Modelo):
+    grupos: list[GrupoCorrelatas]
+
+    def de(self, norma: str, grau: str, acabamento: Acabamento | None = None) -> list[str]:
+        """Correlatas de um grau classificado, sem repetição, na ordem do arquivo."""
+        nomes: list[str] = []
+        for grupo in self.grupos:
+            if grupo.norma == norma and grupo.grau == grau:
+                nomes += grupo.correlatas
+                if acabamento == Acabamento.EG:
+                    nomes += grupo.so_eg
+        return list(dict.fromkeys(nomes))
+
+    def buscar(self, texto: str) -> list[GrupoCorrelatas]:
+        """Grupos em que o texto aparece (rótulo NBR ou correlata), ex.: "dc04", "EN 10130 DC04".
+
+        Prefere nomes que TERMINAM com o texto ("CR1" acha "GMW 2M CR1", não "… CR180B2");
+        se nenhum terminar, procura em qualquer parte do nome.
+        """
+        procurado = _chave(texto)
+        if not procurado:
+            return []
+
+        def nomes(g: GrupoCorrelatas) -> list[str]:
+            return [_chave(n) for n in [g.nbr, *g.correlatas, *g.so_eg]]
+
+        no_fim = [g for g in self.grupos if any(n.endswith(procurado) for n in nomes(g))]
+        return no_fim or [g for g in self.grupos if any(procurado in n for n in nomes(g))]
+
+    def todos_os_nomes(self) -> list[str]:
+        """Todos os nomes de norma conhecidos (para o autocompletar da pesquisa reversa)."""
+        nomes = [n for g in self.grupos for n in [g.nbr, *g.correlatas, *g.so_eg]]
+        return sorted(set(nomes))
