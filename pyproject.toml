@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "classificador"
 version = "0.1.0"
-description = "Classificação automática de aços planos conforme normas ABNT (MG Centro de Serviço)"
+description = "Classificação automática de aços planos conforme normas ABNT (MG Centro de Serviços)"
 requires-python = ">=3.12"
 dependencies = [
     "PySide6>=6.8",     # interface gráfica

@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  Aplicação desktop da <b>MG Centro de Serviço</b> que classifica aços planos — laminados a frio, a quente e
+  Aplicação desktop da <b>MG Centro de Serviços</b> que classifica aços planos — laminados a frio, a quente e
   zincados — a partir das propriedades mecânicas e químicas, indicando o grau conforme as normas ABNT.
 </p>
 

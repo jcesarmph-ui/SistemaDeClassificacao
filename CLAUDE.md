@@ -57,7 +57,7 @@
 - Pendências restantes na seção "Pendências".
 
 ## Objetivo
-Programa (MG Centro de Serviço) para **classificar materiais de aço (produtos planos)** a partir das
+Programa (MG Centro de Serviços) para **classificar materiais de aço (produtos planos)** a partir das
 propriedades mecânicas e químicas digitadas pelo usuário, indicando a classificação (sigla/grau) conforme
 as normas ABNT, além de verificar tolerância de espessura e mostrar normas correlatas.
 

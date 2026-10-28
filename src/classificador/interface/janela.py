@@ -94,7 +94,7 @@ class JanelaPrincipal(QMainWindow):
         self.dicas: dict[str, QLabel] = {}  # nome do campo → faixa exigida (pesquisa reversa)
         self._resultados_pesquisa: list[ResultadoPesquisa] = []
 
-        self.setWindowTitle("Classificação de Materiais — MG Centro de Serviço")
+        self.setWindowTitle("Classificação de Materiais — MG Centro de Serviços")
         self.setStyleSheet(_ESTILO.format(**_CORES))
 
         # Faixas horizontais; dentro de cada faixa, caixas da mesma altura e larguras iguais.
@@ -131,7 +131,7 @@ class JanelaPrincipal(QMainWindow):
                 QPixmap(str(self.servico.logo)).scaledToHeight(80, Qt.SmoothTransformation)
             )
         else:
-            logo = QLabel("MG Centro de Serviço")
+            logo = QLabel("MG Centro de Serviços")
         grade = QGridLayout()
         grade.addWidget(logo, 0, 0, Qt.AlignLeft)
         grade.addWidget(QLabel("CLASSIFICAÇÃO DE MATERIAIS", objectName="titulo"), 0, 1)
