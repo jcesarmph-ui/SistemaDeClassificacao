@@ -20,9 +20,7 @@
       "PowerShell(git diff)",
       "PowerShell(git log *)",
       "PowerShell(git add *)",
-      "PowerShell(git commit *)"
-    ],
-    "ask": [
+      "PowerShell(git commit *)",
       "Bash(git push *)",
       "Bash(git push)",
       "PowerShell(git push *)",

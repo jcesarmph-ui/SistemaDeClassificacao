@@ -11,9 +11,8 @@
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas.**
   **Fase 5 – Interface PySide6 EM ANDAMENTO** (branch `fase-5-interface`, enviada ao GitHub, **sem
-  PR ainda**). Última sessão: 2026-10-28 (usuário deu `/clear` ao final). **Commits de 2026-10-28
-  ainda não enviados ao GitHub** (pedir confirmação antes do push).
-- **Fase 5 — 2026-10-28 (ajustes pedidos pelo usuário, todos com commit local):**
+  PR ainda**). Última sessão: 2026-10-28 (usuário deu `/clear` ao final). Tudo enviado ao GitHub.
+- **Fase 5 — 2026-10-28 (ajustes pedidos pelo usuário, todos commitados e enviados):**
   - Layout refeito em **faixas simétricas** (`janela.py`): cabeçalho (logo | título centralizado |
     versão); entradas em 3 caixas de mesma altura (Material + Espessura e tolerância | Mecânicas |
     Químicas em 3 colunas × 5 linhas); faixa de botões (Nova classificação, Limpar valores,
@@ -72,7 +71,8 @@
   formato das tabelas ABNT) e `dados/normas/nbr-5915-2.yaml` **conferida pelo usuário** (2026-10-27).
   Formato e regras de interpretação: ADR 0005.
 - Ambiente: `.venv` criado; rodar sempre `.venv/Scripts/python -m pytest` / `-m ruff check .`.
-- Permissões em `.claude/settings.json` (testes, ruff, git status/diff/log/add/commit liberados; push pergunta).
+- Permissões em `.claude/settings.json` (testes, ruff, git status/diff/log/add/commit/push liberados;
+  push forçado e `add -f` bloqueados).
 - Pendências restantes na seção "Pendências".
 
 ## Objetivo
@@ -326,5 +326,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   conserto sem mudar comportamento (norma digitada errado → `1.0.1`), MENOR para novidade compatível
   (`1.1.0`), MAIOR para mudança que quebra o jeito de usar ou os dados (`2.0.0`). Cada versão entregue
   ganha uma tag Git `vX.Y.Z`.
-- Sempre confirmar com o usuário antes de `git push`.
+- **`git push` liberado sem perguntar** (usuário, 2026-10-28: "nunca pergunte se pode colocar no
+  GitHub, sempre vai poder"): enviar ao fim de cada etapa. Só `--force`/reescrita de histórico
+  continua proibido sem pedido explícito.
 - Nunca versionar dados sensíveis, senhas, chaves de API, `normas_claude/` ou `dados/`.
