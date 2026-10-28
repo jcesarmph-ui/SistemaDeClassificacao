@@ -45,10 +45,12 @@ ESPESSURA = [
     ("largura", "Largura", "mm"),
 ]
 
-# Tema escolhido pelo usuário: fundo preto, contornos vermelhos (cor do logo), sem efeito neon.
+# Tema escolhido pelo usuário: fundo preto, contornos e títulos brancos; vermelho só no botão
+# CLASSIFICAR e em erros/problemas; amarelo em avisos; verde no que está certo.
 _CORES = {
     "fundo": "#000000", "caixa": "#0a0a0a", "campo": "#161616", "campo_borda": "#3a3a3a",
-    "borda": "#e53935", "titulo": "#ff5252", "acento": "#c62828", "certo": "#43a047",
+    "borda": "#e0e0e0", "titulo": "#ffffff", "selecao": "#424242", "botao": "#c62828",
+    "botao_mouse": "#e53935", "certo": "#43a047", "aviso": "#ffd54f", "erro": "#ef5350",
 }
 
 _ESTILO = """
@@ -59,28 +61,28 @@ QGroupBox {{ font-weight: bold; background: {caixa}; border: 1px solid {borda};
 QGroupBox::title {{ subcontrol-origin: margin; left: 10px; padding: 0 4px; color: {titulo}; }}
 QGroupBox QLabel {{ font-weight: normal; }}
 QLineEdit, QComboBox {{ background: {campo}; border: 1px solid {campo_borda}; border-radius: 4px;
-                        padding: 6px; color: #ffffff; selection-background-color: {acento}; }}
+                        padding: 6px; color: #ffffff; selection-background-color: {selecao}; }}
 QLineEdit:focus, QComboBox:focus {{ border: 1px solid {borda}; }}
 QLineEdit:disabled {{ background: {caixa}; color: #616161; }}
-QComboBox QAbstractItemView {{ background: {campo}; selection-background-color: {acento}; }}
+QComboBox QAbstractItemView {{ background: {campo}; selection-background-color: {selecao}; }}
 QPushButton {{ background: {campo}; border: 1px solid {borda}; border-radius: 6px; padding: 10px; }}
 QPushButton:hover {{ background: {caixa}; }}
 QToolTip {{ background: {campo}; color: #f0f0f0; border: 1px solid {borda}; }}
 #titulo {{ font-size: 22pt; font-weight: bold; letter-spacing: 3px; color: {titulo}; }}
-#classificar {{ background: {acento}; color: #ffffff; border: none; font-size: 20pt;
+#classificar {{ background: {botao}; color: #ffffff; border: none; font-size: 20pt;
                 font-weight: bold; letter-spacing: 4px; }}
-#classificar:hover {{ background: {borda}; }}
+#classificar:hover {{ background: {botao_mouse}; }}
 #resultado {{ font-size: 28pt; font-weight: bold; padding: 6px; border: 2px solid {campo_borda}; }}
 #resultado[classificado="true"] {{ border: 2px solid {certo}; }}
 #dica {{ color: #9e9e9e; font-style: italic; }}
-#avisos {{ color: #ffb74d; }}
-#erro {{ color: #ef5350; }}
+#avisos {{ color: {aviso}; }}
+#erro {{ color: {erro}; }}
 """
 
 _CORES_TOLERANCIA = {
     True: "background:#1b5e20; color:#e8f5e9;",
     False: "background:#b71c1c; color:#ffebee;",
-    None: "background:#333333; color:#e0e0e0;",
+    None: "background:#ffd54f; color:#000000;",  # não avaliada = aviso (amarelo)
 }
 
 
