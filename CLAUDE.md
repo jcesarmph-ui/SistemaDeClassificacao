@@ -300,5 +300,12 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   (ex.: `jcesarmph-ui/SistemaCalibracao`): badges shields.io `for-the-badge` centralizados no topo,
   descrição centralizada, seções com emoji, tabela "Tecnologia | Aplicação no projeto", diagramas
   mermaid, `<details>` recolhíveis, roteiro com checkboxes e frase de fechamento em negrito.
+- **Versão do programa** (decidido em 2026-10-28): versionamento semântico `MAIOR.MENOR.CORREÇÃO`,
+  num lugar só (`__version__` em `src/classificador/__init__.py`; `pyproject.toml` lê de lá) e mostrada
+  na janela. Em desenvolvimento `0.x`: **MENOR = fase do roteiro** (Fase 5 → `0.5.0`, Fase 6 → `0.6.0`…).
+  **`1.0.0` = primeira versão entregue em uso na empresa** (após a Fase 7). Depois: CORREÇÃO para
+  conserto sem mudar comportamento (norma digitada errado → `1.0.1`), MENOR para novidade compatível
+  (`1.1.0`), MAIOR para mudança que quebra o jeito de usar ou os dados (`2.0.0`). Cada versão entregue
+  ganha uma tag Git `vX.Y.Z`.
 - Sempre confirmar com o usuário antes de `git push`.
 - Nunca versionar dados sensíveis, senhas, chaves de API, `normas_claude/` ou `dados/`.

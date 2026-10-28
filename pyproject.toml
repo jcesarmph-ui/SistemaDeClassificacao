@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "classificador"
-version = "0.1.0"
+dynamic = ["version"]  # vem de src/classificador/__init__.py (__version__)
 description = "Classificação automática de aços planos conforme normas ABNT (MG Centro de Serviços)"
 requires-python = ">=3.12"
 dependencies = [
@@ -25,6 +25,9 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "classificador.__version__"}
 
 [tool.pytest.ini_options]
 # dados/testes/ = testes com valores das normas reais (fora do Git; ignorado se não existir)

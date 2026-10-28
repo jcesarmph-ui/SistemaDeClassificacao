@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from classificador import __version__
 from classificador.dominio.amostra import Acabamento
 from classificador.dominio.propriedades import Propriedade
 from classificador.interface.entrada import ErroEntrada
@@ -94,7 +95,9 @@ class JanelaPrincipal(QMainWindow):
         self.dicas: dict[str, QLabel] = {}  # nome do campo → faixa exigida (pesquisa reversa)
         self._resultados_pesquisa: list[ResultadoPesquisa] = []
 
-        self.setWindowTitle("Classificação de Materiais — MG Centro de Serviços")
+        self.setWindowTitle(
+            f"Classificação de Materiais — MG Centro de Serviços — versão {__version__}"
+        )
         self.setStyleSheet(_ESTILO.format(**_CORES))
 
         # Faixas horizontais; dentro de cada faixa, caixas da mesma altura e larguras iguais.
@@ -135,6 +138,8 @@ class JanelaPrincipal(QMainWindow):
         grade = QGridLayout()
         grade.addWidget(logo, 0, 0, Qt.AlignLeft)
         grade.addWidget(QLabel("CLASSIFICAÇÃO DE MATERIAIS", objectName="titulo"), 0, 1)
+        versao = QLabel(f"versão {__version__}", objectName="dica")
+        grade.addWidget(versao, 0, 2, Qt.AlignRight | Qt.AlignBottom)
         grade.setColumnStretch(0, 1)
         grade.setColumnStretch(2, 1)  # coluna vazia do mesmo tamanho → título no centro
         return grade
