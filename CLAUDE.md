@@ -103,7 +103,8 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - **ZC não sai da tabela da 7008-2** (decisão do usuário, 2026-10-27): se o material não atende pelo
   menos ZE na 7008-2, vai direto para a 7008-3. **Mas ZC é o resultado fixo de último recurso de GI/GA**
   (2026-10-28), igual ao `1006/08` dos sem revestimento: sem avaliar a norma (nem a química do ZC),
-  sai `ZC - Z100` / `ZC - ZF100` + o aviso "mais duro que o último ZAR".
+  sai `ZC - Z100` / `ZC - ZF100` + o aviso "Nenhum grau da NBR 7008-2 nem da NBR 7008-3 atendido"
+  (o material pode ser duro ou mole demais). Tolerância do ZC: NBR 7013 Tabela 2.
 - **Sequência de tabelas por acabamento** (passa para a próxima só se não atender nenhum grau da anterior;
   reprovação pode ser **mecânica ou química**):
 
@@ -112,7 +113,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   | FF | NBR 5915-2 | — | `1006/08` |
   | FQ / FQ DO | NBR 5906 | — | `1006/08` |
   | EG | NBR 5915-2 (EM…EEP G3) | — | `1006/08 EG _/_` (teórico) |
-  | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZE…ZEE 4) | NBR 7008-3 (ZAR) | `ZC - Z___` + aviso "material mais duro que o último ZAR" (teórico) |
+  | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZE…ZEE 4) | NBR 7008-3 (ZAR) | `ZC - Z___` + aviso "nenhum grau atendido" (teórico) |
 - **EG (eletrolítico)** é classificado pela norma **sem revestimento** (NBR 5915-2, com NBR 16964 para o
   revestimento — **não é preciso transcrever a NBR 16964**), e a saída recebe `EG` + camada por face: ex. `EEP G3 EG 50/50`.
   Graus EG existentes na folha de classificações: EM, EP, EEP G1, EEP G2, EEP G3 (**não há EEP G4 EG**).
@@ -188,7 +189,8 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   do grau; +0,01 mm para revestimento ≥ Z275.
 - **Sem revestimento (FF, FQ, FQ DO):** NBR 11888 Tab. 11 (FQ usa a mesma tabela do FF).
 - **Grau sem limite de escoamento definido → NBR 7013 Tabela 2** (regra do usuário; a própria norma
-  diz isso para o ZC). **Sem grau no resultado** (EG 1006/08, GI sem ZAR) → **não avalia** e avisa.
+  diz isso para o ZC). **Resultado fixo sem grau** (ZC de GI/GA, `1006/08 EG`) → também **Tabela 2**
+  (decidido em 2026-10-28).
 - Regras decididas na Fase 4: largura **L ≤ 1200 · 1200 < L ≤ 1500 · L > 1500** em todas as tabelas;
   limite **inclusive** (real no limite = dentro); espessura fora da tabela ou "–" na norma → não
   avalia e avisa; espessura real/largura vazia → não avalia e avisa; **+0,01 mm só para GI e GA**
