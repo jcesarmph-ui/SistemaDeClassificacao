@@ -46,6 +46,7 @@ def test_classificar_mostra_resultado_correlatas_e_tolerancia(janela):
     preencher(janela, VALORES)
     janela.classificar()
     assert janela.resultado.text() == "AAA"
+    assert janela.resultado.property("classificado") is True  # contorno verde
     assert janela.norma.text() == "De acordo com a norma NBR 0000-1:2026"
     assert "EN 10130 DC01" in janela.correlatas.text()
     assert janela.tolerancia.text().startswith("Dentro da tolerância")
@@ -55,6 +56,7 @@ def test_erro_de_digitacao_aparece_nos_avisos_sem_resultado(janela):
     preencher(janela, VALORES | {"LE": "abc"})
     janela.classificar()
     assert janela.resultado.text() == ""
+    assert janela.resultado.property("classificado") is False
     assert "Limite de escoamento: 'abc' não é um número" in janela.avisos.text()
 
 

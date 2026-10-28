@@ -1,8 +1,8 @@
 """Janela principal (PySide6): só desenha a tela e liga os botões ao `Servico`.
 
 Nenhuma regra de norma aqui — tudo vem pronto do motor (via `Servico`).
-Layout do esboço do usuário: esquerda (logo, acabamento, camada), centro (mecânicas e espessura),
-direita (químicas e pesquisa reversa); embaixo, CLASSIFICAR e o resultado.
+Layout em faixas: cabeçalho; entradas (material + espessura | mecânicas | químicas); botões;
+resultado | pesquisa reversa. Tema escuro.
 """
 
 from html import escape
@@ -12,7 +12,6 @@ from PySide6.QtGui import QCursor, QPixmap
 from PySide6.QtWidgets import (
     QComboBox,
     QCompleter,
-    QFrame,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
@@ -20,6 +19,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMainWindow,
     QPushButton,
+    QSizePolicy,
     QToolTip,
     QVBoxLayout,
     QWidget,
@@ -45,26 +45,42 @@ ESPESSURA = [
     ("largura", "Largura", "mm"),
 ]
 
+# Tema escolhido pelo usuário: fundo preto, contornos vermelhos (cor do logo), sem efeito neon.
+_CORES = {
+    "fundo": "#000000", "caixa": "#0a0a0a", "campo": "#161616", "campo_borda": "#3a3a3a",
+    "borda": "#e53935", "titulo": "#ff5252", "acento": "#c62828", "certo": "#43a047",
+}
+
 _ESTILO = """
-QWidget { font-size: 11pt; }
-QGroupBox { font-weight: bold; border: 1px solid #b0b0b0; border-radius: 6px; margin-top: 10px; }
-QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
-QLineEdit { padding: 3px; }
-#cabecalho { background: #2f2f2f; border-radius: 6px; }
-#cabecalho QLabel { color: white; }
-#titulo { font-size: 15pt; font-weight: bold; }
-#classificar { background: #c62828; color: white; font-size: 20pt; font-weight: bold;
-               padding: 14px; border-radius: 8px; }
-#classificar:hover { background: #e53935; }
-#resultado { font-size: 22pt; font-weight: bold; padding: 6px; background: #fffde7; }
-#dica { color: #757575; font-style: italic; }
-#erro { color: #c62828; }
+QWidget {{ font-size: 13pt; color: #f0f0f0; font-family: "Segoe UI"; }}
+QMainWindow, #central {{ background: {fundo}; }}
+QGroupBox {{ font-weight: bold; background: {caixa}; border: 1px solid {borda};
+             border-radius: 6px; margin-top: 12px; padding: 8px 8px 4px 8px; }}
+QGroupBox::title {{ subcontrol-origin: margin; left: 10px; padding: 0 4px; color: {titulo}; }}
+QGroupBox QLabel {{ font-weight: normal; }}
+QLineEdit, QComboBox {{ background: {campo}; border: 1px solid {campo_borda}; border-radius: 4px;
+                        padding: 6px; color: #ffffff; selection-background-color: {acento}; }}
+QLineEdit:focus, QComboBox:focus {{ border: 1px solid {borda}; }}
+QLineEdit:disabled {{ background: {caixa}; color: #616161; }}
+QComboBox QAbstractItemView {{ background: {campo}; selection-background-color: {acento}; }}
+QPushButton {{ background: {campo}; border: 1px solid {borda}; border-radius: 6px; padding: 10px; }}
+QPushButton:hover {{ background: {caixa}; }}
+QToolTip {{ background: {campo}; color: #f0f0f0; border: 1px solid {borda}; }}
+#titulo {{ font-size: 22pt; font-weight: bold; letter-spacing: 3px; color: {titulo}; }}
+#classificar {{ background: {acento}; color: #ffffff; border: none; font-size: 20pt;
+                font-weight: bold; letter-spacing: 4px; }}
+#classificar:hover {{ background: {borda}; }}
+#resultado {{ font-size: 28pt; font-weight: bold; padding: 6px; border: 2px solid {campo_borda}; }}
+#resultado[classificado="true"] {{ border: 2px solid {certo}; }}
+#dica {{ color: #9e9e9e; font-style: italic; }}
+#avisos {{ color: #ffb74d; }}
+#erro {{ color: #ef5350; }}
 """
 
 _CORES_TOLERANCIA = {
-    True: "background:#c8e6c9; color:#1b5e20;",
-    False: "background:#ffcdd2; color:#b71c1c;",
-    None: "background:#eeeeee; color:#424242;",
+    True: "background:#1b5e20; color:#e8f5e9;",
+    False: "background:#b71c1c; color:#ffebee;",
+    None: "background:#333333; color:#e0e0e0;",
 }
 
 
@@ -77,17 +93,24 @@ class JanelaPrincipal(QMainWindow):
         self._resultados_pesquisa: list[ResultadoPesquisa] = []
 
         self.setWindowTitle("Classificação de Materiais — MG Centro de Serviço")
-        self.setStyleSheet(_ESTILO)
+        self.setStyleSheet(_ESTILO.format(**_CORES))
 
-        colunas = QHBoxLayout()
-        colunas.addWidget(self._coluna_esquerda(), 1)
-        colunas.addWidget(self._coluna_centro(), 1)
-        colunas.addWidget(self._coluna_direita(), 1)
+        # Faixas horizontais; dentro de cada faixa, caixas da mesma altura e larguras iguais.
+        entradas = QHBoxLayout()
+        entradas.addWidget(self._coluna_material(), 1)
+        entradas.addWidget(self._caixa_mecanicas(), 1)
+        entradas.addWidget(self._caixa_quimicas(), 1)
+
+        saida = QHBoxLayout()
+        saida.addWidget(self._caixa_resultado(), 2)
+        saida.addWidget(self._caixa_pesquisa(), 1)
 
         tela = QVBoxLayout()
-        tela.addLayout(colunas, 2)
-        tela.addWidget(self._painel_resultado(), 1)
-        central = QWidget()
+        tela.addLayout(self._cabecalho())
+        tela.addLayout(entradas, 2)
+        tela.addLayout(self._botoes())
+        tela.addLayout(saida, 1)
+        central = QWidget(objectName="central")
         central.setLayout(tela)
         self.setCentralWidget(central)
 
@@ -98,19 +121,23 @@ class JanelaPrincipal(QMainWindow):
 
     # --- Montagem da tela -------------------------------------------------------------------
 
-    def _coluna_esquerda(self) -> QWidget:
-        cabecalho = QFrame(objectName="cabecalho")
-        caixa = QVBoxLayout(cabecalho)
+    def _cabecalho(self) -> QGridLayout:
+        """Logo à esquerda e título centralizado na largura toda da tela."""
         if self.servico.logo:
             logo = QLabel()
             logo.setPixmap(
-                QPixmap(str(self.servico.logo)).scaledToWidth(360, Qt.SmoothTransformation)
+                QPixmap(str(self.servico.logo)).scaledToHeight(80, Qt.SmoothTransformation)
             )
-            caixa.addWidget(logo)
         else:
-            caixa.addWidget(QLabel("MG Centro de Serviço"))
-        caixa.addWidget(QLabel("CLASSIFICAÇÃO DE MATERIAIS", objectName="titulo"))
+            logo = QLabel("MG Centro de Serviço")
+        grade = QGridLayout()
+        grade.addWidget(logo, 0, 0, Qt.AlignLeft)
+        grade.addWidget(QLabel("CLASSIFICAÇÃO DE MATERIAIS", objectName="titulo"), 0, 1)
+        grade.setColumnStretch(0, 1)
+        grade.setColumnStretch(2, 1)  # coluna vazia do mesmo tamanho → título no centro
+        return grade
 
+    def _coluna_material(self) -> QWidget:
         self.acabamento = QComboBox()
         for acabamento in Acabamento:
             self.acabamento.addItem(acabamento.value)
@@ -119,8 +146,8 @@ class JanelaPrincipal(QMainWindow):
             )
         self.acabamento.currentTextChanged.connect(self._acabamento_mudou)
 
-        grupo = QGroupBox("Material")
-        grade = QGridLayout(grupo)
+        material = QGroupBox("Material")
+        grade = QGridLayout(material)
         grade.addWidget(QLabel("Acabamento"), 0, 0)
         grade.addWidget(self.acabamento, 0, 1, 1, 2)
         grade.addWidget(QLabel("Camada"), 1, 0)
@@ -130,58 +157,79 @@ class JanelaPrincipal(QMainWindow):
         self.dica_camada.setWordWrap(True)
         grade.addWidget(self.dica_camada, 2, 0, 1, 3)
 
-        nova = QPushButton("Nova classificação")
-        nova.clicked.connect(self.nova_classificacao)
-        limpar = QPushButton("Limpar valores")
-        limpar.clicked.connect(self.limpar_valores)
-
-        coluna = QVBoxLayout()
-        coluna.addWidget(cabecalho)
-        coluna.addWidget(grupo)
-        coluna.addStretch()
-        coluna.addWidget(nova)
-        coluna.addWidget(limpar)
-        return self._embrulhar(coluna)
-
-    def _coluna_centro(self) -> QWidget:
-        mecanicas = QGroupBox("Propriedades mecânicas")
-        grade = QGridLayout(mecanicas)
-        for linha, (prop, rotulo, unidade) in enumerate(MECANICAS):
-            self._linha_campo(grade, linha, prop.value, rotulo, unidade, prop.nome_extenso)
-
         espessura = QGroupBox("Espessura e tolerância")
         grade = QGridLayout(espessura)
         for linha, (nome, rotulo, unidade) in enumerate(ESPESSURA):
             self._linha_campo(grade, linha, nome, rotulo, unidade, rotulo)
         self.tolerancia = QLabel()
         self.tolerancia.setWordWrap(True)
+        self.tolerancia.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         grade.addWidget(self.tolerancia, len(ESPESSURA), 0, 1, 4)
 
         coluna = QVBoxLayout()
-        coluna.addWidget(mecanicas)
+        coluna.setContentsMargins(0, 0, 0, 0)
+        coluna.addWidget(material)
         coluna.addWidget(espessura)
-        coluna.addStretch()
         return self._embrulhar(coluna)
 
-    def _coluna_direita(self) -> QWidget:
+    def _caixa_mecanicas(self) -> QGroupBox:
+        mecanicas = QGroupBox("Propriedades mecânicas")
+        grade = QGridLayout(mecanicas)
+        for linha, (prop, rotulo, unidade) in enumerate(MECANICAS):
+            self._linha_campo(grade, linha, prop.value, rotulo, unidade, prop.nome_extenso)
+        return mecanicas
+
+    def _caixa_quimicas(self) -> QGroupBox:
+        """13 elementos em 3 colunas → 5 linhas, alinhadas com as 5 das mecânicas."""
         quimicas = QGroupBox("Propriedades químicas (%)")
         grade = QGridLayout(quimicas)
         for indice, prop in enumerate(Propriedade.quimicas()):
-            linha, coluna = divmod(indice, 4)
+            linha, coluna = divmod(indice, 3)
             rotulo = QLabel(prop.value)
             rotulo.setToolTip(prop.nome_extenso)
-            campo = self._novo_campo(prop.value, prop.nome_extenso)
             dica = QLabel(objectName="dica")
             self.dicas[prop.value] = dica
-            caixa = QVBoxLayout()
-            caixa.setSpacing(0)
-            caixa.addWidget(rotulo)
-            caixa.addWidget(campo)
-            caixa.addWidget(dica)
-            grade.addLayout(caixa, linha, coluna)
+            celula = QGridLayout()
+            celula.setVerticalSpacing(0)
+            celula.addWidget(rotulo, 0, 0)
+            celula.addWidget(self._novo_campo(prop.value, prop.nome_extenso), 0, 1)
+            celula.addWidget(dica, 1, 1)
+            celula.setColumnMinimumWidth(0, 28)
+            grade.addLayout(celula, linha, coluna)
+        return quimicas
 
-        reversa = QGroupBox("Pesquisa reversa — normas correlatas")
-        caixa = QVBoxLayout(reversa)
+    def _botoes(self) -> QHBoxLayout:
+        nova = QPushButton("Nova classificação")
+        nova.clicked.connect(self.nova_classificacao)
+        limpar = QPushButton("Limpar valores")
+        limpar.clicked.connect(self.limpar_valores)
+        classificar = QPushButton("CLASSIFICAR", objectName="classificar")
+        classificar.clicked.connect(self.classificar)
+        faixa = QHBoxLayout()
+        faixa.addWidget(nova, 1)
+        faixa.addWidget(limpar, 1)
+        faixa.addWidget(classificar, 4)
+        return faixa
+
+    def _caixa_resultado(self) -> QGroupBox:
+        self.resultado = QLineEdit(objectName="resultado", readOnly=True)
+        self.resultado.setPlaceholderText("RESULTADO")
+        self.norma = QLabel()
+        self.correlatas = QLabel(wordWrap=True)
+        self.correlatas.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
+        self.correlatas.linkHovered.connect(self._mostrar_fabricante)
+        self.avisos = QLabel(wordWrap=True, objectName="avisos")
+
+        grupo = QGroupBox("Resultado")
+        caixa = QVBoxLayout(grupo)
+        caixa.addWidget(self.resultado)
+        caixa.addWidget(self.norma)
+        caixa.addWidget(self.correlatas)
+        caixa.addWidget(self.avisos)
+        caixa.addStretch()
+        return grupo
+
+    def _caixa_pesquisa(self) -> QGroupBox:
         self.pesquisa = QLineEdit(placeholderText="Digite uma norma (ex.: DC04, EEP G2, GMW 2M)")
         completar = QCompleter(self.servico.nomes_para_autocompletar(), self)
         completar.setCaseSensitivity(Qt.CaseInsensitive)
@@ -189,47 +237,23 @@ class JanelaPrincipal(QMainWindow):
         self.pesquisa.setCompleter(completar)
         self.pesquisa.returnPressed.connect(self.pesquisar)
         botao = QPushButton("Pesquisar")
+        botao.setStyleSheet("padding: 4px 12px;")
         botao.clicked.connect(self.pesquisar)
         linha = QHBoxLayout()
         linha.addWidget(self.pesquisa)
         linha.addWidget(botao)
         self.escolha_pesquisa = QComboBox()
+        self.escolha_pesquisa.setVisible(False)
         self.escolha_pesquisa.currentIndexChanged.connect(self._mostrar_pesquisa)
         self.info_pesquisa = QLabel(objectName="dica")
         self.info_pesquisa.setWordWrap(True)
+
+        grupo = QGroupBox("Pesquisa reversa — normas correlatas")
+        caixa = QVBoxLayout(grupo)
         caixa.addLayout(linha)
         caixa.addWidget(self.escolha_pesquisa)
         caixa.addWidget(self.info_pesquisa)
-
-        coluna = QVBoxLayout()
-        coluna.addWidget(quimicas)
-        coluna.addWidget(reversa)
-        coluna.addStretch()
-        return self._embrulhar(coluna)
-
-    def _painel_resultado(self) -> QWidget:
-        classificar = QPushButton("CLASSIFICAR", objectName="classificar")
-        classificar.clicked.connect(self.classificar)
-
-        self.resultado = QLineEdit(objectName="resultado", readOnly=True)
-        self.resultado.setPlaceholderText("RESULTADO")
-        self.norma = QLabel()
-        self.correlatas = QLabel(wordWrap=True)
-        self.correlatas.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
-        self.correlatas.linkHovered.connect(self._mostrar_fabricante)
-        self.avisos = QLabel(wordWrap=True)
-
-        topo = QHBoxLayout()
-        topo.addWidget(classificar, 1)
-        topo.addWidget(self.resultado, 3)
-        painel = QVBoxLayout()
-        painel.addLayout(topo)
-        painel.addWidget(self.norma)
-        painel.addWidget(self.correlatas)
-        painel.addWidget(self.avisos)
-        painel.addStretch()
-        grupo = QGroupBox("Resultado")
-        grupo.setLayout(painel)
+        caixa.addStretch()
         return grupo
 
     def _linha_campo(self, grade, linha, nome, rotulo, unidade, dica_mouse) -> None:
@@ -268,16 +292,18 @@ class JanelaPrincipal(QMainWindow):
             return
 
         self.resultado.setText(saida.resultado or "—")
+        self._marcar_resultado(saida.resultado is not None)
         self.norma.setText(saida.norma or "")
         if saida.correlatas:
+            estilo = "color:#64b5f6; text-decoration:none"
             links = ", ".join(
-                f'<a href="{escape(n)}" style="color:#1a4c8b; text-decoration:none">{escape(n)}</a>'
+                f'<a href="{escape(n)}" style="{estilo}">{escape(n)}</a>'
                 for n in saida.correlatas
             )
             self.correlatas.setText(f"<b>Normas correlatas:</b> {links}")
         else:
             self.correlatas.setText("")
-        self.avisos.setObjectName("")
+        self.avisos.setObjectName("avisos")
         self.avisos.setText("\n".join(f"⚠ {a}" for a in saida.avisos))
         self._repintar(self.avisos)
         if saida.tolerancia is not None:
@@ -348,6 +374,7 @@ class JanelaPrincipal(QMainWindow):
 
     def limpar_resultado(self) -> None:
         self.resultado.clear()
+        self._marcar_resultado(False)
         self.norma.clear()
         self.correlatas.clear()
         self.avisos.clear()
@@ -376,6 +403,11 @@ class JanelaPrincipal(QMainWindow):
             "EG": "Por face, ex.: 50 → 50/50. Vazio ou zero = sem revestimento.",
         }
         self.dica_camada.setText(dicas[revestimento])
+
+    def _marcar_resultado(self, classificado: bool) -> None:
+        """Contorno verde quando há classificação ("deu certo"); neutro se vazio ou erro."""
+        self.resultado.setProperty("classificado", classificado)
+        self._repintar(self.resultado)
 
     def _limpar_dicas(self) -> None:
         for dica in self.dicas.values():
