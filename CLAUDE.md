@@ -88,6 +88,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   normais/minimizados), GA ZF (zinco-ferro, Galvanew), EG (eletrolítico).
 - Camada: GI → `Z___` (g/m², duas faces, ex. Z100); GA → `ZF___` (ex. ZF100); EG → `_/_` (g/m² por face, ex. 50/50).
 - Formato da saída: sigla + camada, ex. `ZEE G2 - Z275` (GI), `EEP G1 EG 50/50`. Sem camada → só a sigla.
+- Revestido (GI, GA, EG) com camada vazia ou zero → resultado sem camada + **aviso** "Camada não informada".
 - A camada sai **exatamente como digitada** (113 → `Z113`); o usuário é instruído a usar o nominal
   (100 ou 275), não o medido do certificado. EG: digita um número só (por face) → `50` sai `50/50`.
 
@@ -99,8 +100,10 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   (ex.: NBR 5915-2: EEP 4 > … > EP > EM; NBR 5906: EPA > EP > EM; NBR 7008-2: ZEE 4 > … > ZE). A ordem fica **explícita na base de normas** (lista por norma, na mesma
   sequência da tabela) e é conferida pelo usuário na transcrição.
   GI/GA: **todos os ZAR (7008-3) são mais nobres que os graus da 7008-2** (ZE < ZEE 1…4 < ZAR-230 … ZAR-550).
-- **ZC nunca é resultado** (decisão do usuário, 2026-10-27): se o material não atende pelo menos ZE na
-  7008-2, vai direto para a 7008-3.
+- **ZC não sai da tabela da 7008-2** (decisão do usuário, 2026-10-27): se o material não atende pelo
+  menos ZE na 7008-2, vai direto para a 7008-3. **Mas ZC é o resultado fixo de último recurso de GI/GA**
+  (2026-10-28), igual ao `1006/08` dos sem revestimento: sem avaliar a norma (nem a química do ZC),
+  sai `ZC - Z100` / `ZC - ZF100` + o aviso "mais duro que o último ZAR".
 - **Sequência de tabelas por acabamento** (passa para a próxima só se não atender nenhum grau da anterior;
   reprovação pode ser **mecânica ou química**):
 
@@ -109,7 +112,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   | FF | NBR 5915-2 | — | `1006/08` |
   | FQ / FQ DO | NBR 5906 | — | `1006/08` |
   | EG | NBR 5915-2 (EM…EEP G3) | — | `1006/08 EG _/_` (teórico) |
-  | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZE…ZEE 4) | NBR 7008-3 (ZAR) | aviso "material mais duro que o último ZAR" (teórico) |
+  | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZE…ZEE 4) | NBR 7008-3 (ZAR) | `ZC - Z___` + aviso "material mais duro que o último ZAR" (teórico) |
 - **EG (eletrolítico)** é classificado pela norma **sem revestimento** (NBR 5915-2, com NBR 16964 para o
   revestimento — **não é preciso transcrever a NBR 16964**), e a saída recebe `EG` + camada por face: ex. `EEP G3 EG 50/50`.
   Graus EG existentes na folha de classificações: EM, EP, EEP G1, EEP G2, EEP G3 (**não há EEP G4 EG**).
