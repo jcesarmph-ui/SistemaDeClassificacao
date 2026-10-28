@@ -199,6 +199,15 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   ajustes declarativos; ordem de nobreza explícita por norma.
 - Comparações com `Decimal` (sem erro de arredondamento de `float`).
 - Histórico atrás de uma classe `RepositorioHistorico` (permite trocar o banco no futuro).
+- **Uso e distribuição (decidido em 2026-10-28):** programa numa **pasta comum da rede** (sem
+  servidor/TI), 1 pessoa por vez (raramente 2–3, às vezes só consultando), 5–10 classificações/dia,
+  **histórico único compartilhado** (base do ML da Fase 8). Fase 6: SQLite `historico.db` na pasta
+  comum, **modo journal tradicional (nunca WAL — não funciona em rede)**, `busy_timeout`, transações
+  curtas, **backup diário** em `backup/` (guarda as últimas cópias). Fase 7: `.exe` + pasta `dados/` ao
+  lado (norma corrigida = trocar YAML); versão visível na janela; atualizar trocando o `.exe` com o
+  programa fechado; **nunca publicar o `.exe` no GitHub** (repositório público, normas embutidas).
+- Verificação de "valores absurdos" por regra (ex.: C = 82 % por erro de digitação): **recusada pelo
+  usuário** — fica para o aviso de outlier por ML (Fase 8).
 - Estrutura: `src/classificador/{dominio,normas,motor,tolerancia,historico,interface}`, `tests/`,
   `docs/decisoes/` (ADRs), `dados/` (fora do Git).
 - **Repositório GitHub é PÚBLICO:** `normas_claude/` e `dados/` (normas transcritas, casos reais) nunca
