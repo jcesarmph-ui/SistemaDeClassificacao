@@ -6,6 +6,7 @@ Estrutura esperada da pasta de dados (padrão: `dados/` na pasta do projeto):
     correlatas.yaml             (opcional)
     tolerancias/*.yaml          (opcional)
     logo_mg.png                 (opcional)
+    icone_mg.png                (opcional: ícone da janela e da barra de tarefas)
 """
 
 import os
@@ -71,6 +72,7 @@ class Servico:
     correlatas: Correlatas = field(default_factory=lambda: Correlatas(grupos=[]))
     tolerancias: Mapping[str, NormaTolerancia] = field(default_factory=dict)
     logo: Path | None = None
+    icone: Path | None = None
 
     @classmethod
     def carregar(cls, pasta: Path | None = None) -> "Servico":
@@ -78,6 +80,7 @@ class Servico:
         arquivo_correlatas = pasta / "correlatas.yaml"
         pasta_tolerancias = pasta / "tolerancias"
         logo = pasta / "logo_mg.png"
+        icone = pasta / "icone_mg.png"
         normas = carregar_normas(pasta / "normas")
         correlatas = (
             carregar_correlatas(arquivo_correlatas) if arquivo_correlatas.is_file() else None
@@ -90,6 +93,7 @@ class Servico:
                 carregar_tolerancias(pasta_tolerancias) if pasta_tolerancias.is_dir() else {}
             ),
             logo=logo if logo.is_file() else None,
+            icone=icone if icone.is_file() else None,
         )
 
     def classificar(self, acabamento: str, campos: Mapping[str, str]) -> Saida:
