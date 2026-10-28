@@ -37,6 +37,8 @@ def formatar(
         avisos.append(classificacao.aviso_sem_grau)
     elif grau is None:
         avisos.append(f"Nenhum grau da {detalhe.norma.codigo} atendido")
+    if resultado and amostra.acabamento.revestimento and not amostra.tem_camada:
+        avisos.append("Camada não informada: o resultado saiu sem a camada")
     if detalhe.quase_passou:
         avisos.append(detalhe.quase_passou.texto)
     if detalhe.rebaixado_de and grau:

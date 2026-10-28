@@ -57,7 +57,7 @@ FOLHA = FolhaClassificacoes.model_validate(
             },
             "GI ZN": {
                 "tabelas": [{"norma": "ZINC-1", "graus": ["XE", "XEE"]}, {"norma": "ZINC-2"}],
-                "se_nenhum": {"aviso": "Material mais duro que o último XAR"},
+                "se_nenhum": {"resultado": "XC", "aviso": "Material mais duro que o último XAR"},
             },
         }
     }
@@ -130,10 +130,10 @@ def test_gi_so_atende_o_grau_que_nunca_e_resultado_vai_para_a_segunda_tabela():
     assert resultado.detalhe.quase_passou.grau.sigla == "XAR-2"  # só da tabela do resultado
 
 
-def test_gi_nenhuma_tabela_atende_vira_aviso():
+def test_gi_nenhuma_tabela_atende_vira_resultado_padrao_com_aviso():
     resultado = classificar(Amostra(Acabamento.GI_ZN, {P.LE: D(50)}), FOLHA, NORMAS)
     assert resultado.grau is None
-    assert resultado.resultado_padrao is None
+    assert resultado.resultado_padrao == "XC"
     assert resultado.aviso_sem_grau == "Material mais duro que o último XAR"
     assert resultado.detalhe.norma.codigo == "ZINC-2"
 

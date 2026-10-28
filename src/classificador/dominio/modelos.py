@@ -176,15 +176,15 @@ class TabelaDoAcabamento(_Modelo):
 
 
 class SemGrau(_Modelo):
-    """O que fazer quando nenhuma tabela do acabamento é atendida: um resultado fixo OU um aviso."""
+    """O que fazer quando nenhuma tabela do acabamento é atendida: resultado fixo e/ou aviso."""
 
-    resultado: str | None = None  # ex.: "1006/08"
+    resultado: str | None = None  # ex.: "1006/08", "ZC" (último recurso, sem avaliar norma)
     aviso: str | None = None  # ex.: "Material mais duro que o último ZAR"
 
     @model_validator(mode="after")
     def _conferir(self) -> Self:
-        if (self.resultado is None) == (self.aviso is None):
-            raise ValueError("informe 'resultado' ou 'aviso' (um dos dois, não ambos)")
+        if self.resultado is None and self.aviso is None:
+            raise ValueError("informe 'resultado' e/ou 'aviso'")
         return self
 
 

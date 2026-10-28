@@ -50,7 +50,7 @@ ZINC_2 = Norma.model_validate(
 NORMAS = {n.codigo: n for n in (FRIO, ZINC_1, ZINC_2)}
 ZINCADO = {
     "tabelas": [{"norma": "NBR 0000-2:2026"}, {"norma": "NBR 0000-3:2026"}],
-    "se_nenhum": {"aviso": "Material mais duro que o último XAR"},
+    "se_nenhum": {"resultado": "XC", "aviso": "Material mais duro que o último XAR"},
 }
 FOLHA = FolhaClassificacoes.model_validate(
     {
@@ -122,11 +122,23 @@ def test_nenhum_grau_resultado_padrao():
     assert saida(Acabamento.EG, ruim, camada="50").resultado == "1006/08 EG 50/50"
 
 
-def test_gi_sem_nenhum_grau_resultado_vazio_e_aviso_em_destaque():
+def test_gi_e_ga_sem_nenhum_grau_viram_xc_com_camada_e_aviso_em_destaque():
+    # Decisão do usuário (2026-10-28): ZC é o "1006/08" dos revestidos, sem avaliar a norma.
     resultado = saida(Acabamento.GI_ZN, {P.LE: D("50")}, camada="100")
-    assert resultado.resultado is None
+    assert resultado.resultado == "XC - Z100"
     assert resultado.norma is None
     assert resultado.avisos[0] == "Material mais duro que o último XAR"
+    assert saida(Acabamento.GA_ZF, {P.LE: D("50")}, camada="100").resultado == "XC - ZF100"
+
+
+def test_revestido_sem_camada_avisa():
+    aviso = "Camada não informada: o resultado saiu sem a camada"
+    assert aviso in saida(Acabamento.GI_ZN).avisos
+    assert aviso in saida(Acabamento.GI_ZN, camada="0").avisos
+    assert aviso in saida(Acabamento.GI_ZN, {P.LE: D("50")}).avisos  # também no XC
+    assert aviso in saida(Acabamento.EG).avisos
+    assert aviso not in saida(Acabamento.GI_ZN, camada="100").avisos
+    assert aviso not in saida(Acabamento.FF).avisos  # sem revestimento: camada não se aplica
 
 
 # --- Norma e avisos -----------------------------------------------------------------
