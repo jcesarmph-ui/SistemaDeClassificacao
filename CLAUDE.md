@@ -11,21 +11,40 @@
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas.**
   **Fase 5 – Interface PySide6 EM ANDAMENTO** (branch `fase-5-interface`, enviada ao GitHub, **sem
-  PR ainda**). Parada em 2026-10-27 a pedido do usuário ("por hoje está bom").
+  PR ainda**). Última sessão: 2026-10-28 (usuário deu `/clear` ao final). **Commits de 2026-10-28
+  ainda não enviados ao GitHub** (pedir confirmação antes do push).
+- **Fase 5 — 2026-10-28 (ajustes pedidos pelo usuário, todos com commit local):**
+  - Layout refeito em **faixas simétricas** (`janela.py`): cabeçalho (logo | título centralizado |
+    versão); entradas em 3 caixas de mesma altura (Material + Espessura e tolerância | Mecânicas |
+    Químicas em 3 colunas × 5 linhas); faixa de botões (Nova classificação, Limpar valores,
+    CLASSIFICAR largo); Resultado (2/3) | Pesquisa reversa (1/3). **Usuário: "para o layout não
+    precisa mudar mais nada"** — não mexer mais em espaçamentos.
+  - Tema (`_CORES` em `janela.py`): fundo **preto puro**, contornos/títulos **brancos**, vermelho só no
+    CLASSIFICAR e em erros, **amarelo em todo aviso** (inclusive tolerância não avaliada), **contorno
+    verde no resultado** quando há classificação (propriedade `classificado`). Fonte Segoe UI 13pt.
+    O padrão visual foi copiado para o `CLAUDE.md` do usuário (vale para todos os projetos).
+  - Ícone: `dados/icone_mg.png` / `.ico` (recorte do símbolo do logo); `app.py` define o ícone e o
+    `AppUserModelID` (barra de tarefas não mostra mais o Python). `.ico` será usado no PyInstaller.
+  - Nome corrigido: **"MG Centro de Serviços"** (plural) em todo o projeto.
+  - Versão semântica: `0.5.0` (Fase 5), em `__version__` (pyproject lê de lá), na janela e no título.
+  - **ZC como último recurso de GI/GA** e aviso de camada não informada (ver Regras de classificação);
+    `SemGrau` aceita `resultado` + `aviso` juntos; tolerância de resultado sem grau → 7013 Tab. 2.
+- **Fase 5 — próximo passo (etapa 7):** ADR 0009 (interface: layout em faixas, tema e significado das
+  cores, contorno verde, ícone, versão semântica; e ADR/nota para ZC último recurso + aviso de camada
+  + tolerância sem grau), README (como abrir + "foto" da tela com o script de renderização sem
+  mostrar a janela: `WA_DontShowOnScreen` + `grab()`, `resize(1920, 1010)`), roteiro com checkboxes,
+  push (confirmar) e abrir o PR da Fase 5. Depois do merge: versão segue `0.6.0` na Fase 6.
+- **Outro projeto (2026-10-28):** sistema de calibração clonado em
+  `C:\Users\rodrigo.lima\Projetos\SistemaCalibracao` com `CLAUDE.md` próprio (ainda sem commit) —
+  migração Streamlit → PySide6 no padrão deste projeto; trabalhado em **outro terminal**. Não mexer
+  nele a partir daqui.
 - **Fase 5 — feito até agora** (etapas 1–6 do plano): `interface/entrada.py` (`ler_numero`,
   `montar_amostra`, `ErroEntrada`), `interface/servico.py` (`Servico.carregar`, `classificar`,
   `pesquisar`, autocompletar, `fabricante()` pelo prefixo; acrescenta grupos para graus sem
   correlatas, ex. ZAR, para a pesquisa achá-los), `interface/janela.py` (`JanelaPrincipal`),
   `interface/app.py` + `__main__.py` (abre com `.venv/Scripts/python -m classificador`, maximizada).
-  Logo copiado para `dados/logo_mg.png` (fora do Git; faixa escura atrás porque o texto do logo é
-  branco). Testes da janela em modo offscreen (`tests/test_janela.py`); fixture `pasta` em
+  Logo copiado para `dados/logo_mg.png` (fora do Git; texto do logo é branco → fundo escuro). Testes da janela em modo offscreen (`tests/test_janela.py`); fixture `pasta` em
   `tests/conftest.py`. O usuário abriu o programa: **"Funcionou"**.
-- **Fase 5 — retomar amanhã:**
-  1. Perguntar ao usuário o retorno visual do layout (letras, posições, cores, espaço vazio na tela
-     dele — eu só testei em 1600×900) e se algum comportamento ficou diferente do esperado.
-  2. Ajustes pedidos; depois etapa 7: ADR 0009 (interface), README (como abrir + "foto" da tela,
-     tirada com o script de renderização sem mostrar a janela: `WA_DontShowOnScreen` + `grab()`),
-     roteiro, e abrir o PR da Fase 5.
 - Decisões da Fase 5: 7 acabamentos na lista; folha de siglas não aparece na tela; erros de
   digitação em vermelho nos avisos (sem pop-up); "Limpar valores" mantém acabamento e camada,
   "Nova classificação" apaga tudo; vírgula ou ponto decimal, "%" opcional, **sem separador de
