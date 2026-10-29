@@ -33,7 +33,6 @@
   <a href="#-funcionalidades">Funcionalidades</a> •
   <a href="#-como-a-classificação-funciona">Como funciona</a> •
   <a href="#️-arquitetura">Arquitetura</a> •
-  <a href="#-como-executar">Como executar</a> •
   <a href="#-roteiro">Roteiro</a>
 </p>
 
@@ -250,25 +249,6 @@ SistemaDeClassificacao/
 ├── CLAUDE.md            # instruções do projeto para o Claude Code
 └── README.md
 ```
-
-## 🚀 Como executar
-
-Requisitos: **Windows** e **Python 3.12+**. No PowerShell, na pasta do projeto:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
-.\.venv\Scripts\python.exe -m pytest
-```
-
-Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato das tabelas):
-
-```powershell
-.\.venv\Scripts\python.exe -m classificador.normas.conferir tests\dados\norma-ficticia.yaml
-```
-
-> A interface ainda não está disponível — o motor de classificação já funciona e é testado
-> automaticamente; a tela chega na Fase 5.
 
 ## 🗺️ Roteiro
 
