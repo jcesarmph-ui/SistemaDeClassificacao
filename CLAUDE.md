@@ -9,9 +9,26 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas.**
-  **Fase 5 – Interface PySide6 concluída** (branch `fase-5-interface`, PR aberto, aguardando merge).
-  Última sessão: 2026-11-03.
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 5 concluídas** (PR #6 da Fase 5 com merge).
+  **Fase 6 – Histórico EM ANDAMENTO** (branch `fase-6-historico`, versão `0.6.0`, enviada ao GitHub,
+  sem PR ainda). Última sessão: 2026-11-03 — **usuário pausou o projeto** ("vou parar um momento");
+  ao voltar, retomar pela etapa 3.
+- **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
+  3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
+  excluir; Lixeira com restaurar / excluir permanentemente; 4) aba Divergências (registrar no
+  Histórico: correta + motivo; lista de pendentes; marcar resolvida); 5) trava de edição (modo
+  edição/consulta, padrão do `CLAUDE.md` global; referência SistemaCalibracao `regras/trava.py`,
+  tabela `trava_edicao` = esquema versão 2); 6) ADR 0010, README (foto, roteiro), PR.
+- **Fase 6 — feito:** `historico/esquema.py` (`conectar`: journal DELETE, `busy_timeout`, FK;
+  `PRAGMA user_version` = 1; tabelas `classificacao` e `divergencia`), `historico/backup.py` (diário,
+  30 cópias), `historico/repositorio.py` (`RepositorioHistorico.abrir(pasta)`, `salvar`, `obter`,
+  `listar(texto, lixeira)`, `excluir`, `restaurar`, `excluir_permanentemente`,
+  `registrar_divergencia`, `listar_divergencias`, `resolver_divergencia`; `modo_consulta` recusa
+  gravação; banco ocupado → `ErroDeValidacao`). Janela: `volume` + `botao_salvar`,
+  `situacao_salvar` (verde/vermelho); `app.py` abre o histórico. Botões desligados em cinza.
+  Escolhas feitas sem perguntar (informadas ao usuário, sem objeção até agora): divergências de
+  registro na Lixeira somem da lista e voltam ao restaurar; registro salvo não é editável;
+  "Limpar valores" mantém o volume, "Nova classificação" apaga.
 - **Fase 5 — 2026-10-28 (ajustes pedidos pelo usuário, todos commitados e enviados):**
   - Layout refeito em **faixas simétricas** (`janela.py`): cabeçalho (logo | título centralizado |
     versão); entradas em 3 caixas de mesma altura (Material + Espessura e tolerância | Mecânicas |
