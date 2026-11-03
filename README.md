@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/fase-5_interface-blue?style=flat-square" alt="Fase"/>
+  <img src="https://img.shields.io/badge/fase-6_histórico-blue?style=flat-square" alt="Fase"/>
   <img src="https://img.shields.io/badge/normas-ABNT-009739?style=flat-square" alt="Normas ABNT"/>
   <img src="https://img.shields.io/badge/idioma-pt--BR-green?style=flat-square" alt="Idioma"/>
 </p>
