@@ -207,6 +207,9 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   - Pesquisa do histórico: **uma caixa de texto livre** que procura em tudo (resultado, bobina…).
   - Divergência: **classificação correta + motivo, os dois obrigatórios**; lista de divergências
     para revisão, marcadas como resolvidas depois da correção.
+  - Tela: **bobina + Salvar na faixa de botões** (`[Nova] [Limpar] [CLASSIFICAR] Bobina [__] [Salvar]`);
+    Salvar só ativo depois de classificar; **bobina obrigatória** (vazia → erro vermelho nos avisos).
+  - **4 abas:** Classificar | Histórico | Divergências | Lixeira.
 - Aba de **histórico**: salvar classificações e pesquisar antigas.
 - **Excluir** move para a aba **Lixeira** (exclusão lógica). Na lixeira o registro aparece igual ao do
   histórico e pode ser **restaurado** de volta ou **excluído permanentemente**.
