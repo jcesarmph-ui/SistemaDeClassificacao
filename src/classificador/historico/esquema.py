@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS classificacao (
     usuario          TEXT NOT NULL,      -- usuário do Windows
     computador       TEXT NOT NULL,
     versao_programa  TEXT NOT NULL,
-    bobina           TEXT NOT NULL,      -- nº da bobina / lote (obrigatório)
+    volume           TEXT NOT NULL,      -- nº do volume (obrigatório)
     acabamento       TEXT NOT NULL,
     valores          TEXT NOT NULL,      -- JSON: campo da tela → texto digitado
     resultado        TEXT,               -- ex.: "ZEE G2 - Z275"

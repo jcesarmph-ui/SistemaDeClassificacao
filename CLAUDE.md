@@ -203,12 +203,12 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   - Salvar **só pelo botão "Salvar"** depois de CLASSIFICAR (testes/simulações não entram no
     histórico, que é a base do ML da Fase 8).
   - Cada registro guarda: valores digitados, acabamento, camada, resultado completo (como saiu na
-    hora), **nº da bobina / lote**, data/hora, usuário do Windows e PC.
-  - Pesquisa do histórico: **uma caixa de texto livre** que procura em tudo (resultado, bobina…).
+    hora), **volume** (o campo se chama "Volume", não "bobina" — usuário, 2026-11-03), data/hora, usuário do Windows e PC.
+  - Pesquisa do histórico: **uma caixa de texto livre** que procura em tudo (resultado, volume…).
   - Divergência: **classificação correta + motivo, os dois obrigatórios**; lista de divergências
     para revisão, marcadas como resolvidas depois da correção.
-  - Tela: **bobina + Salvar na faixa de botões** (`[Nova] [Limpar] [CLASSIFICAR] Bobina [__] [Salvar]`);
-    Salvar só ativo depois de classificar; **bobina obrigatória** (vazia → erro vermelho nos avisos).
+  - Tela: **Volume + Salvar na faixa de botões** (`[Nova] [Limpar] [CLASSIFICAR] Volume [__] [Salvar]`);
+    Salvar só ativo depois de classificar; **volume obrigatório** (vazio → erro vermelho nos avisos).
   - **4 abas:** Classificar | Histórico | Divergências | Lixeira.
 - Aba de **histórico**: salvar classificações e pesquisar antigas.
 - **Excluir** move para a aba **Lixeira** (exclusão lógica). Na lixeira o registro aparece igual ao do

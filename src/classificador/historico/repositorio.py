@@ -39,7 +39,7 @@ class ErroDeValidacao(Exception):
 class NovaClassificacao:
     """O que a tela manda salvar: o "retrato" da classificação como saiu na hora."""
 
-    bobina: str
+    volume: str
     acabamento: str
     valores: Mapping[str, str]  # campo da tela → texto digitado
     resultado: str | None
@@ -134,11 +134,11 @@ class RepositorioHistorico:
 
     @_escrita
     def salvar(self, nova: NovaClassificacao) -> int:
-        """Grava e devolve o número do registro. Bobina vazia → ErroDeValidacao."""
-        bobina = nova.bobina.strip()
+        """Grava e devolve o número do registro. Volume vazio → ErroDeValidacao."""
+        volume = nova.volume.strip()
         erros = []
-        if not bobina:
-            erros.append("Informe o nº da bobina / lote para salvar")
+        if not volume:
+            erros.append("Informe o volume para salvar")
         if not nova.resultado:
             erros.append("Não há resultado para salvar: classifique primeiro")
         if erros:
@@ -146,12 +146,12 @@ class RepositorioHistorico:
         with self._conexao:
             cursor = self._conexao.execute(
                 """INSERT INTO classificacao (criado_em, usuario, computador, versao_programa,
-                       bobina, acabamento, valores, resultado, norma, correlatas, avisos,
+                       volume, acabamento, valores, resultado, norma, correlatas, avisos,
                        tolerancia, tolerancia_dentro)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     self._carimbo(), self.usuario, self.computador, __version__,
-                    bobina, nova.acabamento,
+                    volume, nova.acabamento,
                     json.dumps(dict(nova.valores), ensure_ascii=False),
                     nova.resultado, nova.norma,
                     json.dumps(nova.correlatas, ensure_ascii=False),
@@ -170,7 +170,7 @@ class RepositorioHistorico:
 
     def listar(self, texto: str = "", lixeira: bool = False) -> list[Registro]:
         """Mais recentes primeiro. `texto`: cada palavra tem de aparecer em algum campo do
-        registro (bobina, resultado, acabamento, norma, avisos, valores, usuário…), sem
+        registro (volume, resultado, acabamento, norma, avisos, valores, usuário…), sem
         diferenciar maiúsculas nem acentos. `lixeira=True` lista só os excluídos."""
         condicao = "IS NOT NULL" if lixeira else "IS NULL"
         linhas = self._conexao.execute(
@@ -284,7 +284,7 @@ def _registro(linha: sqlite3.Row) -> Registro:
         usuario=linha["usuario"],
         computador=linha["computador"],
         versao_programa=linha["versao_programa"],
-        bobina=linha["bobina"],
+        volume=linha["volume"],
         acabamento=linha["acabamento"],
         valores=json.loads(linha["valores"]),
         resultado=linha["resultado"],
@@ -300,7 +300,7 @@ def _registro(linha: sqlite3.Row) -> Registro:
 
 def _texto_pesquisavel(r: Registro) -> str:
     partes = [
-        r.bobina, r.acabamento, r.resultado or "", r.norma or "", r.tolerancia or "",
+        r.volume, r.acabamento, r.resultado or "", r.norma or "", r.tolerancia or "",
         r.usuario, r.computador, r.criado_em.strftime("%d/%m/%Y") if r.criado_em else "",
         *r.correlatas, *r.avisos, *r.valores.values(),
     ]

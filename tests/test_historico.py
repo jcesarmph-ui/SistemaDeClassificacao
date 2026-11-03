@@ -34,9 +34,9 @@ def repo(tmp_path):
     r.fechar()
 
 
-def nova(bobina="B-001", resultado="GRAU X - Z100", **outros):
+def nova(volume="V-001", resultado="GRAU X - Z100", **outros):
     return NovaClassificacao(
-        bobina=bobina,
+        volume=volume,
         acabamento=outros.pop("acabamento", "GI ZN"),
         valores=outros.pop("valores", {"LE": "200", "Mn": "0,15"}),
         resultado=resultado,
@@ -49,9 +49,9 @@ def nova(bobina="B-001", resultado="GRAU X - Z100", **outros):
 
 
 def test_salva_e_le_o_retrato_completo(repo):
-    id_ = repo.salvar(nova(bobina="  B-001  "))
+    id_ = repo.salvar(nova(volume="  V-001  "))
     r = repo.obter(id_)
-    assert r.bobina == "B-001"  # espaços das pontas tirados
+    assert r.volume == "V-001"  # espaços das pontas tirados
     assert r.resultado == "GRAU X - Z100"
     assert r.valores == {"LE": "200", "Mn": "0,15"}
     assert r.avisos == ["Seria GRAU Y, mas o LE rebaixou"]
@@ -61,26 +61,26 @@ def test_salva_e_le_o_retrato_completo(repo):
     assert r.versao_programa and r.excluido_em is None
 
 
-def test_bobina_obrigatoria_e_precisa_de_resultado(repo):
+def test_volume_obrigatoria_e_precisa_de_resultado(repo):
     with pytest.raises(ErroDeValidacao) as erro:
-        repo.salvar(nova(bobina="  ", resultado=None))
+        repo.salvar(nova(volume="  ", resultado=None))
     assert len(erro.value.mensagens) == 2
     assert repo.listar() == []
 
 
 def test_lista_mais_recente_primeiro(repo):
-    primeiro = repo.salvar(nova(bobina="B-1"))
-    segundo = repo.salvar(nova(bobina="B-2"))
+    primeiro = repo.salvar(nova(volume="V-1"))
+    segundo = repo.salvar(nova(volume="V-2"))
     assert [r.id for r in repo.listar()] == [segundo, primeiro]
 
 
 def test_pesquisa_texto_livre_sem_maiusculas_nem_acentos(repo):
-    repo.salvar(nova(bobina="B-777", acabamento="FF", resultado="EEP G2"))
-    repo.salvar(nova(bobina="B-888", avisos=["Valores não informados: Lo80"]))
-    assert [r.bobina for r in repo.listar("b-777")] == ["B-777"]
-    assert [r.bobina for r in repo.listar("eep g2")] == ["B-777"]  # palavras em qualquer ordem
-    assert [r.bobina for r in repo.listar("NAO informados")] == ["B-888"]  # sem acento
-    assert [r.bobina for r in repo.listar("ana 03/11/2026 B-888")] == ["B-888"]
+    repo.salvar(nova(volume="V-777", acabamento="FF", resultado="EEP G2"))
+    repo.salvar(nova(volume="V-888", avisos=["Valores não informados: Lo80"]))
+    assert [r.volume for r in repo.listar("v-777")] == ["V-777"]
+    assert [r.volume for r in repo.listar("eep g2")] == ["V-777"]  # palavras em qualquer ordem
+    assert [r.volume for r in repo.listar("NAO informados")] == ["V-888"]  # sem acento
+    assert [r.volume for r in repo.listar("ana 03/11/2026 V-888")] == ["V-888"]
     assert repo.listar("inexistente") == []
 
 
