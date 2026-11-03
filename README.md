@@ -224,6 +224,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 | [0006](docs/decisoes/0006-motor-de-classificacao.md) | Motor de classificação: etapas e regras |
 | [0007](docs/decisoes/0007-notas-por-motivo-e-correlatas.md) | Notas por motivo/acabamento e normas correlatas |
 | [0008](docs/decisoes/0008-tolerancia-de-espessura.md) | Tolerância de espessura (NBR 11888 e NBR 7013) |
+| [0009](docs/decisoes/0009-interface-e-resultado-sem-grau.md) | Interface (layout em faixas, cores, versão) e resultado sem grau (ZC de último recurso) |
 
 </details>
 
