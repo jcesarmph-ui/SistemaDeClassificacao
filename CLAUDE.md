@@ -16,9 +16,12 @@
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
   excluir; Lixeira com restaurar / excluir permanentemente; 4) aba Divergências (registrar no
-  Histórico: correta + motivo; lista de pendentes; marcar resolvida); 5) trava de edição (modo
-  edição/consulta, padrão do `CLAUDE.md` global; referência SistemaCalibracao `regras/trava.py`,
-  tabela `trava_edicao` = esquema versão 2); 6) ADR 0010, README (foto, roteiro), PR.
+  Histórico: correta + motivo; lista de pendentes; marcar resolvida); 5) ADR 0010, README (foto,
+  roteiro), PR.
+- **SEM trava de edição neste programa** (decisão do usuário, 2026-11-03 — **exceção** ao padrão do
+  `CLAUDE.md` global): duas pessoas podem usar ao mesmo tempo e as duas salvam classificações; um
+  não interfere no outro (cada salvamento é um registro novo; SQLite com `busy_timeout` e
+  transações curtas dá conta). Não criar modo edição/consulta nem a tabela `trava_edicao`.
 - **Fase 6 — feito:** `historico/esquema.py` (`conectar`: journal DELETE, `busy_timeout`, FK;
   `PRAGMA user_version` = 1; tabelas `classificacao` e `divergencia`), `historico/backup.py` (diário,
   30 cópias), `historico/repositorio.py` (`RepositorioHistorico.abrir(pasta)`, `salvar`, `obter`,
@@ -49,14 +52,14 @@
   parte o 0006), README **sem "Como executar"** (só mostruário) e com foto da tela
   (`docs/imagens/tela-principal.png`: valores fictícios, **sem o logo** — escolha do usuário),
   `interface/componentes.py` (`FiltroRodaDoMouse`: roda só rola a tela + mãozinha nos clicáveis).
-  PR da Fase 5 aberto; **falta o usuário aprovar o merge**. Depois: Fase 6 em `0.6.0`, incluindo a
-  **trava de edição** (modo edição/consulta, padrão do `CLAUDE.md` global).
+  PR da Fase 5 aberto; **falta o usuário aprovar o merge**. Depois: Fase 6 em `0.6.0` (a trava de
+  edição foi **descartada** pelo usuário em 2026-11-03).
 - Para refazer a foto: script com `dataclasses.replace(servico, logo=None)`, rótulo do logo vazio,
   `WA_DontShowOnScreen`, `resize(1920, 1010)`, `grab()` (GI ZN, camada 275, valores inventados).
 - **Outro projeto (2026-10-28):** sistema de calibração clonado em
   `C:\Users\rodrigo.lima\Projetos\SistemaCalibracao` com `CLAUDE.md` próprio (ainda sem commit) —
-  migração Streamlit → PySide6 no padrão deste projeto; trabalhado em **outro terminal**. Não mexer
-  nele a partir daqui.
+  migração Streamlit → PySide6 no padrão deste projeto; trabalhado em **outro terminal**.
+  **Concluído** (usuário, 2026-11-03). Não mexer nele a partir daqui.
 - **Fase 5 — feito até agora** (etapas 1–6 do plano): `interface/entrada.py` (`ler_numero`,
   `montar_amostra`, `ErroEntrada`), `interface/servico.py` (`Servico.carregar`, `classificar`,
   `pesquisar`, autocompletar, `fabricante()` pelo prefixo; acrescenta grupos para graus sem
