@@ -10,8 +10,8 @@
 
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas.**
-  **Fase 5 – Interface PySide6 EM ANDAMENTO** (branch `fase-5-interface`, enviada ao GitHub, **sem
-  PR ainda**). Última sessão: 2026-10-28 (usuário deu `/clear` ao final). Tudo enviado ao GitHub.
+  **Fase 5 – Interface PySide6 concluída** (branch `fase-5-interface`, PR aberto, aguardando merge).
+  Última sessão: 2026-11-03.
 - **Fase 5 — 2026-10-28 (ajustes pedidos pelo usuário, todos commitados e enviados):**
   - Layout refeito em **faixas simétricas** (`janela.py`): cabeçalho (logo | título centralizado |
     versão); entradas em 3 caixas de mesma altura (Material + Espessura e tolerância | Mecânicas |
@@ -28,11 +28,14 @@
   - Versão semântica: `0.5.0` (Fase 5), em `__version__` (pyproject lê de lá), na janela e no título.
   - **ZC como último recurso de GI/GA** e aviso de camada não informada (ver Regras de classificação);
     `SemGrau` aceita `resultado` + `aviso` juntos; tolerância de resultado sem grau → 7013 Tab. 2.
-- **Fase 5 — próximo passo (etapa 7):** ADR 0009 (interface: layout em faixas, tema e significado das
-  cores, contorno verde, ícone, versão semântica; e ADR/nota para ZC último recurso + aviso de camada
-  + tolerância sem grau), README (como abrir + "foto" da tela com o script de renderização sem
-  mostrar a janela: `WA_DontShowOnScreen` + `grab()`, `resize(1920, 1010)`), roteiro com checkboxes,
-  push (confirmar) e abrir o PR da Fase 5. Depois do merge: versão segue `0.6.0` na Fase 6.
+- **Fase 5 — etapa 7 concluída (2026-11-03):** ADR 0009 (interface + resultado sem grau; altera em
+  parte o 0006), README **sem "Como executar"** (só mostruário) e com foto da tela
+  (`docs/imagens/tela-principal.png`: valores fictícios, **sem o logo** — escolha do usuário),
+  `interface/componentes.py` (`FiltroRodaDoMouse`: roda só rola a tela + mãozinha nos clicáveis).
+  PR da Fase 5 aberto; **falta o usuário aprovar o merge**. Depois: Fase 6 em `0.6.0`, incluindo a
+  **trava de edição** (modo edição/consulta, padrão do `CLAUDE.md` global).
+- Para refazer a foto: script com `dataclasses.replace(servico, logo=None)`, rótulo do logo vazio,
+  `WA_DontShowOnScreen`, `resize(1920, 1010)`, `grab()` (GI ZN, camada 275, valores inventados).
 - **Outro projeto (2026-10-28):** sistema de calibração clonado em
   `C:\Users\rodrigo.lima\Projetos\SistemaCalibracao` com `CLAUDE.md` próprio (ainda sem commit) —
   migração Streamlit → PySide6 no padrão deste projeto; trabalhado em **outro terminal**. Não mexer

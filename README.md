@@ -274,8 +274,8 @@ SistemaDeClassificacao/
   reversa por qualquer norma
 - [x] **Fase 4** — Tolerância de espessura: NBR 11888 (Tab. 11) e NBR 7013 (Tab. 1–4) transcritas e
   conferidas; dentro/fora com intervalo e norma
-- [ ] **Fase 5** — Interface PySide6: tela em faixas simétricas, tema escuro com cores de significado
-  fixo, classificação, tolerância, correlatas e pesquisa reversa na tela *(em fechamento)*
+- [x] **Fase 5** — Interface PySide6: tela em faixas simétricas, tema escuro com cores de significado
+  fixo, classificação, tolerância, correlatas e pesquisa reversa na tela
 - [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)
 - [ ] **Fase 7** — Executável `.exe`
 - [ ] **Fase 8** — Detecção de outliers com machine learning
