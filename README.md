@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  Aplicação desktop da <b>MG Centro de Serviço</b> que classifica aços planos — laminados a frio, a quente e
+  Aplicação desktop da <b>MG Centro de Serviços</b> que classifica aços planos — laminados a frio, a quente e
   zincados — a partir das propriedades mecânicas e químicas, indicando o grau conforme as normas ABNT.
 </p>
 
@@ -53,6 +53,18 @@ classificação no formato usado no dia a dia, por exemplo:
 | Zincado por imersão (GI) | `ZEE G2 - Z275` |
 | Zinco-ferro (GA) | `ZE - ZF100` |
 | Eletrolítico (EG) | `EEP G3 EG 50/50` |
+
+<details open>
+<summary><b>🖥️ Tela principal</b></summary>
+
+<p align="center">
+  <img src="docs/imagens/tela-principal.png" alt="Tela principal: zincado GI classificado como ZEE G2 - Z275" width="100%"/>
+</p>
+
+<sub>Valores fictícios. Vermelho só no botão principal e em erros, amarelo em avisos e verde no que
+está certo (tolerância dentro e contorno do resultado).</sub>
+
+</details>
 
 ## ✨ Funcionalidades
 
@@ -223,6 +235,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 | [0006](docs/decisoes/0006-motor-de-classificacao.md) | Motor de classificação: etapas e regras |
 | [0007](docs/decisoes/0007-notas-por-motivo-e-correlatas.md) | Notas por motivo/acabamento e normas correlatas |
 | [0008](docs/decisoes/0008-tolerancia-de-espessura.md) | Tolerância de espessura (NBR 11888 e NBR 7013) |
+| [0009](docs/decisoes/0009-interface-e-resultado-sem-grau.md) | Interface (layout em faixas, cores, versão) e resultado sem grau (ZC de último recurso) |
 
 </details>
 
@@ -234,7 +247,8 @@ SistemaDeClassificacao/
 │   ├── dominio/         # propriedades, amostra, modelos (norma, grau, folha de classificações)
 │   ├── normas/          # carregador do YAML e comando de conferência
 │   ├── motor/           # limites, avaliação, classificação, sequência, saída, pesquisa reversa
-│   └── tolerancia/      # tolerância de espessura (real × nominal)
+│   ├── tolerancia/      # tolerância de espessura (real × nominal)
+│   └── interface/       # janela PySide6 (só mostra; as regras ficam no motor)
 ├── tests/               # testes automáticos
 │   └── dados/           # norma, folha, correlatas e tolerância fictícias usadas nos testes
 ├── docs/decisoes/       # registros de decisões de arquitetura (ADRs)
@@ -260,7 +274,8 @@ SistemaDeClassificacao/
   reversa por qualquer norma
 - [x] **Fase 4** — Tolerância de espessura: NBR 11888 (Tab. 11) e NBR 7013 (Tab. 1–4) transcritas e
   conferidas; dentro/fora com intervalo e norma
-- [ ] **Fase 5** — Interface PySide6
+- [x] **Fase 5** — Interface PySide6: tela em faixas simétricas, tema escuro com cores de significado
+  fixo, classificação, tolerância, correlatas e pesquisa reversa na tela
 - [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)
 - [ ] **Fase 7** — Executável `.exe`
 - [ ] **Fase 8** — Detecção de outliers com machine learning

@@ -100,12 +100,13 @@ def test_nao_avaliada_com_motivo(norma, kwargs, motivo):
     assert motivo in resultado.texto
 
 
-def test_sem_grau_nao_avalia_quando_a_tabela_depende_do_le(norma):
+def test_resultado_fixo_sem_grau_usa_a_tabela_sem_le(norma):
+    # ZC (último recurso de GI/GA) e 1006/08 EG: sem grau → mesma tabela do grau sem LE
     amostra = Amostra(Acabamento.GI_ZN, espessura_nominal=D("0.60"),
                       espessura_real=D("0.60"), largura=D("1000"))
     resultado = verificar_tolerancia(amostra, None, norma)
-    assert resultado.dentro is None
-    assert "sem grau no resultado" in resultado.texto
+    assert resultado.dentro is True
+    assert resultado.tolerancia == D("0.06")
 
 
 def test_grau_sem_le_minimo_usa_a_tabela_indicada_pela_norma(norma):

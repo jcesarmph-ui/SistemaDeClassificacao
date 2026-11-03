@@ -129,14 +129,14 @@ def test_carrega_folha_ficticia():
         folha.regra(Acabamento.GI_ZN)
 
 
-def test_folha_com_resultado_e_aviso_ao_mesmo_tempo(tmp_path):
+def test_folha_sem_resultado_nem_aviso(tmp_path):
     texto = """\
 acabamentos:
   FF:
     tabelas: [{norma: X}]
-    se_nenhum: {resultado: "1006/08", aviso: teste}
+    se_nenhum: {}
 """
-    with pytest.raises(ErroNorma, match="um dos dois"):
+    with pytest.raises(ErroNorma, match="'resultado' e/ou 'aviso'"):
         carregar_folha(escrever(tmp_path, texto))
 
 

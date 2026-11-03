@@ -9,8 +9,50 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas** (Fase 4: branch
-  `fase-4-tolerancia`, PR para a `main`). Próxima: **Fase 5 – Interface PySide6**.
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas.**
+  **Fase 5 – Interface PySide6 concluída** (branch `fase-5-interface`, PR aberto, aguardando merge).
+  Última sessão: 2026-11-03.
+- **Fase 5 — 2026-10-28 (ajustes pedidos pelo usuário, todos commitados e enviados):**
+  - Layout refeito em **faixas simétricas** (`janela.py`): cabeçalho (logo | título centralizado |
+    versão); entradas em 3 caixas de mesma altura (Material + Espessura e tolerância | Mecânicas |
+    Químicas em 3 colunas × 5 linhas); faixa de botões (Nova classificação, Limpar valores,
+    CLASSIFICAR largo); Resultado (2/3) | Pesquisa reversa (1/3). **Usuário: "para o layout não
+    precisa mudar mais nada"** — não mexer mais em espaçamentos.
+  - Tema (`_CORES` em `janela.py`): fundo **preto puro**, contornos/títulos **brancos**, vermelho só no
+    CLASSIFICAR e em erros, **amarelo em todo aviso** (inclusive tolerância não avaliada), **contorno
+    verde no resultado** quando há classificação (propriedade `classificado`). Fonte Segoe UI 13pt.
+    O padrão visual foi copiado para o `CLAUDE.md` do usuário (vale para todos os projetos).
+  - Ícone: `dados/icone_mg.png` / `.ico` (recorte do símbolo do logo); `app.py` define o ícone e o
+    `AppUserModelID` (barra de tarefas não mostra mais o Python). `.ico` será usado no PyInstaller.
+  - Nome corrigido: **"MG Centro de Serviços"** (plural) em todo o projeto.
+  - Versão semântica: `0.5.0` (Fase 5), em `__version__` (pyproject lê de lá), na janela e no título.
+  - **ZC como último recurso de GI/GA** e aviso de camada não informada (ver Regras de classificação);
+    `SemGrau` aceita `resultado` + `aviso` juntos; tolerância de resultado sem grau → 7013 Tab. 2.
+- **Fase 5 — etapa 7 concluída (2026-11-03):** ADR 0009 (interface + resultado sem grau; altera em
+  parte o 0006), README **sem "Como executar"** (só mostruário) e com foto da tela
+  (`docs/imagens/tela-principal.png`: valores fictícios, **sem o logo** — escolha do usuário),
+  `interface/componentes.py` (`FiltroRodaDoMouse`: roda só rola a tela + mãozinha nos clicáveis).
+  PR da Fase 5 aberto; **falta o usuário aprovar o merge**. Depois: Fase 6 em `0.6.0`, incluindo a
+  **trava de edição** (modo edição/consulta, padrão do `CLAUDE.md` global).
+- Para refazer a foto: script com `dataclasses.replace(servico, logo=None)`, rótulo do logo vazio,
+  `WA_DontShowOnScreen`, `resize(1920, 1010)`, `grab()` (GI ZN, camada 275, valores inventados).
+- **Outro projeto (2026-10-28):** sistema de calibração clonado em
+  `C:\Users\rodrigo.lima\Projetos\SistemaCalibracao` com `CLAUDE.md` próprio (ainda sem commit) —
+  migração Streamlit → PySide6 no padrão deste projeto; trabalhado em **outro terminal**. Não mexer
+  nele a partir daqui.
+- **Fase 5 — feito até agora** (etapas 1–6 do plano): `interface/entrada.py` (`ler_numero`,
+  `montar_amostra`, `ErroEntrada`), `interface/servico.py` (`Servico.carregar`, `classificar`,
+  `pesquisar`, autocompletar, `fabricante()` pelo prefixo; acrescenta grupos para graus sem
+  correlatas, ex. ZAR, para a pesquisa achá-los), `interface/janela.py` (`JanelaPrincipal`),
+  `interface/app.py` + `__main__.py` (abre com `.venv/Scripts/python -m classificador`, maximizada).
+  Logo copiado para `dados/logo_mg.png` (fora do Git; texto do logo é branco → fundo escuro). Testes da janela em modo offscreen (`tests/test_janela.py`); fixture `pasta` em
+  `tests/conftest.py`. O usuário abriu o programa: **"Funcionou"**.
+- Decisões da Fase 5: 7 acabamentos na lista; folha de siglas não aparece na tela; erros de
+  digitação em vermelho nos avisos (sem pop-up); "Limpar valores" mantém acabamento e camada,
+  "Nova classificação" apaga tudo; vírgula ou ponto decimal, "%" opcional, **sem separador de
+  milhar** (largura 1244); pesquisa reversa mostra faixas em cinza ao lado dos campos (lista para
+  escolher se achar mais de um grau); histórico/lixeira ficam para a Fase 6.
+- Ao rodar o programa pelo `!`, o terminal passa para segundo plano após 2 min (normal).
 - Fase 4 entregou: `Amostra.espessura_real/largura`; `NormaTolerancia` (`dominio/modelos.py`,
   `Faixa` genérica), `carregar_tolerancia(s)`; `tolerancia/verificar.py` (`verificar_tolerancia`);
   `Saida.tolerancia`; folha com `tolerancia:` por acabamento; NBR 11888 e NBR 7013 em
@@ -32,11 +74,12 @@
   formato das tabelas ABNT) e `dados/normas/nbr-5915-2.yaml` **conferida pelo usuário** (2026-10-27).
   Formato e regras de interpretação: ADR 0005.
 - Ambiente: `.venv` criado; rodar sempre `.venv/Scripts/python -m pytest` / `-m ruff check .`.
-- Permissões em `.claude/settings.json` (testes, ruff, git status/diff/log/add/commit liberados; push pergunta).
+- Permissões em `.claude/settings.json` (testes, ruff, git status/diff/log/add/commit/push liberados;
+  push forçado e `add -f` bloqueados).
 - Pendências restantes na seção "Pendências".
 
 ## Objetivo
-Programa (MG Centro de Serviço) para **classificar materiais de aço (produtos planos)** a partir das
+Programa (MG Centro de Serviços) para **classificar materiais de aço (produtos planos)** a partir das
 propriedades mecânicas e químicas digitadas pelo usuário, indicando a classificação (sigla/grau) conforme
 as normas ABNT, além de verificar tolerância de espessura e mostrar normas correlatas.
 
@@ -67,6 +110,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   normais/minimizados), GA ZF (zinco-ferro, Galvanew), EG (eletrolítico).
 - Camada: GI → `Z___` (g/m², duas faces, ex. Z100); GA → `ZF___` (ex. ZF100); EG → `_/_` (g/m² por face, ex. 50/50).
 - Formato da saída: sigla + camada, ex. `ZEE G2 - Z275` (GI), `EEP G1 EG 50/50`. Sem camada → só a sigla.
+- Revestido (GI, GA, EG) com camada vazia ou zero → resultado sem camada + **aviso** "Camada não informada".
 - A camada sai **exatamente como digitada** (113 → `Z113`); o usuário é instruído a usar o nominal
   (100 ou 275), não o medido do certificado. EG: digita um número só (por face) → `50` sai `50/50`.
 
@@ -78,8 +122,11 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   (ex.: NBR 5915-2: EEP 4 > … > EP > EM; NBR 5906: EPA > EP > EM; NBR 7008-2: ZEE 4 > … > ZE). A ordem fica **explícita na base de normas** (lista por norma, na mesma
   sequência da tabela) e é conferida pelo usuário na transcrição.
   GI/GA: **todos os ZAR (7008-3) são mais nobres que os graus da 7008-2** (ZE < ZEE 1…4 < ZAR-230 … ZAR-550).
-- **ZC nunca é resultado** (decisão do usuário, 2026-10-27): se o material não atende pelo menos ZE na
-  7008-2, vai direto para a 7008-3.
+- **ZC não sai da tabela da 7008-2** (decisão do usuário, 2026-10-27): se o material não atende pelo
+  menos ZE na 7008-2, vai direto para a 7008-3. **Mas ZC é o resultado fixo de último recurso de GI/GA**
+  (2026-10-28), igual ao `1006/08` dos sem revestimento: sem avaliar a norma (nem a química do ZC),
+  sai `ZC - Z100` / `ZC - ZF100` + o aviso "Nenhum grau da NBR 7008-2 nem da NBR 7008-3 atendido"
+  (o material pode ser duro ou mole demais). Tolerância do ZC: NBR 7013 Tabela 2.
 - **Sequência de tabelas por acabamento** (passa para a próxima só se não atender nenhum grau da anterior;
   reprovação pode ser **mecânica ou química**):
 
@@ -88,7 +135,7 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   | FF | NBR 5915-2 | — | `1006/08` |
   | FQ / FQ DO | NBR 5906 | — | `1006/08` |
   | EG | NBR 5915-2 (EM…EEP G3) | — | `1006/08 EG _/_` (teórico) |
-  | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZE…ZEE 4) | NBR 7008-3 (ZAR) | aviso "material mais duro que o último ZAR" (teórico) |
+  | GI ZN / GI ZM / GA ZF | NBR 7008-2 (ZE…ZEE 4) | NBR 7008-3 (ZAR) | `ZC - Z___` + aviso "nenhum grau atendido" (teórico) |
 - **EG (eletrolítico)** é classificado pela norma **sem revestimento** (NBR 5915-2, com NBR 16964 para o
   revestimento — **não é preciso transcrever a NBR 16964**), e a saída recebe `EG` + camada por face: ex. `EEP G3 EG 50/50`.
   Graus EG existentes na folha de classificações: EM, EP, EEP G1, EEP G2, EEP G3 (**não há EEP G4 EG**).
@@ -164,7 +211,8 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   do grau; +0,01 mm para revestimento ≥ Z275.
 - **Sem revestimento (FF, FQ, FQ DO):** NBR 11888 Tab. 11 (FQ usa a mesma tabela do FF).
 - **Grau sem limite de escoamento definido → NBR 7013 Tabela 2** (regra do usuário; a própria norma
-  diz isso para o ZC). **Sem grau no resultado** (EG 1006/08, GI sem ZAR) → **não avalia** e avisa.
+  diz isso para o ZC). **Resultado fixo sem grau** (ZC de GI/GA, `1006/08 EG`) → também **Tabela 2**
+  (decidido em 2026-10-28).
 - Regras decididas na Fase 4: largura **L ≤ 1200 · 1200 < L ≤ 1500 · L > 1500** em todas as tabelas;
   limite **inclusive** (real no limite = dentro); espessura fora da tabela ou "–" na norma → não
   avalia e avisa; espessura real/largura vazia → não avalia e avisa; **+0,01 mm só para GI e GA**
@@ -178,6 +226,15 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   ajustes declarativos; ordem de nobreza explícita por norma.
 - Comparações com `Decimal` (sem erro de arredondamento de `float`).
 - Histórico atrás de uma classe `RepositorioHistorico` (permite trocar o banco no futuro).
+- **Uso e distribuição (decidido em 2026-10-28):** programa numa **pasta comum da rede** (sem
+  servidor/TI), 1 pessoa por vez (raramente 2–3, às vezes só consultando), 5–10 classificações/dia,
+  **histórico único compartilhado** (base do ML da Fase 8). Fase 6: SQLite `historico.db` na pasta
+  comum, **modo journal tradicional (nunca WAL — não funciona em rede)**, `busy_timeout`, transações
+  curtas, **backup diário** em `backup/` (guarda as últimas cópias). Fase 7: `.exe` + pasta `dados/` ao
+  lado (norma corrigida = trocar YAML); versão visível na janela; atualizar trocando o `.exe` com o
+  programa fechado; **nunca publicar o `.exe` no GitHub** (repositório público, normas embutidas).
+- Verificação de "valores absurdos" por regra (ex.: C = 82 % por erro de digitação): **recusada pelo
+  usuário** — fica para o aviso de outlier por ML (Fase 8).
 - Estrutura: `src/classificador/{dominio,normas,motor,tolerancia,historico,interface}`, `tests/`,
   `docs/decisoes/` (ADRs), `dados/` (fora do Git).
 - **Repositório GitHub é PÚBLICO:** `normas_claude/` e `dados/` (normas transcritas, casos reais) nunca
@@ -265,5 +322,14 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   (ex.: `jcesarmph-ui/SistemaCalibracao`): badges shields.io `for-the-badge` centralizados no topo,
   descrição centralizada, seções com emoji, tabela "Tecnologia | Aplicação no projeto", diagramas
   mermaid, `<details>` recolhíveis, roteiro com checkboxes e frase de fechamento em negrito.
-- Sempre confirmar com o usuário antes de `git push`.
+- **Versão do programa** (decidido em 2026-10-28): versionamento semântico `MAIOR.MENOR.CORREÇÃO`,
+  num lugar só (`__version__` em `src/classificador/__init__.py`; `pyproject.toml` lê de lá) e mostrada
+  na janela. Em desenvolvimento `0.x`: **MENOR = fase do roteiro** (Fase 5 → `0.5.0`, Fase 6 → `0.6.0`…).
+  **`1.0.0` = primeira versão entregue em uso na empresa** (após a Fase 7). Depois: CORREÇÃO para
+  conserto sem mudar comportamento (norma digitada errado → `1.0.1`), MENOR para novidade compatível
+  (`1.1.0`), MAIOR para mudança que quebra o jeito de usar ou os dados (`2.0.0`). Cada versão entregue
+  ganha uma tag Git `vX.Y.Z`.
+- **`git push` liberado sem perguntar** (usuário, 2026-10-28: "nunca pergunte se pode colocar no
+  GitHub, sempre vai poder"): enviar ao fim de cada etapa. Só `--force`/reescrita de histórico
+  continua proibido sem pedido explícito.
 - Nunca versionar dados sensíveis, senhas, chaves de API, `normas_claude/` ou `dados/`.

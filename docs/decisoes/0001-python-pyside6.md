@@ -4,7 +4,7 @@
 - **Data:** 2026-10-27
 
 ## Contexto
-O programa será usado todos os dias em **um PC Windows** da MG Centro de Serviço. Precisa de uma tela
+O programa será usado todos os dias em **um PC Windows** da MG Centro de Serviços. Precisa de uma tela
 com três colunas (acabamento, propriedades mecânicas, químicas), abas (classificação, histórico,
 lixeira), tooltips e tela cheia. O núcleo do trabalho é comparar valores com limites de tabelas —
 lógica de regras e dados, que precisa ser testada automaticamente.

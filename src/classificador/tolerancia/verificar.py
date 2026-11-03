@@ -45,13 +45,10 @@ def verificar_tolerancia(
     if all(t.le_min is None for t in norma.tabelas):
         tabela = norma.tabelas[0]
     else:
-        if grau is None:
-            return _nao_avaliada(
-                f"sem grau no resultado (a {norma.codigo} depende do LE mínimo do grau)"
-            )
-        limite_le = grau.limites.get(Propriedade.LE)
+        limite_le = grau.limites.get(Propriedade.LE) if grau else None
         if limite_le is None or limite_le.min is None:
-            # Grau sem LE definido: a norma indica a tabela (NBR 7013 → Tabela 2)
+            # Grau sem LE definido, ou resultado fixo sem grau (ZC, 1006/08): a norma indica a
+            # tabela (NBR 7013 → Tabela 2). Decisão do usuário (2026-10-28).
             if norma.tabela_sem_le is None:
                 return _nao_avaliada(
                     f"o grau não tem LE mínimo para escolher a tabela da {norma.codigo}"
