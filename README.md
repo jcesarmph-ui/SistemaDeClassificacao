@@ -54,6 +54,18 @@ classificação no formato usado no dia a dia, por exemplo:
 | Zinco-ferro (GA) | `ZE - ZF100` |
 | Eletrolítico (EG) | `EEP G3 EG 50/50` |
 
+<details open>
+<summary><b>🖥️ Tela principal</b></summary>
+
+<p align="center">
+  <img src="docs/imagens/tela-principal.png" alt="Tela principal: zincado GI classificado como ZEE G2 - Z275" width="100%"/>
+</p>
+
+<sub>Valores fictícios. Vermelho só no botão principal e em erros, amarelo em avisos e verde no que
+está certo (tolerância dentro e contorno do resultado).</sub>
+
+</details>
+
 ## ✨ Funcionalidades
 
 - 🔎 **Classificação automática** — sempre no **grau mais nobre** atendido.
