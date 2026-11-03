@@ -123,5 +123,71 @@ def test_maozinha_nos_botoes(janela):
 
     janela.show()
     botoes = janela.findChildren(QtWidgets.QPushButton)
-    assert botoes and all(b.cursor().shape() == Qt.PointingHandCursor for b in botoes)
+    assert botoes
+    for botao in botoes:  # ligado → mãozinha; desligado (ex.: Salvar) → seta
+        esperado = Qt.PointingHandCursor if botao.isEnabled() else Qt.ArrowCursor
+        assert botao.cursor().shape() == esperado, botao.text()
     janela.close()
+
+
+# --- Salvar no histórico ------------------------------------------------------------------
+
+
+@pytest.fixture
+def janela_com_historico(app, pasta):
+    from classificador.historico.repositorio import RepositorioHistorico
+
+    historico = RepositorioHistorico.abrir(pasta, quem=("ana", "PC-01"))
+    yield JanelaPrincipal(Servico.carregar(pasta), historico)
+    historico.fechar()
+
+
+def test_salvar_so_depois_de_classificar(janela_com_historico):
+    janela = janela_com_historico
+    assert not janela.botao_salvar.isEnabled()
+    preencher(janela, VALORES)
+    janela.classificar()
+    assert janela.botao_salvar.isEnabled()
+    janela.campos["LE"].textEdited.emit("210")  # digitou de novo → precisa reclassificar
+    assert not janela.botao_salvar.isEnabled()
+
+
+def test_salvar_grava_o_retrato_com_o_volume(janela_com_historico):
+    janela = janela_com_historico
+    preencher(janela, VALORES)
+    janela.classificar()
+    janela.volume.setText("V-123")
+    janela.salvar()
+    [registro] = janela.historico.listar()
+    assert (registro.volume, registro.resultado, registro.acabamento) == ("V-123", "AAA", "FF")
+    assert registro.valores["LE"] == "200"
+    assert registro.tolerancia_dentro is True
+    assert janela.situacao_salvar.text().startswith("✔ Salvo no histórico")
+    assert janela.situacao_salvar.objectName() == "salvo"  # verde
+    assert not janela.botao_salvar.isEnabled()  # não salva duas vezes o mesmo
+
+
+def test_volume_vazio_e_erro_em_vermelho_e_nao_grava(janela_com_historico):
+    janela = janela_com_historico
+    preencher(janela, VALORES)
+    janela.classificar()
+    janela.salvar()
+    assert janela.historico.listar() == []
+    assert janela.situacao_salvar.objectName() == "erro"
+    assert "Informe o volume" in janela.situacao_salvar.text()
+    assert janela.resultado.text() == "AAA"  # o resultado continua na tela
+
+
+def test_sem_historico_o_salvar_fica_desligado(janela):
+    preencher(janela, VALORES)
+    janela.classificar()
+    assert not janela.botao_salvar.isEnabled()
+
+
+def test_nova_classificacao_limpa_o_volume_e_limpar_valores_mantem(janela_com_historico):
+    janela = janela_com_historico
+    janela.volume.setText("V-9")
+    janela.limpar_valores()
+    assert janela.volume.text() == "V-9"
+    janela.nova_classificacao()
+    assert janela.volume.text() == ""

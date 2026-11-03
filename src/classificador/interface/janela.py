@@ -28,10 +28,16 @@ from PySide6.QtWidgets import (
 from classificador import __version__
 from classificador.dominio.amostra import Acabamento
 from classificador.dominio.propriedades import Propriedade
+from classificador.historico.repositorio import (
+    ErroDeValidacao,
+    NovaClassificacao,
+    RepositorioHistorico,
+)
 from classificador.interface.componentes import instalar_filtro_roda
 from classificador.interface.entrada import ErroEntrada
 from classificador.interface.servico import Servico, fabricante
 from classificador.motor.reversa import ResultadoPesquisa
+from classificador.motor.saida import Saida
 from classificador.motor.sequencia import ErroClassificacao
 
 MECANICAS = [
@@ -69,6 +75,7 @@ QLineEdit:disabled {{ background: {caixa}; color: #616161; }}
 QComboBox QAbstractItemView {{ background: {campo}; selection-background-color: {selecao}; }}
 QPushButton {{ background: {campo}; border: 1px solid {borda}; border-radius: 6px; padding: 10px; }}
 QPushButton:hover {{ background: {caixa}; }}
+QPushButton:disabled {{ color: #616161; border: 1px solid {campo_borda}; }}
 QToolTip {{ background: {campo}; color: #f0f0f0; border: 1px solid {borda}; }}
 #titulo {{ font-size: 22pt; font-weight: bold; letter-spacing: 3px; color: {titulo}; }}
 #classificar {{ background: {botao}; color: #ffffff; border: none; font-size: 20pt;
@@ -79,6 +86,7 @@ QToolTip {{ background: {campo}; color: #f0f0f0; border: 1px solid {borda}; }}
 #dica {{ color: #9e9e9e; font-style: italic; }}
 #avisos {{ color: {aviso}; }}
 #erro {{ color: {erro}; }}
+#salvo {{ color: {certo}; }}
 """
 
 _CORES_TOLERANCIA = {
@@ -89,10 +97,16 @@ _CORES_TOLERANCIA = {
 
 
 class JanelaPrincipal(QMainWindow):
-    def __init__(self, servico: Servico) -> None:
+    def __init__(
+        self, servico: Servico, historico: RepositorioHistorico | None = None
+    ) -> None:
         super().__init__()
         instalar_filtro_roda()  # roda do mouse só rola a tela (nunca troca o acabamento)
         self.servico = servico
+        self.historico = historico
+        # O que foi classificado por último (acabamento, textos digitados, saída): é isso que o
+        # Salvar grava. Volta a None quando algo é digitado de novo — aí precisa reclassificar.
+        self._classificado: tuple[str, dict[str, str], Saida] | None = None
         self.campos: dict[str, QLineEdit] = {}  # nome do campo → caixa de texto
         self.dicas: dict[str, QLabel] = {}  # nome do campo → faixa exigida (pesquisa reversa)
         self._resultados_pesquisa: list[ResultadoPesquisa] = []
@@ -124,6 +138,8 @@ class JanelaPrincipal(QMainWindow):
         self._ordem = list(self.campos.values())  # ordem do Enter → próximo campo
         for campo in self._ordem:
             campo.returnPressed.connect(self._enter_no_campo)
+            campo.textEdited.connect(self._entrada_mudou)
+        self.acabamento.currentTextChanged.connect(self._entrada_mudou)
         self.limpar_resultado()
 
     # --- Montagem da tela -------------------------------------------------------------------
@@ -214,10 +230,20 @@ class JanelaPrincipal(QMainWindow):
         limpar.clicked.connect(self.limpar_valores)
         classificar = QPushButton("CLASSIFICAR", objectName="classificar")
         classificar.clicked.connect(self.classificar)
+        self.volume = QLineEdit(placeholderText="nº do volume")
+        self.volume.setToolTip("Número do volume (obrigatório para salvar no histórico)")
+        self.volume.returnPressed.connect(self.salvar)
+        self.volume.textEdited.connect(self._limpar_situacao_salvar)
+        self.botao_salvar = QPushButton("Salvar")
+        self.botao_salvar.setToolTip("Salva esta classificação no histórico")
+        self.botao_salvar.clicked.connect(self.salvar)
         faixa = QHBoxLayout()
         faixa.addWidget(nova, 1)
         faixa.addWidget(limpar, 1)
-        faixa.addWidget(classificar, 4)
+        faixa.addWidget(classificar, 3)
+        faixa.addWidget(QLabel("Volume"))
+        faixa.addWidget(self.volume, 1)
+        faixa.addWidget(self.botao_salvar, 1)
         return faixa
 
     def _caixa_resultado(self) -> QGroupBox:
@@ -228,6 +254,7 @@ class JanelaPrincipal(QMainWindow):
         self.correlatas.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
         self.correlatas.linkHovered.connect(self._mostrar_fabricante)
         self.avisos = QLabel(wordWrap=True, objectName="avisos")
+        self.situacao_salvar = QLabel(wordWrap=True)  # "✔ Salvo…" (verde) ou erro (vermelho)
 
         grupo = QGroupBox("Resultado")
         caixa = QVBoxLayout(grupo)
@@ -235,6 +262,7 @@ class JanelaPrincipal(QMainWindow):
         caixa.addWidget(self.norma)
         caixa.addWidget(self.correlatas)
         caixa.addWidget(self.avisos)
+        caixa.addWidget(self.situacao_salvar)
         caixa.addStretch()
         return grupo
 
@@ -300,6 +328,9 @@ class JanelaPrincipal(QMainWindow):
             self._repintar(self.avisos)
             return
 
+        self._classificado = (self.acabamento.currentText(), textos, saida)
+        self._atualizar_salvar()
+        self._mostrar_situacao_salvar(None, "")
         self.resultado.setText(saida.resultado or "—")
         self._marcar_resultado(saida.resultado is not None)
         self.norma.setText(saida.norma or "")
@@ -362,7 +393,38 @@ class JanelaPrincipal(QMainWindow):
             linhas += [escape(a) for a in exigido.avisos]
         self.info_pesquisa.setText("<br>".join(linhas))
 
+    def salvar(self) -> None:
+        """Grava no histórico o que foi classificado por último, com o volume."""
+        if self.historico is None or self._classificado is None:
+            return
+        acabamento, textos, saida = self._classificado
+        tolerancia = saida.tolerancia
+        nova = NovaClassificacao(
+            volume=self.volume.text(),
+            acabamento=acabamento,
+            valores=textos,
+            resultado=saida.resultado,
+            norma=saida.norma,
+            correlatas=list(saida.correlatas),
+            avisos=list(saida.avisos),
+            tolerancia=tolerancia.texto if tolerancia else None,
+            tolerancia_dentro=tolerancia.dentro if tolerancia else None,
+        )
+        try:
+            numero = self.historico.salvar(nova)
+        except ErroDeValidacao as erro:
+            self._mostrar_situacao_salvar("erro", "\n".join(f"✖ {m}" for m in erro.mensagens))
+            if not self.volume.text().strip():
+                self.volume.setFocus()
+            return
+        self._classificado = None  # já salvo: não grava duas vezes o mesmo
+        self._atualizar_salvar()
+        self._mostrar_situacao_salvar(
+            "salvo", f"✔ Salvo no histórico (nº {numero}) — volume {self.volume.text().strip()}"
+        )
+
     def nova_classificacao(self) -> None:
+        self.volume.clear()
         for campo in self.campos.values():
             campo.clear()
         self.acabamento.setCurrentIndex(0)
@@ -382,6 +444,9 @@ class JanelaPrincipal(QMainWindow):
         self.limpar_resultado()
 
     def limpar_resultado(self) -> None:
+        self._classificado = None
+        self._atualizar_salvar()
+        self._mostrar_situacao_salvar(None, "")
         self.resultado.clear()
         self._marcar_resultado(False)
         self.norma.clear()
@@ -412,6 +477,34 @@ class JanelaPrincipal(QMainWindow):
             "EG": "Por face, ex.: 50 → 50/50. Vazio ou zero = sem revestimento.",
         }
         self.dica_camada.setText(dicas[revestimento])
+
+    def _entrada_mudou(self, *_) -> None:
+        """Digitou depois de classificar: o resultado na tela não vale mais para salvar."""
+        if self._classificado is not None:
+            self._classificado = None
+            self._atualizar_salvar()
+
+    def _atualizar_salvar(self) -> None:
+        pode = self.historico is not None and self._classificado is not None
+        if pode and not self._classificado[2].resultado:
+            pode = False  # sem resultado não há o que salvar
+        self.botao_salvar.setEnabled(pode)
+        if self.historico is None:
+            dica = "Histórico indisponível"
+        elif pode:
+            dica = "Salva esta classificação no histórico"
+        else:
+            dica = "Classifique para poder salvar"
+        self.botao_salvar.setToolTip(dica)
+
+    def _mostrar_situacao_salvar(self, tipo: str | None, texto: str) -> None:
+        self.situacao_salvar.setObjectName(tipo or "")
+        self.situacao_salvar.setText(texto)
+        self._repintar(self.situacao_salvar)
+
+    def _limpar_situacao_salvar(self, *_) -> None:
+        if self.situacao_salvar.objectName() == "erro":
+            self._mostrar_situacao_salvar(None, "")
 
     def _marcar_resultado(self, classificado: bool) -> None:
         """Contorno verde quando há classificação ("deu certo"); neutro se vazio ou erro."""
