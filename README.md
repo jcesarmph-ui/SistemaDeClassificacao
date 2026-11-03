@@ -33,7 +33,6 @@
   <a href="#-funcionalidades">Funcionalidades</a> •
   <a href="#-como-a-classificação-funciona">Como funciona</a> •
   <a href="#️-arquitetura">Arquitetura</a> •
-  <a href="#-como-executar">Como executar</a> •
   <a href="#-roteiro">Roteiro</a>
 </p>
 
@@ -236,7 +235,8 @@ SistemaDeClassificacao/
 │   ├── dominio/         # propriedades, amostra, modelos (norma, grau, folha de classificações)
 │   ├── normas/          # carregador do YAML e comando de conferência
 │   ├── motor/           # limites, avaliação, classificação, sequência, saída, pesquisa reversa
-│   └── tolerancia/      # tolerância de espessura (real × nominal)
+│   ├── tolerancia/      # tolerância de espessura (real × nominal)
+│   └── interface/       # janela PySide6 (só mostra; as regras ficam no motor)
 ├── tests/               # testes automáticos
 │   └── dados/           # norma, folha, correlatas e tolerância fictícias usadas nos testes
 ├── docs/decisoes/       # registros de decisões de arquitetura (ADRs)
@@ -252,31 +252,6 @@ SistemaDeClassificacao/
 └── README.md
 ```
 
-## 🚀 Como executar
-
-Requisitos: **Windows** e **Python 3.12+**. No PowerShell, na pasta do projeto:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
-.\.venv\Scripts\python.exe -m pytest
-```
-
-Para conferir uma norma transcrita contra as imagens da ABNT (imprime no formato das tabelas):
-
-```powershell
-.\.venv\Scripts\python.exe -m classificador.normas.conferir tests\dados\norma-ficticia.yaml
-```
-
-Para abrir o programa (precisa da pasta local `dados/` com as normas transcritas):
-
-```powershell
-.\.venv\Scripts\python.exe -m classificador
-```
-
-> Interface em desenvolvimento (Fase 5): classificação, tolerância, correlatas e pesquisa reversa
-> já funcionam na tela; histórico e lixeira chegam na Fase 6.
-
 ## 🗺️ Roteiro
 
 - [x] **Fase 0** — Fundação: repositório, ADRs, ambiente Python, permissões do Claude Code
@@ -287,7 +262,8 @@ Para abrir o programa (precisa da pasta local `dados/` com as normas transcritas
   reversa por qualquer norma
 - [x] **Fase 4** — Tolerância de espessura: NBR 11888 (Tab. 11) e NBR 7013 (Tab. 1–4) transcritas e
   conferidas; dentro/fora com intervalo e norma
-- [ ] **Fase 5** — Interface PySide6 *(em andamento: tela principal pronta, faltam ajustes visuais)*
+- [ ] **Fase 5** — Interface PySide6: tela em faixas simétricas, tema escuro com cores de significado
+  fixo, classificação, tolerância, correlatas e pesquisa reversa na tela *(em fechamento)*
 - [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)
 - [ ] **Fase 7** — Executável `.exe`
 - [ ] **Fase 8** — Detecção de outliers com machine learning
