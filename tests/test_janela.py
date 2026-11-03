@@ -101,3 +101,27 @@ def test_limpar_valores_mantem_acabamento_e_nova_classificacao_apaga_tudo(janela
     janela.nova_classificacao()
     assert janela.campos["camada"].text() == ""
     assert janela.acabamento.currentText() == "FF"
+
+
+def test_roda_do_mouse_nao_troca_o_acabamento(janela):
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtGui import QWheelEvent
+
+    janela.show()  # a lista só reage à roda quando está visível
+    janela.acabamento.setCurrentText("FF")
+    roda = QWheelEvent(  # um passo para baixo: sem o filtro, trocaria FF → FQ
+        QPointF(5, 5), QPointF(5, 5), QPoint(0, 0), QPoint(0, -120),
+        Qt.NoButton, Qt.NoModifier, Qt.NoScrollPhase, False,
+    )
+    QtWidgets.QApplication.sendEvent(janela.acabamento, roda)
+    assert janela.acabamento.currentText() == "FF"
+    janela.close()
+
+
+def test_maozinha_nos_botoes(janela):
+    from PySide6.QtCore import Qt
+
+    janela.show()
+    botoes = janela.findChildren(QtWidgets.QPushButton)
+    assert botoes and all(b.cursor().shape() == Qt.PointingHandCursor for b in botoes)
+    janela.close()

@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
 from classificador import __version__
 from classificador.dominio.amostra import Acabamento
 from classificador.dominio.propriedades import Propriedade
+from classificador.interface.componentes import instalar_filtro_roda
 from classificador.interface.entrada import ErroEntrada
 from classificador.interface.servico import Servico, fabricante
 from classificador.motor.reversa import ResultadoPesquisa
@@ -90,6 +91,7 @@ _CORES_TOLERANCIA = {
 class JanelaPrincipal(QMainWindow):
     def __init__(self, servico: Servico) -> None:
         super().__init__()
+        instalar_filtro_roda()  # roda do mouse só rola a tela (nunca troca o acabamento)
         self.servico = servico
         self.campos: dict[str, QLineEdit] = {}  # nome do campo → caixa de texto
         self.dicas: dict[str, QLabel] = {}  # nome do campo → faixa exigida (pesquisa reversa)

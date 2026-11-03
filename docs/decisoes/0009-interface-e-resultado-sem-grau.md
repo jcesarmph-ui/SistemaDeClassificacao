@@ -35,6 +35,9 @@ A janela é testada automaticamente em modo offscreen (sem aparecer na tela).
 - "Limpar valores" mantém acabamento e camada; "Nova classificação" apaga tudo.
 - Números com vírgula ou ponto decimal, "%" opcional, **sem separador de milhar**.
 - Erros de digitação aparecem em vermelho na área de avisos, **sem pop-up**.
+- **Roda do mouse só rola a tela**: nunca troca a opção de uma lista, como o acabamento
+  (`interface/componentes.py`, `FiltroRodaDoMouse`, igual ao do SistemaCalibracao). O mesmo filtro
+  põe a mãozinha do mouse em tudo o que é clicável.
 - Tooltips: nome por extenso dos elementos químicos e fabricante/emissor das normas correlatas.
 - A pesquisa reversa mostra as faixas exigidas em cinza ao lado de cada campo; se a norma
   digitada leva a mais de um grau, aparece uma lista para escolher.
