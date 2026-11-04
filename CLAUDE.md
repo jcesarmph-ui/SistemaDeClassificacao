@@ -9,12 +9,18 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 6 concluídas** (PR #7 da Fase 6 com merge em
-  2026-11-04). **Fase 7 – Executável EM ANDAMENTO** (branch `fase-7-executavel`, versão `0.7.0`).
-  **Usuário confirmou (2026-11-04):** programa funcionando na rede e **teste em 2 PCs salvando ao
-  mesmo tempo deu certo**. Etapa 5 feita (ADR 0011, README, PR da Fase 7). **Próximo:** usuário
-  aprovar o merge → versão **`1.0.0`** (gerar entrega de novo, trocar `programa/` na rede, tag
-  `v1.0.0`) → Fase 8.
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 7 concluídas** (PR #8 da Fase 7 com merge em
+  2026-11-04; programa em uso na rede, teste com 2 PCs salvando juntos deu certo). A **1.0.0 ficou
+  para depois** (usuário quis ir direto ao ML). **Fase 8 – Machine learning EM ANDAMENTO** (branch
+  `fase-8-machine-learning`, versão `0.8.0`).
+- **Fase 8 — decisões do usuário (2026-11-04):**
+  - **Biblioteca scikit-learn** (escolha do usuário, mesmo sabendo que o `.exe` cresce ~40–60 MB e
+    cada aviso é mais difícil de explicar; alternativa recusada: Python puro). Medir o tamanho na
+    entrega.
+  - **Aviso por divergência:** "parecido" = **mesmo acabamento + mesmo resultado da norma** (o
+    programa deu de novo o resultado que estava errado) **+ valores próximos**.
+  - **Aviso de outlier:** só começa com **20 classificações salvas do mesmo grau**.
+  - Os dois avisos são **amarelos** e **nunca mudam o resultado** (ver Regras de classificação).
 - **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
   2) empacotamento ✅; 3) teste numa pasta que simula a rede ✅; 4) pasta de entrega ✅ (copiada para a rede e testada em 2 PCs); 5) ADR 0011, README, PR ✅.
 - **Entrega igual à da calibração** (decisão do usuário, 2026-11-04: "deixa a pasta pronta e eu
