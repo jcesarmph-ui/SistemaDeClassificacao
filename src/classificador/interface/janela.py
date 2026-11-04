@@ -1,8 +1,9 @@
 """Janela principal (PySide6): só desenha a tela e liga os botões ao `Servico`.
 
 Nenhuma regra de norma aqui — tudo vem pronto do motor (via `Servico`).
-Layout em faixas: cabeçalho; entradas (material + espessura | mecânicas | químicas); botões;
-resultado | pesquisa reversa. Tema escuro.
+Cabeçalho em cima e 4 abas: Classificar | Histórico | Divergências | Lixeira. A aba Classificar
+é em faixas: entradas (material + espessura | mecânicas | químicas); botões; resultado | pesquisa
+reversa. Tema escuro.
 """
 
 from html import escape
@@ -20,6 +21,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QSizePolicy,
+    QTabWidget,
     QToolTip,
     QVBoxLayout,
     QWidget,
@@ -33,6 +35,7 @@ from classificador.historico.repositorio import (
     NovaClassificacao,
     RepositorioHistorico,
 )
+from classificador.interface.abas_historico import PainelRegistros
 from classificador.interface.componentes import instalar_filtro_roda
 from classificador.interface.entrada import ErroEntrada
 from classificador.interface.servico import Servico, fabricante
@@ -87,6 +90,19 @@ QToolTip {{ background: {campo}; color: #f0f0f0; border: 1px solid {borda}; }}
 #avisos {{ color: {aviso}; }}
 #erro {{ color: {erro}; }}
 #salvo {{ color: {certo}; }}
+QTabWidget::pane {{ border: 1px solid {borda}; border-radius: 6px; top: -1px; }}
+QTabBar::tab {{ background: {campo}; border: 1px solid {campo_borda}; border-bottom: none;
+               border-top-left-radius: 6px; border-top-right-radius: 6px;
+               padding: 8px 28px; margin-right: 4px; color: #9e9e9e; }}
+QTabBar::tab:selected {{ background: {caixa}; border: 1px solid {borda}; border-bottom: none;
+                        color: {titulo}; font-weight: bold; }}
+QTabBar::tab:disabled {{ color: #616161; }}
+QTableWidget {{ background: {campo}; alternate-background-color: {caixa};
+                border: 1px solid {campo_borda}; gridline-color: {campo_borda};
+                selection-background-color: {selecao}; selection-color: #ffffff; }}
+QHeaderView::section {{ background: {caixa}; color: {titulo}; font-weight: bold;
+                        border: none; border-bottom: 1px solid {borda}; padding: 6px; }}
+QScrollArea, QScrollArea > QWidget > QWidget {{ background: transparent; }}
 """
 
 _CORES_TOLERANCIA = {
@@ -126,11 +142,14 @@ class JanelaPrincipal(QMainWindow):
         saida.addWidget(self._caixa_resultado(), 2)
         saida.addWidget(self._caixa_pesquisa(), 1)
 
+        aba_classificar = QVBoxLayout()
+        aba_classificar.addLayout(entradas, 2)
+        aba_classificar.addLayout(self._botoes())
+        aba_classificar.addLayout(saida, 1)
+
         tela = QVBoxLayout()
         tela.addLayout(self._cabecalho())
-        tela.addLayout(entradas, 2)
-        tela.addLayout(self._botoes())
-        tela.addLayout(saida, 1)
+        tela.addWidget(self._abas(self._embrulhar(aba_classificar)), 1)
         central = QWidget(objectName="central")
         central.setLayout(tela)
         self.setCentralWidget(central)
@@ -161,6 +180,34 @@ class JanelaPrincipal(QMainWindow):
         grade.setColumnStretch(0, 1)
         grade.setColumnStretch(2, 1)  # coluna vazia do mesmo tamanho → título no centro
         return grade
+
+    def _abas(self, classificar: QWidget) -> QTabWidget:
+        """Classificar | Histórico | Divergências | Lixeira (sem histórico: só Classificar)."""
+        self.historico_aba = PainelRegistros(self.historico)
+        self.lixeira_aba = PainelRegistros(self.historico, lixeira=True)
+        divergencias = QLabel("A lista de divergências será feita na próxima etapa.",
+                              objectName="dica", alignment=Qt.AlignCenter)
+        # Excluir no Histórico aparece na Lixeira e vice-versa.
+        self.historico_aba.mudou.connect(self.lixeira_aba.atualizar)
+        self.lixeira_aba.mudou.connect(self.historico_aba.atualizar)
+
+        self.abas = QTabWidget()
+        self.abas.addTab(classificar, "Classificar")
+        self.abas.addTab(self.historico_aba, "Histórico")
+        self.abas.addTab(divergencias, "Divergências")
+        self.abas.addTab(self.lixeira_aba, "Lixeira")
+        if self.historico is None:
+            for indice in range(1, self.abas.count()):
+                self.abas.setTabEnabled(indice, False)
+                self.abas.setTabToolTip(indice, "Histórico indisponível")
+        self.abas.currentChanged.connect(self._aba_mudou)
+        return self.abas
+
+    def _aba_mudou(self, _indice: int) -> None:
+        """Ao abrir uma aba, relê o banco (outra pessoa pode ter salvo algo nesse meio-tempo)."""
+        atual = self.abas.currentWidget()
+        if isinstance(atual, PainelRegistros):
+            atual.atualizar()
 
     def _coluna_material(self) -> QWidget:
         self.acabamento = QComboBox()

@@ -191,3 +191,112 @@ def test_nova_classificacao_limpa_o_volume_e_limpar_valores_mantem(janela_com_hi
     assert janela.volume.text() == "V-9"
     janela.nova_classificacao()
     assert janela.volume.text() == ""
+
+
+# --- Abas Histórico e Lixeira -------------------------------------------------------------
+
+
+def salvar_volume(janela, volume, valores=VALORES):
+    preencher(janela, valores)
+    janela.classificar()
+    janela.volume.setText(volume)
+    janela.salvar()
+
+
+def responde(painel, resposta):
+    """Troca a pergunta "tem certeza?" por uma resposta automática e guarda o que foi perguntado."""
+    perguntas = []
+
+    def confirmar(titulo, texto, sim):
+        perguntas.append((titulo, texto, sim))
+        return resposta
+
+    painel.confirmar = confirmar
+    return perguntas
+
+
+def test_tem_as_4_abas(janela_com_historico):
+    abas = janela_com_historico.abas
+    assert [abas.tabText(i) for i in range(abas.count())] == [
+        "Classificar", "Histórico", "Divergências", "Lixeira"
+    ]
+    assert all(abas.isTabEnabled(i) for i in range(abas.count()))
+
+
+def test_sem_historico_so_a_aba_classificar_funciona(janela):
+    assert janela.abas.isTabEnabled(0)
+    assert not any(janela.abas.isTabEnabled(i) for i in range(1, janela.abas.count()))
+
+
+def test_historico_lista_e_mostra_detalhes(janela_com_historico):
+    janela = janela_com_historico
+    salvar_volume(janela, "V-1")
+    janela.abas.setCurrentWidget(janela.historico_aba)  # abrir a aba relê o banco
+    painel = janela.historico_aba
+    assert painel.tabela.rowCount() == 1
+    assert painel.tabela.item(0, 1).text() == "V-1"
+    assert painel.tabela.item(0, 2).text() == "AAA"
+    assert not painel.botao_excluir.isEnabled()  # nada selecionado
+    painel.tabela.selectRow(0)
+    assert painel.botao_excluir.isEnabled()
+    detalhes = painel.detalhes.text()
+    assert "AAA" in detalhes and "ana — PC-01" in detalhes
+    assert "Limite de escoamento" in detalhes and "200 MPa" in detalhes
+    assert "Ni (Níquel)" not in detalhes  # campo vazio não aparece
+
+
+def test_pesquisa_do_historico(janela_com_historico):
+    janela = janela_com_historico
+    salvar_volume(janela, "V-1")
+    salvar_volume(janela, "X-2")
+    painel = janela.historico_aba
+    painel.pesquisa.setText("x-2")
+    assert painel.tabela.rowCount() == 1 and painel.tabela.item(0, 1).text() == "X-2"
+    assert painel.contagem.text() == "1 registro"
+    painel.pesquisa.setText("")
+    assert painel.contagem.text() == "2 registros"
+
+
+def test_excluir_pergunta_e_cancelar_nao_apaga(janela_com_historico):
+    janela = janela_com_historico
+    salvar_volume(janela, "V-1")
+    painel = janela.historico_aba
+    painel.atualizar()
+    painel.tabela.selectRow(0)
+    perguntas = responde(painel, False)
+    painel.excluir()
+    assert perguntas[0][2] == "Mandar para a Lixeira"
+    assert len(janela.historico.listar()) == 1
+
+
+def test_excluir_manda_para_a_lixeira_e_restaurar_devolve(janela_com_historico):
+    janela = janela_com_historico
+    salvar_volume(janela, "V-1")
+    historico, lixeira = janela.historico_aba, janela.lixeira_aba
+    historico.atualizar()
+    historico.tabela.selectRow(0)
+    responde(historico, True)
+    historico.excluir()
+    assert historico.tabela.rowCount() == 0
+    assert "enviado para a Lixeira" in historico.situacao.text()
+    assert lixeira.tabela.rowCount() == 1  # a Lixeira se atualizou sozinha
+    lixeira.tabela.selectRow(0)
+    assert "Excluído em" in lixeira.detalhes.text()
+    lixeira.restaurar()
+    assert lixeira.tabela.rowCount() == 0
+    assert historico.tabela.rowCount() == 1
+
+
+def test_excluir_permanentemente_pergunta_e_apaga_de_vez(janela_com_historico):
+    janela = janela_com_historico
+    salvar_volume(janela, "V-1")
+    [registro] = janela.historico.listar()
+    janela.historico.excluir(registro.id)
+    lixeira = janela.lixeira_aba
+    lixeira.atualizar()
+    lixeira.tabela.selectRow(0)
+    perguntas = responde(lixeira, True)
+    lixeira.excluir()
+    assert "não pode ser desfeito" in perguntas[0][1]
+    assert janela.historico.obter(registro.id) is None
+    assert lixeira.tabela.rowCount() == 0
