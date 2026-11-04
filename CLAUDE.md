@@ -23,7 +23,9 @@
 - Gerar: `.venv/Scripts/python empacotamento/gerar_exe.py` (programa ~79 MB, sem
   opengl32sw/Quick/Qml/Pdf/traduções; `versao.txt` = versão + data/hora) e depois
   `empacotamento/montar_entrega.py` → `dist/entrega/` (dados só com normas, tolerâncias, folha,
-  correlatas, logo e ícone; **histórico começa vazio** — decisão do usuário; recusa se houver `.db`).
+  correlatas, logo e ícone; **histórico começa vazio** — decisão do usuário; recusa se houver `.db`; a entrega **já sai com
+  `_internal`, `programa` e `dados` ocultas** — pedido do usuário; copiar pelo Explorador mantém a
+  marca, o `Copy-Item` do PowerShell não; o lançador oculta de novo na 1ª abertura).
   **`empacotamento/` fora do GitHub público** (`.gitignore`), cópia no privado
   `claude-config/projetos/Classificacao_Automatica/empacotamento/`; a receita `.spec` foi trocada
   por esses scripts. Teste (2026-11-04): 1ª abertura 1,6 s, 2ª 1,0 s, histórico criado na rede.
