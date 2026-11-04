@@ -14,6 +14,17 @@
   `__version__` = 1.0.0, selos do README "em uso" + "versão 1.0.0", entrega gerada
   (`dist/entrega`, versão `1.0.0_20261104-165017`). **Falta:** usuário trocar **só a pasta
   `programa`** na rede (nunca `dados/`) e testar; PR da 1.0.0; depois do merge, tag `v1.0.0` no main.
+- **Última sessão: 2026-11-04** — usuário saiu ("vou sair agora") **antes** de trocar a pasta na
+  rede e pediu: **"me lembre dessas instruções na próxima vez"**. **Ao voltar, a PRIMEIRA coisa é
+  repetir estas instruções** e perguntar se já fez:
+  1. ninguém com o programa aberto;
+  2. abrir a entrega: `! explorer "C:\Users\rodrigo.lima\Projetos\Classificação_Automática\dist\entrega"`;
+  3. Explorador (entrega e rede): **Exibir → Mostrar → Itens ocultos**;
+  4. na rede, **renomear** `programa` → `programa_antigo` (caminho de volta);
+  5. copiar `programa` da entrega para a rede; **não mexer em `dados`** (histórico);
+  6. abrir pelo "Classificação de Materiais.exe" da rede ("Preparando…" demora mais: 193 MB) e
+     conferir **versão 1.0.0** no canto, **histórico antigo** na aba Histórico, classificar e salvar;
+  7. deu certo → apagar `programa_antigo`; eu abro o PR da 1.0.0 e, após o merge, tag `v1.0.0`.
 - **Tamanho com o ML:** programa passou de 79 MB para **193 MB** (scipy ~67 MB com libs, numpy
   ~28 MB, sklearn 13 MB). 1ª abertura de cada versão em cada PC demora mais (cópia); as seguintes
   não mudam. Cortar partes do scipy foi descartado (risco de quebrar em uso).
