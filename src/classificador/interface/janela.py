@@ -160,6 +160,10 @@ class JanelaPrincipal(QMainWindow):
             campo.textEdited.connect(self._entrada_mudou)
         self.acabamento.currentTextChanged.connect(self._entrada_mudou)
         self.limpar_resultado()
+        # Calcula o tamanho das abas já agora: sem isso o Qt só mede a caixa de abas depois de
+        # mostrar a janela, e o showMaximized() se perde (a janela abria pequena, 964×835).
+        self.ensurePolished()
+        central.layout().activate()
 
     # --- Montagem da tela -------------------------------------------------------------------
 
