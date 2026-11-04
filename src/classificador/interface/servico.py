@@ -1,6 +1,6 @@
 """Serviço da aplicação: carrega os dados uma vez e atende a tela (sem Qt).
 
-Estrutura esperada da pasta de dados (padrão: `dados/` na pasta do projeto):
+Estrutura esperada da pasta de dados (padrão: `dados/` ao lado do `.exe` ou na pasta do projeto):
     folha-classificacoes.yaml   (obrigatória)
     normas/*.yaml               (obrigatória)
     correlatas.yaml             (opcional)
@@ -10,6 +10,7 @@ Estrutura esperada da pasta de dados (padrão: `dados/` na pasta do projeto):
 """
 
 import os
+import sys
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -57,9 +58,14 @@ def fabricante(norma: str) -> str | None:
 
 
 def pasta_dados_padrao() -> Path:
-    """Variável CLASSIFICADOR_DADOS, senão dados/ na pasta atual, senão na pasta do projeto."""
+    """Onde estão as normas e o histórico, nesta ordem:
+    1. variável de ambiente CLASSIFICADOR_DADOS;
+    2. no `.exe` (PyInstaller marca `sys.frozen`): `dados/` ao lado do executável — a pasta da rede;
+    3. `dados/` na pasta atual; 4. `dados/` na pasta do projeto (desenvolvimento)."""
     if os.environ.get("CLASSIFICADOR_DADOS"):
         return Path(os.environ["CLASSIFICADOR_DADOS"])
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent / "dados"
     if (Path.cwd() / "dados").is_dir():
         return Path.cwd() / "dados"
     return Path(__file__).resolve().parents[3] / "dados"

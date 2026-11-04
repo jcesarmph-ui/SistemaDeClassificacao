@@ -9,9 +9,30 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 5 concluídas** (PR #6 da Fase 5 com merge).
-  **Fase 6 – Histórico EM ANDAMENTO** (branch `fase-6-historico`, versão `0.6.0`, enviada ao GitHub,
-  PR aberto em 2026-11-04 — **falta o usuário aprovar o merge**). Etapas 1–5 concluídas. Depois do merge: Fase 7 (`.exe`, versão `0.7.0`).
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 6 concluídas** (PR #7 da Fase 6 com merge em
+  2026-11-04). **Fase 7 – Executável EM ANDAMENTO** (branch `fase-7-executavel`, versão `0.7.0`).
+  **Usuário confirmou (2026-11-04):** programa funcionando na rede e **teste em 2 PCs salvando ao
+  mesmo tempo deu certo**. Etapa 5 feita (ADR 0011, README, PR da Fase 7). **Próximo:** usuário
+  aprovar o merge → versão **`1.0.0`** (gerar entrega de novo, trocar `programa/` na rede, tag
+  `v1.0.0`) → Fase 8.
+- **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
+  2) empacotamento ✅; 3) teste numa pasta que simula a rede ✅; 4) pasta de entrega ✅ (copiada para a rede e testada em 2 PCs); 5) ADR 0011, README, PR ✅.
+- **Entrega igual à da calibração** (decisão do usuário, 2026-11-04: "deixa a pasta pronta e eu
+  copio"): **lançador** `src/classificador/lancador.py` ("Classificação de Materiais.exe", ~25 MB,
+  sem PySide6) copia `programa/` para `%LOCALAPPDATA%\MG Centro de Servicos\Classificacao\<versão>`
+  uma vez por versão (janelinha "Preparando…") e abre de lá (~1–2 s), com `CLASSIFICADOR_DADOS` =
+  `dados/` **da rede**; oculta `_internal`, `programa`, `dados` (na rede só se vê o `.exe`).
+  **Atualizar = trocar `programa/`** (nunca copiar `dados/` por cima: perde o histórico).
+- Gerar: `.venv/Scripts/python empacotamento/gerar_exe.py` (programa ~79 MB, sem
+  opengl32sw/Quick/Qml/Pdf/traduções; `versao.txt` = versão + data/hora) e depois
+  `empacotamento/montar_entrega.py` → `dist/entrega/` (dados só com normas, tolerâncias, folha,
+  correlatas, logo e ícone; **histórico começa vazio** — decisão do usuário; recusa se houver `.db`; a entrega **já sai com
+  `_internal`, `programa` e `dados` ocultas** — pedido do usuário; copiar pelo Explorador mantém a
+  marca, o `Copy-Item` do PowerShell não; o lançador oculta de novo na 1ª abertura).
+  **`empacotamento/` fora do GitHub público** (`.gitignore`), cópia no privado
+  `claude-config/projetos/Classificacao_Automatica/empacotamento/`; a receita `.spec` foi trocada
+  por esses scripts. Teste (2026-11-04): 1ª abertura 1,6 s, 2ª 1,0 s, histórico criado na rede.
+  Caminho mais longo da cópia local ≈ 187 caracteres (limite do Windows: 260).
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
   excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
@@ -168,6 +189,10 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   EM → `1006/08 EG _/_` (caso teórico).
 - `1010` **não** é usado como resultado.
 - NBR 5915-3/-4/-5/-6 (IS, IFAR, BH, RP, ARBL) estão **fora do escopo** e são ignoradas.
+- **ZARP e ZARIF** (zincados refosforados e IF estruturais; fotos em `normas_claude/Captura de tela
+  2026-11-04 *.png`) também ficam **fora do escopo** (usuário, 2026-11-04: "ignora toda essa parte").
+  Motivo da dúvida: a comparação mostrou que eles se cruzam com ZE/ZEE (ZARIF × ZEE G3/G4, mesmo
+  C ≤ 0,01) e com ZAR (ZARP), porque a tabela só traz **máximos** de P/Ti/Nb. Não reabrir sem pedido.
 - **Os candidatos de cada acabamento vêm da folha de classificações** (`classificações.pdf`): só pode
   ser resultado um grau que exista ali para aquele acabamento (FF, FQ, GI, GA, EG). Exceção: ZAR
   (não está na folha), com saída no formato `ZAR-230 - Z275` / `ZAR-230 - ZF100`.

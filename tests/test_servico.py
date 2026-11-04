@@ -105,3 +105,16 @@ def test_pesquisa_funciona_sem_arquivo_de_correlatas(pasta):
     (pasta / "correlatas.yaml").unlink()
     [achado] = Servico.carregar(pasta).pesquisar("AAA")
     assert achado.grupo.nbr == "NBR 0000-1 AAA"
+
+
+def test_no_exe_a_pasta_de_dados_fica_ao_lado_do_executavel(monkeypatch, tmp_path):
+    import sys
+
+    from classificador.interface.servico import pasta_dados_padrao
+
+    monkeypatch.delenv("CLASSIFICADOR_DADOS", raising=False)
+    monkeypatch.setattr(sys, "frozen", True, raising=False)  # como o PyInstaller deixa
+    monkeypatch.setattr(sys, "executable", str(tmp_path / "rede" / "ClassificacaoMateriais.exe"))
+    assert pasta_dados_padrao() == (tmp_path / "rede" / "dados").resolve()
+    monkeypatch.setenv("CLASSIFICADOR_DADOS", str(tmp_path / "outra"))  # a variável vence
+    assert pasta_dados_padrao() == tmp_path / "outra"
