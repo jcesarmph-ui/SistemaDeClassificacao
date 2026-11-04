@@ -18,7 +18,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/fase-6_histórico-blue?style=flat-square" alt="Fase"/>
+  <img src="https://img.shields.io/badge/fase-7_executável-blue?style=flat-square" alt="Fase"/>
   <img src="https://img.shields.io/badge/normas-ABNT-009739?style=flat-square" alt="Normas ABNT"/>
   <img src="https://img.shields.io/badge/idioma-pt--BR-green?style=flat-square" alt="Idioma"/>
 </p>
@@ -107,6 +107,8 @@ original, até ser marcada como resolvida.</sub>
   **divergência** (classificação correta + motivo); cada uma vira correção de regra e caso de teste.
 - 🛡️ **Uso em rede sem servidor** — banco SQLite numa pasta comum, com backup diário automático;
   duas pessoas podem classificar e salvar ao mesmo tempo.
+- 🚀 **Executável para Windows** — não precisa instalar nada; mora na pasta da rede, mas abre em
+  1–2 segundos porque cada PC guarda uma cópia local do programa.
 - 🤖 **Machine learning** *(planejado)* — aprende com o histórico e com as divergências para
   **avisar** quando algo parece fora do comum ou parecido com um caso que já deu errado (só alerta;
   a classificação continua sempre pela regra da norma).
@@ -200,6 +202,35 @@ flowchart LR
 ```
 
 <details>
+<summary><b>🚀 Distribuição na rede (sem servidor)</b></summary>
+
+Na pasta da rede aparece um único arquivo: o **lançador**. Ele copia o programa para o PC uma vez
+por versão e abre a cópia local; normas e histórico continuam na rede, iguais para todos.
+
+```mermaid
+flowchart LR
+    subgraph REDE[📁 Pasta comum da rede]
+        L[Lançador<br/>.exe]
+        P[programa<br/>oculta]
+        D[(dados<br/>normas + histórico)]
+    end
+    subgraph PC[💻 Cada computador]
+        C[Cópia local<br/>do programa]
+    end
+    L -->|1ª vez de cada versão| P
+    P -->|copia| C
+    L -->|abre em 1–2 s| C
+    C <-->|lê normas,<br/>grava histórico| D
+```
+
+- **Atualizar** = trocar a pasta do programa; cada PC copia a versão nova sozinho.
+- **Norma corrigida** = trocar o arquivo YAML, sem gerar o programa de novo.
+- Cópia segura: uma cópia interrompida nunca é usada e duas aberturas ao mesmo tempo não se
+  atrapalham.
+
+</details>
+
+<details>
 <summary><b>🧩 Modelo de dados de uma norma</b></summary>
 
 Cada norma é um arquivo YAML validado ao carregar — exemplo completo em
@@ -264,7 +295,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 | SQLite | Histórico, lixeira e divergências numa pasta de rede (journal tradicional, backup diário). |
 | YAML + Pydantic | Base de normas legível e validada ao carregar. |
 | Pytest + Ruff | Testes automáticos e qualidade do código. |
-| PyInstaller | Geração do executável `.exe` para Windows. |
+| PyInstaller | Executável para Windows, com lançador que copia o programa para o PC e abre rápido. |
 | Git + GitHub | Controle de versão e documentação. |
 | Claude Code | Desenvolvimento assistido por IA, guiado por `CLAUDE.md` e ADRs. |
 
@@ -283,6 +314,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 | [0008](docs/decisoes/0008-tolerancia-de-espessura.md) | Tolerância de espessura (NBR 11888 e NBR 7013) |
 | [0009](docs/decisoes/0009-interface-e-resultado-sem-grau.md) | Interface (layout em faixas, cores, versão) e resultado sem grau (ZC de último recurso) |
 | [0010](docs/decisoes/0010-historico-lixeira-e-divergencias.md) | Histórico, lixeira e divergências (SQLite em rede, abas, melhoria contínua) |
+| [0011](docs/decisoes/0011-executavel-e-entrega-na-rede.md) | Executável e entrega na pasta da rede (lançador com cópia local) |
 
 </details>
 
@@ -296,7 +328,8 @@ SistemaDeClassificacao/
 │   ├── motor/           # limites, avaliação, classificação, sequência, saída, pesquisa reversa
 │   ├── tolerancia/      # tolerância de espessura (real × nominal)
 │   ├── historico/       # banco SQLite, repositório, lixeira, divergências e backup
-│   └── interface/       # janela PySide6 em abas (só mostra; as regras ficam no motor)
+│   ├── interface/       # janela PySide6 em abas (só mostra; as regras ficam no motor)
+│   └── lancador.py      # lançador da rede: copia o programa para o PC e abre rápido
 ├── tests/               # testes automáticos
 │   └── dados/           # norma, folha, correlatas e tolerância fictícias usadas nos testes
 ├── docs/decisoes/       # registros de decisões de arquitetura (ADRs)
@@ -327,7 +360,8 @@ SistemaDeClassificacao/
   fixo, classificação, tolerância, correlatas e pesquisa reversa na tela
 - [x] **Fase 6** — Histórico em SQLite na rede (backup diário), abas Histórico, Divergências e
   Lixeira, pesquisa por texto livre e registro de divergências (melhoria contínua)
-- [ ] **Fase 7** — Executável `.exe`
+- [x] **Fase 7** — Executável para Windows na pasta da rede: lançador com cópia local (abre em
+  1–2 s), dados ao lado do programa e teste com dois PCs salvando ao mesmo tempo
 - [ ] **Fase 8** — Machine learning: avisos de valores fora do comum e de casos parecidos com
   divergências já registradas
 
