@@ -9,10 +9,20 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 7 concluídas** (PR #8 da Fase 7 com merge em
-  2026-11-04; programa em uso na rede, teste com 2 PCs salvando juntos deu certo). A **1.0.0 ficou
-  para depois** (usuário quis ir direto ao ML). **Fase 8 – Machine learning EM ANDAMENTO** (branch
-  `fase-8-machine-learning`, versão `0.8.0`).
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 8 concluídas** (PR #8 da Fase 7 e PR #9 da
+  Fase 8 com merge em 2026-11-04). **Versão 1.0.0 EM ANDAMENTO** (branch `versao-1.0.0`):
+  `__version__` = 1.0.0, selos do README "em uso" + "versão 1.0.0", entrega gerada
+  (`dist/entrega`, versão `1.0.0_20261104-165017`). **Falta:** usuário trocar **só a pasta
+  `programa`** na rede (nunca `dados/`) e testar; PR da 1.0.0; depois do merge, tag `v1.0.0` no main.
+- **Tamanho com o ML:** programa passou de 79 MB para **193 MB** (scipy ~67 MB com libs, numpy
+  ~28 MB, sklearn 13 MB). 1ª abertura de cada versão em cada PC demora mais (cópia); as seguintes
+  não mudam. Cortar partes do scipy foi descartado (risco de quebrar em uso).
+- **Lição do empacotamento (2026-11-04):** o gerador tirava o `unittest`; o scipy precisa dele
+  (`numpy.testing`) → o `.exe` não abria ("Unhandled exception in script"). Corrigido no
+  `gerar_exe.py` (cópia no claude-config). **Testar o `.exe` antes de entregar:** abrir com
+  `QT_QPA_PLATFORM=offscreen` + `CLASSIFICADOR_DADOS` numa pasta temporária e conferir se o
+  `historico.db` foi criado ("processo continua aberto" não serve: a janela de erro também fica
+  aberta — e aparece na tela do usuário).
 - **Fase 8 — decisões do usuário (2026-11-04):**
   - **Biblioteca scikit-learn** (escolha do usuário, mesmo sabendo que o `.exe` cresce ~40–60 MB e
     cada aviso é mais difícil de explicar; alternativa recusada: Python puro). Medir o tamanho na
