@@ -172,6 +172,10 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
   EM → `1006/08 EG _/_` (caso teórico).
 - `1010` **não** é usado como resultado.
 - NBR 5915-3/-4/-5/-6 (IS, IFAR, BH, RP, ARBL) estão **fora do escopo** e são ignoradas.
+- **ZARP e ZARIF** (zincados refosforados e IF estruturais; fotos em `normas_claude/Captura de tela
+  2026-11-04 *.png`) também ficam **fora do escopo** (usuário, 2026-11-04: "ignora toda essa parte").
+  Motivo da dúvida: a comparação mostrou que eles se cruzam com ZE/ZEE (ZARIF × ZEE G3/G4, mesmo
+  C ≤ 0,01) e com ZAR (ZARP), porque a tabela só traz **máximos** de P/Ti/Nb. Não reabrir sem pedido.
 - **Os candidatos de cada acabamento vêm da folha de classificações** (`classificações.pdf`): só pode
   ser resultado um grau que exista ali para aquele acabamento (FF, FQ, GI, GA, EG). Exceção: ZAR
   (não está na folha), com saída no formato `ZAR-230 - Z275` / `ZAR-230 - ZF100`.
