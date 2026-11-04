@@ -21,6 +21,17 @@
     programa deu de novo o resultado que estava errado) **+ valores próximos**.
   - **Aviso de outlier:** só começa com **20 classificações salvas do mesmo grau**.
   - Os dois avisos são **amarelos** e **nunca mudam o resultado** (ver Regras de classificação).
+  - **"Próximo" (divergência)** = margem fixa por valor (usuário confirmou): LE/LR ±20 MPa,
+    Lo50/Lo80 ±3, embutimento ±0,5 mm, espessura nominal ±0,2 mm, químicos ±25 % do valor de agora
+    com piso (C/P/S/Ti/V/Nb/Mo 0,005; Mn 0,05; Al/Ni/Cr/Si 0,01; B 0,0005); só valores preenchidos
+    nos dois; todos dentro; mínimo 3 comparados; mostra só o mais próximo (`aprendizado/semelhanca.py`).
+  - **Outlier: "só muito fora"** (usuário): |valor − mediana| > 4 × faixa central (quartis), faixa
+    nunca < meia margem; 20 preenchidos daquele valor no grupo (acabamento + grau certo); espessura
+    nominal fora. **IsolationForest descartado** (marca fração fixa como estranha e não diz qual
+    valor) — usuário informado; scikit-learn fica no `NearestNeighbors` (`aprendizado/fora_do_comum.py`).
+  - Etapas: 1) versão + scikit-learn ✅; 2) histórico → exemplos (`aprendizado/dados.py`) ✅;
+    3) aviso por divergência ✅; 4) outlier ✅; 5) avisos na tela; 6) demonstração com histórico
+    fictício + fotos; 7) ADR 0012, README, PR.
 - **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
   2) empacotamento ✅; 3) teste numa pasta que simula a rede ✅; 4) pasta de entrega ✅ (copiada para a rede e testada em 2 PCs); 5) ADR 0011, README, PR ✅.
 - **Entrega igual à da calibração** (decisão do usuário, 2026-11-04: "deixa a pasta pronta e eu
