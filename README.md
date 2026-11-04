@@ -66,6 +66,30 @@ está certo (tolerância dentro e contorno do resultado).</sub>
 
 </details>
 
+<details>
+<summary><b>🗂️ Histórico</b></summary>
+
+<p align="center">
+  <img src="docs/imagens/historico.png" alt="Aba Histórico: lista de classificações salvas e detalhes do registro" width="100%"/>
+</p>
+
+<sub>Dados fictícios. Lista (data/hora, volume, resultado) e, ao lado, o registro completo como saiu
+na hora — com avisos, tolerância e valores digitados.</sub>
+
+</details>
+
+<details>
+<summary><b>🔁 Divergências</b></summary>
+
+<p align="center">
+  <img src="docs/imagens/divergencias.png" alt="Aba Divergências: classificação correta, motivo e o registro original" width="100%"/>
+</p>
+
+<sub>Dados fictícios. Cada divergência mostra a classificação correta, o motivo e o registro
+original, até ser marcada como resolvida.</sub>
+
+</details>
+
 ## ✨ Funcionalidades
 
 - 🔎 **Classificação automática** — sempre no **grau mais nobre** atendido.
@@ -75,11 +99,17 @@ está certo (tolerância dentro e contorno do resultado).</sub>
 - 🔗 **Normas correlatas** — equivalências de montadoras (Honda, Toyota, GM, VW, Stellantis…) com
   identificação do fabricante ao passar o mouse.
 - ↩️ **Pesquisa reversa** — digite qualquer norma e veja os intervalos exigidos.
-- 🗂️ **Histórico** — classificações salvas e pesquisáveis, com **lixeira** (restaurar ou excluir de vez).
-- 🔁 **Melhoria contínua** *(planejado)* — divergências apontadas pelo usuário viram correções de regra e
-  novos casos de teste.
-- 🤖 **Detecção de outliers** *(planejado)* — machine learning sobre o histórico para apontar valores
-  fora do comum (só alerta; a classificação continua sempre pela regra da norma).
+- 🗂️ **Histórico** — cada classificação salva com o volume, quem salvou, em qual PC e com qual
+  versão do programa; pesquisa por texto livre em tudo o que foi salvo.
+- 🗑️ **Lixeira** — excluir não apaga: o registro pode ser restaurado ou excluído de vez, sempre com
+  confirmação.
+- 🔁 **Melhoria contínua** — quando uma classificação salva estava errada, registra-se a
+  **divergência** (classificação correta + motivo); cada uma vira correção de regra e caso de teste.
+- 🛡️ **Uso em rede sem servidor** — banco SQLite numa pasta comum, com backup diário automático;
+  duas pessoas podem classificar e salvar ao mesmo tempo.
+- 🤖 **Machine learning** *(planejado)* — aprende com o histórico e com as divergências para
+  **avisar** quando algo parece fora do comum ou parecido com um caso que já deu errado (só alerta;
+  a classificação continua sempre pela regra da norma).
 
 <details>
 <summary><b>📚 Normas cobertas</b> (clique para expandir)</summary>
@@ -141,6 +171,21 @@ usando os mesmos limites do classificador.
 
 </details>
 
+## 🔁 Melhoria contínua
+
+Uma classificação errada nunca passa em silêncio: ela vira dado organizado para corrigir o programa
+— e, no futuro, para o machine learning avisar em casos parecidos.
+
+```mermaid
+flowchart LR
+    A[Classificar<br/>e salvar] --> B[(Histórico)]
+    B --> C{Estava<br/>certo?}
+    C -->|não| D[Registrar divergência<br/>correta + motivo]
+    D --> E[Corrigir norma/regra<br/>+ caso de teste]
+    E --> F[Nova versão<br/>marcada como resolvida]
+    D -.->|Fase 8| G[🤖 ML avisa em<br/>casos parecidos]
+```
+
 ## 🏛️ Arquitetura
 
 Camadas independentes: a interface **não contém regras** e o motor **não conhece a interface** — por isso
@@ -150,7 +195,8 @@ o motor é testado automaticamente, sem abrir nenhuma janela.
 flowchart LR
     UI[🖥️ Interface<br/>PySide6] --> M[⚙️ Motor de<br/>classificação]
     M --> N[(📄 Normas<br/>YAML)]
-    UI --> H[(🗄️ Histórico<br/>SQLite)]
+    UI --> R[🗄️ Repositório<br/>do histórico]
+    R --> H[(SQLite<br/>+ backup diário)]
 ```
 
 <details>
@@ -215,7 +261,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 |---|---|
 | Python | Motor de regras, validação e lógica da aplicação. |
 | PySide6 (Qt) | Interface desktop em tela cheia, com abas e tooltips. |
-| SQLite | Histórico de classificações e lixeira. |
+| SQLite | Histórico, lixeira e divergências numa pasta de rede (journal tradicional, backup diário). |
 | YAML + Pydantic | Base de normas legível e validada ao carregar. |
 | Pytest + Ruff | Testes automáticos e qualidade do código. |
 | PyInstaller | Geração do executável `.exe` para Windows. |
@@ -236,6 +282,7 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 | [0007](docs/decisoes/0007-notas-por-motivo-e-correlatas.md) | Notas por motivo/acabamento e normas correlatas |
 | [0008](docs/decisoes/0008-tolerancia-de-espessura.md) | Tolerância de espessura (NBR 11888 e NBR 7013) |
 | [0009](docs/decisoes/0009-interface-e-resultado-sem-grau.md) | Interface (layout em faixas, cores, versão) e resultado sem grau (ZC de último recurso) |
+| [0010](docs/decisoes/0010-historico-lixeira-e-divergencias.md) | Histórico, lixeira e divergências (SQLite em rede, abas, melhoria contínua) |
 
 </details>
 
@@ -248,10 +295,12 @@ SistemaDeClassificacao/
 │   ├── normas/          # carregador do YAML e comando de conferência
 │   ├── motor/           # limites, avaliação, classificação, sequência, saída, pesquisa reversa
 │   ├── tolerancia/      # tolerância de espessura (real × nominal)
-│   └── interface/       # janela PySide6 (só mostra; as regras ficam no motor)
+│   ├── historico/       # banco SQLite, repositório, lixeira, divergências e backup
+│   └── interface/       # janela PySide6 em abas (só mostra; as regras ficam no motor)
 ├── tests/               # testes automáticos
 │   └── dados/           # norma, folha, correlatas e tolerância fictícias usadas nos testes
 ├── docs/decisoes/       # registros de decisões de arquitetura (ADRs)
+├── docs/imagens/        # fotos da tela (dados fictícios)
 ├── dados/               # NÃO versionado
 │   ├── normas/          # normas transcritas (YAML)
 │   ├── tolerancias/     # NBR 11888 e NBR 7013 transcritas (YAML)
@@ -276,9 +325,11 @@ SistemaDeClassificacao/
   conferidas; dentro/fora com intervalo e norma
 - [x] **Fase 5** — Interface PySide6: tela em faixas simétricas, tema escuro com cores de significado
   fixo, classificação, tolerância, correlatas e pesquisa reversa na tela
-- [ ] **Fase 6** — Histórico, lixeira, pesquisa e registro de divergências (melhoria contínua)
+- [x] **Fase 6** — Histórico em SQLite na rede (backup diário), abas Histórico, Divergências e
+  Lixeira, pesquisa por texto livre e registro de divergências (melhoria contínua)
 - [ ] **Fase 7** — Executável `.exe`
-- [ ] **Fase 8** — Detecção de outliers com machine learning
+- [ ] **Fase 8** — Machine learning: avisos de valores fora do comum e de casos parecidos com
+  divergências já registradas
 
 ## ⚖️ Direitos autorais
 

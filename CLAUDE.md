@@ -11,7 +11,7 @@
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 5 concluídas** (PR #6 da Fase 5 com merge).
   **Fase 6 – Histórico EM ANDAMENTO** (branch `fase-6-historico`, versão `0.6.0`, enviada ao GitHub,
-  sem PR ainda). Última sessão: 2026-11-04 — etapas 3 e 4 feitas; próxima: etapa 5 (ADR, README, PR).
+  PR aberto em 2026-11-04 — **falta o usuário aprovar o merge**). Etapas 1–5 concluídas. Depois do merge: Fase 7 (`.exe`, versão `0.7.0`).
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
   excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
@@ -21,8 +21,8 @@
   **vermelhos**, **Restaurar** com contorno **verde** — escolha do usuário); 4) aba Divergências (registrar no
   Histórico: correta + motivo; lista de pendentes; marcar resolvida) ✅ (`interface/abas_divergencias.py`: janela própria
   `DialogoDivergencia`, aba lista | detalhes com Pendentes/Resolvidas e nota cinza "Para que serve";
-  **só uma divergência pendente por registro** — regra no repositório; resolver pede confirmação); 5) ADR 0010, README (foto,
-  roteiro), PR.
+  **só uma divergência pendente por registro** — regra no repositório; resolver pede confirmação); 5) ADR 0010, README (fotos
+  `historico.png` e `divergencias.png`, dados e usuário fictícios), PR ✅.
 - **SEM trava de edição neste programa** (decisão do usuário, 2026-11-03 — **exceção** ao padrão do
   `CLAUDE.md` global): duas pessoas podem usar ao mesmo tempo e as duas salvam classificações; um
   não interfere no outro (cada salvamento é um registro novo; SQLite com `busy_timeout` e
