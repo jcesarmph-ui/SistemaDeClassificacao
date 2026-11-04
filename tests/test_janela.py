@@ -372,3 +372,30 @@ def test_aba_divergencias_explica_para_que_serve(janela_com_historico):
     textos = [r.text() for r in janela_com_historico.divergencias_aba.findChildren(
         QtWidgets.QLabel)]
     assert PARA_QUE_SERVE in textos
+
+
+# --- Machine learning (Fase 8) ------------------------------------------------------------
+
+
+def test_divergencia_registrada_ja_avisa_na_proxima_classificacao(janela_com_historico):
+    janela = janela_com_historico
+    preencher(janela, VALORES)
+    janela.classificar()
+    assert "Histórico:" not in janela.avisos.text()  # nada aprendido ainda
+    janela.volume.setText("V-1")
+    janela.salvar()
+    [registro] = janela.historico.listar()
+    janela.historico.registrar_divergencia(registro.id, "BBB", "certificado trocado")
+
+    preencher(janela, VALORES | {"LE": "205"})  # parecido (LE ± 20)
+    janela.classificar()
+    aviso = ("⚠ Histórico: Em um caso parecido (volume V-1), a classificação correta foi BBB. "
+             "Motivo: certificado trocado. Confira.")
+    assert aviso in janela.avisos.text()
+    assert janela.resultado.text() == "AAA"  # o resultado continua sendo o da norma
+
+    janela.volume.setText("V-2")
+    janela.salvar()
+    novo = janela.historico.listar()[0]
+    assert novo.volume == "V-2"
+    assert aviso.removeprefix("⚠ ") in novo.avisos  # gravado no retrato

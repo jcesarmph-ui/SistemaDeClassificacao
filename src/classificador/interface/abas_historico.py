@@ -1,4 +1,4 @@
-"""Abas Histórico e Lixeira: lista de classificações salvas (2/3) | detalhes do registro (1/3).
+"""Abas Histórico e Lixeira: lista de classificações salvas (2/5) | detalhes do registro (3/5).
 
 As duas abas têm o mesmo desenho; muda só o que os botões fazem:
 - Histórico: pesquisar, **Registrar divergência** e **Excluir** (manda para a Lixeira).
@@ -36,6 +36,7 @@ from classificador.historico.repositorio import (
 from classificador.interface.componentes import confirmar
 
 COLUNAS = ["Data/hora", "Volume", "Resultado"]
+PROPORCAO_LISTA, PROPORCAO_DETALHES = 2, 3  # lista 2/5 | detalhes 3/5
 
 # Campos que não são propriedades da norma: nome na tela e unidade.
 _OUTROS_CAMPOS = {
@@ -116,8 +117,10 @@ class PainelRegistros(QWidget):
 
         faixa = QHBoxLayout(self)
         faixa.setContentsMargins(0, 0, 0, 0)
-        faixa.addWidget(lista, 2)
-        faixa.addWidget(detalhes, 1)
+        # Lista 2/5 | detalhes 3/5 (usuário, 2026-11-04): a lista só tem colunas curtas e os
+        # detalhes têm muita informação — antes (2/3 | 1/3) precisavam de rolagem.
+        faixa.addWidget(lista, PROPORCAO_LISTA)
+        faixa.addWidget(detalhes, PROPORCAO_DETALHES)
         self.atualizar()
 
     # --- Lista ------------------------------------------------------------------------
@@ -307,8 +310,22 @@ def detalhes_html(r: Registro) -> str:
     partes.append(_tabela(linhas))
     valores = valores_digitados(r.valores)
     if valores:
-        partes.append("<p><b>Valores digitados</b></p>" + _tabela(valores))
+        # Duas colunas (espessuras e mecânicas | químicos): metade da altura, sem rolagem.
+        quimicos = {_rotulo_quimico(p) for p in Propriedade.quimicas()}
+        esquerda = [linha for linha in valores if linha[0] not in quimicos]
+        direita = [linha for linha in valores if linha[0] in quimicos]
+        partes.append(
+            "<p><b>Valores digitados</b></p>"
+            '<table width="100%"><tr>'
+            f'<td valign="top" width="50%">{_tabela(esquerda)}</td>'
+            f'<td valign="top" width="50%">{_tabela(direita)}</td>'
+            "</tr></table>"
+        )
     return "".join(partes)
+
+
+def _rotulo_quimico(prop: Propriedade) -> str:
+    return f"{prop.value} ({prop.nome_extenso})"
 
 
 def valores_digitados(valores) -> list[tuple[str, str]]:
@@ -325,7 +342,7 @@ def valores_digitados(valores) -> list[tuple[str, str]]:
             prop = Propriedade(nome)
             rotulo, unidade = prop.nome_extenso, prop.unidade
             if prop in Propriedade.quimicas():
-                rotulo = f"{prop.value} ({prop.nome_extenso})"
+                rotulo = _rotulo_quimico(prop)
         linhas.append((rotulo, f"{texto} {unidade}"))
     return linhas
 

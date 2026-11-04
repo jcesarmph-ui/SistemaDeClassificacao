@@ -45,7 +45,7 @@ na outra; o `busy_timeout` e as transações curtas dão conta.
 - Registro salvo **não é editável**. Se estava errado, registra-se uma divergência.
 
 ## Decisão — abas Classificar | Histórico | Divergências | Lixeira
-- Histórico e Lixeira usam a mesma peça (`PainelRegistros`): **lista (2/3) | detalhes (1/3)**.
+- Histórico e Lixeira usam a mesma peça (`PainelRegistros`): **lista (2/5) | detalhes (3/5)** (era 2/3 | 1/3 até a Fase 8: a coluna do resultado ficava larga demais e os detalhes precisavam de rolagem). Os valores digitados aparecem em duas colunas (espessuras e mecânicas | químicos).
   A lista mostra **Data/hora, Volume e Resultado**; os detalhes mostram o registro completo, com
   cores (tolerância verde/vermelho/amarelo, avisos em amarelo).
 - **Pesquisa por texto livre**: cada palavra tem de aparecer em algum campo do registro, sem

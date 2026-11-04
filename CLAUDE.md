@@ -9,12 +9,34 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 6 concluídas** (PR #7 da Fase 6 com merge em
-  2026-11-04). **Fase 7 – Executável EM ANDAMENTO** (branch `fase-7-executavel`, versão `0.7.0`).
-  **Usuário confirmou (2026-11-04):** programa funcionando na rede e **teste em 2 PCs salvando ao
-  mesmo tempo deu certo**. Etapa 5 feita (ADR 0011, README, PR da Fase 7). **Próximo:** usuário
-  aprovar o merge → versão **`1.0.0`** (gerar entrega de novo, trocar `programa/` na rede, tag
-  `v1.0.0`) → Fase 8.
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 7 concluídas** (PR #8 da Fase 7 com merge em
+  2026-11-04; programa em uso na rede, teste com 2 PCs salvando juntos deu certo). A **1.0.0 ficou
+  para depois** (usuário quis ir direto ao ML). **Fase 8 – Machine learning EM ANDAMENTO** (branch
+  `fase-8-machine-learning`, versão `0.8.0`).
+- **Fase 8 — decisões do usuário (2026-11-04):**
+  - **Biblioteca scikit-learn** (escolha do usuário, mesmo sabendo que o `.exe` cresce ~40–60 MB e
+    cada aviso é mais difícil de explicar; alternativa recusada: Python puro). Medir o tamanho na
+    entrega.
+  - **Aviso por divergência:** "parecido" = **mesmo acabamento + mesmo resultado da norma** (o
+    programa deu de novo o resultado que estava errado) **+ valores próximos**.
+  - **Aviso de outlier:** só começa com **20 classificações salvas do mesmo grau**.
+  - Os dois avisos são **amarelos** e **nunca mudam o resultado** (ver Regras de classificação).
+  - **"Próximo" (divergência)** = margem fixa por valor (usuário confirmou): LE/LR ±20 MPa,
+    Lo50/Lo80 ±3, embutimento ±0,5 mm, espessura nominal ±0,2 mm, químicos ±25 % do valor de agora
+    com piso (C/P/S/Ti/V/Nb/Mo 0,005; Mn 0,05; Al/Ni/Cr/Si 0,01; B 0,0005); só valores preenchidos
+    nos dois; todos dentro; mínimo 3 comparados; mostra só o mais próximo (`aprendizado/semelhanca.py`).
+  - **Outlier: "só muito fora"** (usuário): |valor − mediana| > 4 × faixa central (quartis), faixa
+    nunca < meia margem; 20 preenchidos daquele valor no grupo (acabamento + grau certo); espessura
+    nominal fora. **IsolationForest descartado** (marca fração fixa como estranha e não diz qual
+    valor) — usuário informado; scikit-learn fica no `NearestNeighbors` (`aprendizado/fora_do_comum.py`).
+  - Etapas: 1) versão + scikit-learn ✅; 2) histórico → exemplos (`aprendizado/dados.py`) ✅;
+    3) aviso por divergência ✅; 4) outlier ✅; 5) avisos na tela (`aprendizado/avisos.py`, prefixo
+    "Histórico:", gravados ao salvar — usuário) ✅; 6) demonstração com histórico
+    fictício + fotos ✅ (340 classificações, 5 divergências; normais: 0 alarmes de fora do comum,
+    19/335 ≈ 6 % de "caso parecido" — se incomodar no uso real, apertar margens, ex. LE ± 10);
+    7) ADR 0012, README (foto `ml-fora-do-comum.png` = LR 29 aceito pela norma) e PR ✅.
+    **Próximo:** usuário aprovar o merge → versão **1.0.0** (gerar entrega, medir o tamanho com
+    scikit-learn, trocar `programa/` na rede, tag `v1.0.0`).
 - **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
   2) empacotamento ✅; 3) teste numa pasta que simula a rede ✅; 4) pasta de entrega ✅ (copiada para a rede e testada em 2 PCs); 5) ADR 0011, README, PR ✅.
 - **Entrega igual à da calibração** (decisão do usuário, 2026-11-04: "deixa a pasta pronta e eu
@@ -36,8 +58,8 @@
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
   excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
-  `PainelRegistros` usado nas duas abas; decisões do usuário em 2026-11-04: **lista 2/3 | detalhes
-  1/3**, colunas só **Data/hora, Volume, Resultado**, **confirmação nas duas exclusões**; abrir a
+  `PainelRegistros` usado nas duas abas; decisões do usuário em 2026-11-04: **lista 2/5 | detalhes
+  3/5** (era 2/3 | 1/3; usuário pediu equilibrar em 2026-11-04 — coluna do resultado larga demais e detalhes com rolagem; valores digitados em 2 colunas), colunas só **Data/hora, Volume, Resultado**, **confirmação nas duas exclusões**; abrir a
   aba relê o banco; sem histórico só a aba Classificar fica ativa; botões **Excluir** com contorno e letra
   **vermelhos**, **Restaurar** com contorno **verde** — escolha do usuário); 4) aba Divergências (registrar no
   Histórico: correta + motivo; lista de pendentes; marcar resolvida) ✅ (`interface/abas_divergencias.py`: janela própria
