@@ -32,7 +32,11 @@
   - Etapas: 1) versão + scikit-learn ✅; 2) histórico → exemplos (`aprendizado/dados.py`) ✅;
     3) aviso por divergência ✅; 4) outlier ✅; 5) avisos na tela (`aprendizado/avisos.py`, prefixo
     "Histórico:", gravados ao salvar — usuário) ✅; 6) demonstração com histórico
-    fictício + fotos; 7) ADR 0012, README, PR.
+    fictício + fotos ✅ (340 classificações, 5 divergências; normais: 0 alarmes de fora do comum,
+    19/335 ≈ 6 % de "caso parecido" — se incomodar no uso real, apertar margens, ex. LE ± 10);
+    7) ADR 0012, README (foto `ml-fora-do-comum.png` = LR 29 aceito pela norma) e PR ✅.
+    **Próximo:** usuário aprovar o merge → versão **1.0.0** (gerar entrega, medir o tamanho com
+    scikit-learn, trocar `programa/` na rede, tag `v1.0.0`).
 - **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
   2) empacotamento ✅; 3) teste numa pasta que simula a rede ✅; 4) pasta de entrega ✅ (copiada para a rede e testada em 2 PCs); 5) ADR 0011, README, PR ✅.
 - **Entrega igual à da calibração** (decisão do usuário, 2026-11-04: "deixa a pasta pronta e eu
