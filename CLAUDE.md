@@ -11,6 +11,10 @@
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 6 concluídas** (PR #7 da Fase 6 com merge em
   2026-11-04). **Fase 7 – Executável EM ANDAMENTO** (branch `fase-7-executavel`, versão `0.7.0`).
+  **Última sessão: 2026-11-04** — usuário pausou ("hoje já deu, depois seguimos") depois de
+  receber a entrega (`dist/entrega`) e responder "foi" sobre copiar para a rede. **Ao voltar:**
+  perguntar como foi na rede (abriu? histórico criado? teste em 2 PCs salvando ao mesmo tempo?) e
+  seguir para a etapa 5 (ADR 0011, README, PR da Fase 7).
 - **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
   2) empacotamento ✅; 3) teste numa pasta que simula a rede ✅; 4) pasta de entrega ✅ (falta o
   usuário copiar para a rede e testar em 2 PCs); 5) ADR 0011, README, PR.
