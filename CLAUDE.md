@@ -11,11 +11,13 @@
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 5 concluídas** (PR #6 da Fase 5 com merge).
   **Fase 6 – Histórico EM ANDAMENTO** (branch `fase-6-historico`, versão `0.6.0`, enviada ao GitHub,
-  sem PR ainda). Última sessão: 2026-11-03 — **usuário pausou o projeto** ("vou parar um momento");
-  ao voltar, retomar pela etapa 3.
+  sem PR ainda). Última sessão: 2026-11-04 — etapa 3 feita; próxima: etapa 4 (Divergências).
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
-  excluir; Lixeira com restaurar / excluir permanentemente; 4) aba Divergências (registrar no
+  excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
+  `PainelRegistros` usado nas duas abas; decisões do usuário em 2026-11-04: **lista 2/3 | detalhes
+  1/3**, colunas só **Data/hora, Volume, Resultado**, **confirmação nas duas exclusões**; abrir a
+  aba relê o banco; sem histórico só a aba Classificar fica ativa); 4) aba Divergências (registrar no
   Histórico: correta + motivo; lista de pendentes; marcar resolvida); 5) ADR 0010, README (foto,
   roteiro), PR.
 - **SEM trava de edição neste programa** (decisão do usuário, 2026-11-03 — **exceção** ao padrão do
