@@ -6,6 +6,7 @@ Cabeçalho em cima e 4 abas: Classificar | Histórico | Divergências | Lixeira.
 reversa. Tema escuro.
 """
 
+from dataclasses import replace
 from html import escape
 
 from PySide6.QtCore import Qt
@@ -28,6 +29,7 @@ from PySide6.QtWidgets import (
 )
 
 from classificador import __version__
+from classificador.aprendizado.avisos import avisos_do_historico
 from classificador.dominio.amostra import Acabamento
 from classificador.dominio.propriedades import Propriedade
 from classificador.historico.repositorio import (
@@ -397,7 +399,13 @@ class JanelaPrincipal(QMainWindow):
             self._repintar(self.avisos)
             return
 
-        self._classificado = (self.acabamento.currentText(), textos, saida)
+        # ML (Fase 8): avisos aprendidos do histórico — só se somam aos da norma, nunca mudam o
+        # resultado; entram no que é salvo.
+        acabamento = self.acabamento.currentText()
+        do_historico = avisos_do_historico(self.historico, acabamento, saida.resultado, textos)
+        if do_historico:
+            saida = replace(saida, avisos=[*saida.avisos, *do_historico])
+        self._classificado = (acabamento, textos, saida)
         self._atualizar_salvar()
         self._mostrar_situacao_salvar(None, "")
         self.resultado.setText(saida.resultado or "—")

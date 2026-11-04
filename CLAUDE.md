@@ -30,7 +30,8 @@
     nominal fora. **IsolationForest descartado** (marca fração fixa como estranha e não diz qual
     valor) — usuário informado; scikit-learn fica no `NearestNeighbors` (`aprendizado/fora_do_comum.py`).
   - Etapas: 1) versão + scikit-learn ✅; 2) histórico → exemplos (`aprendizado/dados.py`) ✅;
-    3) aviso por divergência ✅; 4) outlier ✅; 5) avisos na tela; 6) demonstração com histórico
+    3) aviso por divergência ✅; 4) outlier ✅; 5) avisos na tela (`aprendizado/avisos.py`, prefixo
+    "Histórico:", gravados ao salvar — usuário) ✅; 6) demonstração com histórico
     fictício + fotos; 7) ADR 0012, README, PR.
 - **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
   2) empacotamento ✅; 3) teste numa pasta que simula a rede ✅; 4) pasta de entrega ✅ (copiada para a rede e testada em 2 PCs); 5) ADR 0011, README, PR ✅.
