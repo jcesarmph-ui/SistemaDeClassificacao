@@ -3,7 +3,11 @@
 import pytest
 
 from classificador.aprendizado.dados import Exemplo, numeros
-from classificador.aprendizado.fora_do_comum import avisos_fora_do_comum, numero_br
+from classificador.aprendizado.fora_do_comum import (
+    avisos_fora_do_comum,
+    numero_br,
+    numero_faixa,
+)
 
 
 def historico(quantos=20, acabamento="GI ZN", grau_programa="ZEE G2", correta=None):
@@ -24,6 +28,14 @@ def avisos(exemplos, valores, acabamento="GI ZN", resultado="ZEE G2 - Z275"):
 ])
 def test_numero_br(valor, texto):
     assert numero_br(valor) == texto
+
+
+@pytest.mark.parametrize(("valor", "texto"), [
+    (269.6, "270"), (310.8, "311"), (38.6, "39"), (0.0468, "0,047"), (0.0729, "0,073"),
+    (0.03, "0,03"), (0.0015, "0,0015"), (0.6, "0,6"),
+])
+def test_numero_faixa_arredonda_para_ler_de_relance(valor, texto):
+    assert numero_faixa(valor) == texto
 
 
 def test_valor_muito_fora_avisa_qual_e_o_normal():

@@ -33,6 +33,16 @@ def numero_br(valor: float) -> str:
     return texto.replace(".", ",")
 
 
+def numero_faixa(valor: float) -> str:
+    """Número arredondado para a faixa "costuma ficar entre": fácil de ler de relance.
+
+    ≥ 10 → inteiro (269,6 → "270"); menor → 2 algarismos significativos (0,0468 → "0,047").
+    """
+    if abs(valor) >= 10:
+        return numero_br(round(valor))
+    return numero_br(float(f"{valor:.2g}"))
+
+
 def avisos_fora_do_comum(
     exemplos: list[Exemplo], acabamento: str, resultado: str | None, numeros: tuple[float, ...],
 ) -> list[str]:
@@ -58,8 +68,9 @@ def avisos_fora_do_comum(
         if abs(valor - mediana) > VEZES * faixa:
             de, ate = np.percentile(coluna, [5, 95])
             nome = Propriedade(campo).rotulo
+            normal = f"costuma ficar entre {numero_faixa(de)} e {numero_faixa(ate)}"
             avisos.append(
                 f"{nome} ({numero_br(valor)}) fora do comum para {grau_agora} em {acabamento} "
-                f"(costuma ficar entre {numero_br(de)} e {numero_br(ate)}). Confira a digitação."
+                f"({normal}). Confira a digitação."
             )
     return avisos
