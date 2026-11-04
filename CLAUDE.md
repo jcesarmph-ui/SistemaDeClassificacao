@@ -11,7 +11,7 @@
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 5 concluídas** (PR #6 da Fase 5 com merge).
   **Fase 6 – Histórico EM ANDAMENTO** (branch `fase-6-historico`, versão `0.6.0`, enviada ao GitHub,
-  sem PR ainda). Última sessão: 2026-11-04 — etapa 3 feita; próxima: etapa 4 (Divergências).
+  sem PR ainda). Última sessão: 2026-11-04 — etapas 3 e 4 feitas; próxima: etapa 5 (ADR, README, PR).
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
   excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
@@ -19,7 +19,9 @@
   1/3**, colunas só **Data/hora, Volume, Resultado**, **confirmação nas duas exclusões**; abrir a
   aba relê o banco; sem histórico só a aba Classificar fica ativa; botões **Excluir** com contorno e letra
   **vermelhos**, **Restaurar** com contorno **verde** — escolha do usuário); 4) aba Divergências (registrar no
-  Histórico: correta + motivo; lista de pendentes; marcar resolvida); 5) ADR 0010, README (foto,
+  Histórico: correta + motivo; lista de pendentes; marcar resolvida) ✅ (`interface/abas_divergencias.py`: janela própria
+  `DialogoDivergencia`, aba lista | detalhes com Pendentes/Resolvidas e nota cinza "Para que serve";
+  **só uma divergência pendente por registro** — regra no repositório; resolver pede confirmação); 5) ADR 0010, README (foto,
   roteiro), PR.
 - **SEM trava de edição neste programa** (decisão do usuário, 2026-11-03 — **exceção** ao padrão do
   `CLAUDE.md` global): duas pessoas podem usar ao mesmo tempo e as duas salvam classificações; um
@@ -183,6 +185,13 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - **Aviso por histórico (machine learning, Fase 8):** quando houver registros suficientes, comparar com
   classificações parecidas já salvas e avisar se algum valor está fora do comum (outlier). **Só alerta —
   nunca muda a classificação**, que é sempre por regra da norma (explicável e determinística).
+  - **Divergências no ML** (conversa de 2026-11-04, decidir na Fase 8): registros com divergência
+    usam a **classificação correta** informada (não aprender com o erro); ideia de aviso extra
+    "parecido com o volume X, que teve divergência".
+  - **Demonstração pedida pelo usuário (2026-11-04):** ao fim da Fase 8 (ou quando der), simular
+    um histórico grande **fictício** (muitas classificações + várias divergências), deixar o ML
+    "aprender" e mostrar **fotos (prints) de tudo em que o ML ajuda** — como ele avisa que algo pode
+    estar errado. Nunca usar dados reais da empresa nessa simulação.
 - **Casos reais** (certificados já classificados pela empresa) ficam em `dados/casos/` e viram testes
   locais (nunca no Git nem em arquivo versionado). 1º caso: certificado GI em `normas_claude/` (PDF
   "CQ …"), classificado pela empresa como ZAR-250 — confirma ZC fora, ZE reprovado por LE e queda

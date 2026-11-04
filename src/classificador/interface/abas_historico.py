@@ -1,7 +1,7 @@
 """Abas Histórico e Lixeira: lista de classificações salvas (2/3) | detalhes do registro (1/3).
 
 As duas abas têm o mesmo desenho; muda só o que os botões fazem:
-- Histórico: pesquisar e **Excluir** (manda para a Lixeira).
+- Histórico: pesquisar, **Registrar divergência** e **Excluir** (manda para a Lixeira).
 - Lixeira: pesquisar, **Restaurar** (volta ao Histórico) e **Excluir permanentemente**.
 Toda exclusão pede confirmação (decisão do usuário, 2026-11-04). Nenhuma regra aqui: quem lê e
 grava é o `RepositorioHistorico`.
@@ -13,6 +13,7 @@ from html import escape
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QDialog,
     QGroupBox,
     QHBoxLayout,
     QHeaderView,
@@ -60,6 +61,8 @@ class PainelRegistros(QWidget):
         self.confirmar: Callable[[str, str, str], bool] = (
             lambda titulo, texto, sim: confirmar(self, titulo, texto, sim)
         )
+        # Abre a janela "Registrar divergência" (True = gravou); os testes trocam também.
+        self.pedir_divergencia: Callable[[Registro], bool] = self._abrir_dialogo_divergencia
 
         self.pesquisa = QLineEdit(
             placeholderText="Pesquisar (volume, resultado, acabamento, data, usuário…)"
@@ -70,17 +73,7 @@ class PainelRegistros(QWidget):
         self.pesquisa.textChanged.connect(self.atualizar)
         self.contagem = QLabel(objectName="dica")
 
-        self.tabela = QTableWidget(0, len(COLUNAS))
-        self.tabela.setHorizontalHeaderLabels(COLUNAS)
-        self.tabela.setEditTriggers(QAbstractItemView.NoEditTriggers)  # registro não é editável
-        self.tabela.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.tabela.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.tabela.verticalHeader().setVisible(False)
-        self.tabela.setAlternatingRowColors(True)
-        cabecalho = self.tabela.horizontalHeader()
-        cabecalho.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        cabecalho.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        cabecalho.setSectionResizeMode(2, QHeaderView.Stretch)
+        self.tabela = nova_tabela(COLUNAS, esticar=2)
         self.tabela.itemSelectionChanged.connect(self._mostrar_detalhes)
 
         self.detalhes = QLabel(wordWrap=True)
@@ -99,9 +92,11 @@ class PainelRegistros(QWidget):
             self.botao_excluir.setToolTip("Apaga de vez: não dá para desfazer")
             botoes = [self.botao_restaurar, self.botao_excluir]
         else:
+            self.botao_divergencia = QPushButton("Registrar divergência")
+            self.botao_divergencia.clicked.connect(self.registrar_divergencia)
             self.botao_excluir = QPushButton("Excluir", objectName="excluir")
             self.botao_excluir.setToolTip("Manda para a Lixeira (dá para restaurar depois)")
-            botoes = [self.botao_excluir]
+            botoes = [self.botao_divergencia, self.botao_excluir]
         self.botao_excluir.clicked.connect(self.excluir)
 
         lista = QGroupBox("Lixeira" if lixeira else "Classificações salvas")
@@ -163,6 +158,15 @@ class PainelRegistros(QWidget):
         registro = self.selecionado()
         for botao in self._botoes():
             botao.setEnabled(registro is not None)
+        pendente = None
+        if not self.lixeira:
+            if registro is not None and self.historico is not None:
+                pendente = self.historico.divergencia_pendente(registro.id)
+            self.botao_divergencia.setEnabled(registro is not None and pendente is None)
+            self.botao_divergencia.setToolTip(
+                "Este registro já tem uma divergência pendente (veja a aba Divergências)"
+                if pendente else "A classificação correta era outra? Registre aqui"
+            )
         if registro is None:
             onde = "da Lixeira" if self.lixeira else "do Histórico"
             self.detalhes.setText(
@@ -170,12 +174,18 @@ class PainelRegistros(QWidget):
                 "para ver os detalhes.</i></span>"
             )
             return
-        self.detalhes.setText(detalhes_html(registro))
+        aviso = ""
+        if pendente is not None:
+            aviso = (
+                '<p style="color:#ffd54f">⚠ Divergência pendente: a correta seria '
+                f"<b>{escape(pendente.correta)}</b> — {escape(pendente.motivo)}</p>"
+            )
+        self.detalhes.setText(aviso + detalhes_html(registro))
 
     def _botoes(self) -> list[QPushButton]:
         if self.lixeira:
             return [self.botao_restaurar, self.botao_excluir]
-        return [self.botao_excluir]
+        return [self.botao_divergencia, self.botao_excluir]
 
     # --- Ações ------------------------------------------------------------------------
 
@@ -198,6 +208,30 @@ class PainelRegistros(QWidget):
             return
         self._executar(acao, registro.id, feito)
 
+    def registrar_divergencia(self) -> None:
+        registro = self.selecionado()
+        if registro is None or self.historico is None:
+            return
+        if not self.pedir_divergencia(registro):
+            return  # cancelou
+        self.atualizar()
+        mostrar_situacao(
+            self.situacao, "salvo",
+            f"✔ Divergência registrada para o volume {registro.volume} (aba Divergências)",
+        )
+        self.mudou.emit()
+
+    def _abrir_dialogo_divergencia(self, registro: Registro) -> bool:
+        from classificador.interface.abas_divergencias import DialogoDivergencia
+
+        dialogo = DialogoDivergencia(
+            self, registro,
+            lambda correta, motivo: self.historico.registrar_divergencia(
+                registro.id, correta, motivo
+            ),
+        )
+        return dialogo.exec() == QDialog.Accepted
+
     def restaurar(self) -> None:
         registro = self.selecionado()
         if registro is None or self.historico is None:
@@ -211,17 +245,35 @@ class PainelRegistros(QWidget):
         try:
             acao(id_)
         except ErroDeValidacao as erro:
-            self._mostrar_situacao("erro", "\n".join(f"✖ {m}" for m in erro.mensagens))
+            mostrar_situacao(self.situacao, "erro", "\n".join(f"✖ {m}" for m in erro.mensagens))
             return
         self.atualizar()
-        self._mostrar_situacao("salvo", feito)
+        mostrar_situacao(self.situacao, "salvo", feito)
         self.mudou.emit()
 
-    def _mostrar_situacao(self, tipo: str, texto: str) -> None:
-        self.situacao.setObjectName(tipo)
-        self.situacao.setText(texto)
-        self.situacao.style().unpolish(self.situacao)
-        self.situacao.style().polish(self.situacao)
+
+def nova_tabela(colunas: list[str], esticar: int) -> QTableWidget:
+    """Tabela só de leitura, seleção de linha inteira; a coluna `esticar` ocupa o que sobra."""
+    tabela = QTableWidget(0, len(colunas))
+    tabela.setHorizontalHeaderLabels(colunas)
+    tabela.setEditTriggers(QAbstractItemView.NoEditTriggers)  # registro não é editável
+    tabela.setSelectionBehavior(QAbstractItemView.SelectRows)
+    tabela.setSelectionMode(QAbstractItemView.SingleSelection)
+    tabela.verticalHeader().setVisible(False)
+    tabela.setAlternatingRowColors(True)
+    cabecalho = tabela.horizontalHeader()
+    for coluna in range(len(colunas)):
+        modo = QHeaderView.Stretch if coluna == esticar else QHeaderView.ResizeToContents
+        cabecalho.setSectionResizeMode(coluna, modo)
+    return tabela
+
+
+def mostrar_situacao(rotulo: QLabel, tipo: str, texto: str) -> None:
+    """Mensagem embaixo dos detalhes: "erro" (vermelho) ou "salvo" (verde)."""
+    rotulo.setObjectName(tipo)
+    rotulo.setText(texto)
+    rotulo.style().unpolish(rotulo)
+    rotulo.style().polish(rotulo)
 
 
 def detalhes_html(r: Registro) -> str:

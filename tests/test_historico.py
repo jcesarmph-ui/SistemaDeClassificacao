@@ -130,6 +130,19 @@ def test_divergencias_pendentes_resolvidas_e_lixeira(repo):
     assert repo._conexao.execute("SELECT COUNT(*) FROM divergencia").fetchone()[0] == 0
 
 
+def test_so_uma_divergencia_pendente_por_registro(repo):
+    id_ = repo.salvar(nova())
+    assert repo.divergencia_pendente(id_) is None
+    d = repo.registrar_divergencia(id_, "GRAU Y", "motivo 1")
+    assert repo.divergencia_pendente(id_).id == d
+    with pytest.raises(ErroDeValidacao) as erro:
+        repo.registrar_divergencia(id_, "GRAU Z", "motivo 2")
+    assert "já tem uma divergência pendente" in erro.value.mensagens[0]
+    repo.resolver_divergencia(d)  # resolvida → pode registrar outra
+    assert repo.divergencia_pendente(id_) is None
+    assert repo.registrar_divergencia(id_, "GRAU Z", "motivo 2") != d
+
+
 def test_modo_consulta_recusa_toda_gravacao(repo):
     id_ = repo.salvar(nova())
     repo.modo_consulta = True

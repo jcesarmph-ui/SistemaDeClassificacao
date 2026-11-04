@@ -35,6 +35,7 @@ from classificador.historico.repositorio import (
     NovaClassificacao,
     RepositorioHistorico,
 )
+from classificador.interface.abas_divergencias import PainelDivergencias
 from classificador.interface.abas_historico import PainelRegistros
 from classificador.interface.componentes import instalar_filtro_roda
 from classificador.interface.entrada import ErroEntrada
@@ -109,6 +110,13 @@ QScrollArea, QScrollArea > QWidget > QWidget {{ background: transparent; }}
 #simbolo_aviso {{ color: {aviso}; font-size: 30pt; padding-right: 8px; }}
 #titulo_dialogo {{ font-size: 15pt; font-weight: bold; color: {titulo}; }}
 #dialogo QPushButton {{ padding: 8px 24px; }}
+QPlainTextEdit {{ background: {campo}; border: 1px solid {campo_borda}; border-radius: 4px;
+                  padding: 4px; color: #ffffff; selection-background-color: {selecao}; }}
+QPlainTextEdit:focus {{ border: 1px solid {borda}; }}
+QRadioButton {{ spacing: 8px; }}
+QRadioButton::indicator {{ width: 14px; height: 14px; border-radius: 8px;
+                          border: 2px solid {campo_borda}; background: {campo}; }}
+QRadioButton::indicator:checked {{ border: 2px solid {borda}; background: {titulo}; }}
 #excluir:disabled, #restaurar:disabled {{ color: #616161; border: 1px solid {campo_borda}; }}
 """
 
@@ -196,16 +204,19 @@ class JanelaPrincipal(QMainWindow):
         """Classificar | Histórico | Divergências | Lixeira (sem histórico: só Classificar)."""
         self.historico_aba = PainelRegistros(self.historico)
         self.lixeira_aba = PainelRegistros(self.historico, lixeira=True)
-        divergencias = QLabel("A lista de divergências será feita na próxima etapa.",
-                              objectName="dica", alignment=Qt.AlignCenter)
-        # Excluir no Histórico aparece na Lixeira e vice-versa.
-        self.historico_aba.mudou.connect(self.lixeira_aba.atualizar)
-        self.lixeira_aba.mudou.connect(self.historico_aba.atualizar)
+        self.divergencias_aba = PainelDivergencias(self.historico)
+        # O que muda numa aba aparece nas outras (ex.: excluir no Histórico → Lixeira; registro
+        # na Lixeira some das Divergências; divergência resolvida → some o aviso no Histórico).
+        paineis = [self.historico_aba, self.divergencias_aba, self.lixeira_aba]
+        for origem in paineis:
+            for destino in paineis:
+                if destino is not origem:
+                    origem.mudou.connect(destino.atualizar)
 
         self.abas = QTabWidget()
         self.abas.addTab(classificar, "Classificar")
         self.abas.addTab(self.historico_aba, "Histórico")
-        self.abas.addTab(divergencias, "Divergências")
+        self.abas.addTab(self.divergencias_aba, "Divergências")
         self.abas.addTab(self.lixeira_aba, "Lixeira")
         if self.historico is None:
             for indice in range(1, self.abas.count()):
@@ -217,7 +228,7 @@ class JanelaPrincipal(QMainWindow):
     def _aba_mudou(self, _indice: int) -> None:
         """Ao abrir uma aba, relê o banco (outra pessoa pode ter salvo algo nesse meio-tempo)."""
         atual = self.abas.currentWidget()
-        if isinstance(atual, PainelRegistros):
+        if isinstance(atual, (PainelRegistros, PainelDivergencias)):
             atual.atualizar()
 
     def _coluna_material(self) -> QWidget:

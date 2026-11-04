@@ -226,6 +226,10 @@ class RepositorioHistorico:
         registro = self.obter(id_)
         if registro is None or registro.excluido_em is not None:
             erros.append("Classificação não encontrada no Histórico")
+        elif self.divergencia_pendente(id_) is not None:
+            erros.append(
+                "Este registro já tem uma divergência pendente: resolva-a antes de registrar outra"
+            )
         if erros:
             raise ErroDeValidacao(erros)
         with self._conexao:
@@ -246,20 +250,29 @@ class RepositorioHistorico:
                 WHERE d.resolvida_em {condicao} AND c.excluido_em IS NULL
                 ORDER BY d.criado_em DESC, d.id DESC"""
         ).fetchall()
-        return [
-            Divergencia(
-                id=linha["id"],
-                classificacao=self.obter(linha["c_id"]),
-                correta=linha["correta"],
-                motivo=linha["motivo"],
-                criado_em=datetime.datetime.fromisoformat(linha["criado_em"]),
-                usuario=linha["usuario"],
-                computador=linha["computador"],
-                resolvida_em=_data(linha["resolvida_em"]),
-                resolvida_por=linha["resolvida_por"],
-            )
-            for linha in linhas
-        ]
+        return [self._divergencia(linha) for linha in linhas]
+
+    def divergencia_pendente(self, id_: int) -> Divergencia | None:
+        """A divergência ainda não resolvida da classificação `id_` (só pode haver uma)."""
+        linha = self._conexao.execute(
+            """SELECT d.*, d.classificacao_id AS c_id FROM divergencia d
+               WHERE d.classificacao_id = ? AND d.resolvida_em IS NULL""",
+            (id_,),
+        ).fetchone()
+        return self._divergencia(linha) if linha else None
+
+    def _divergencia(self, linha: sqlite3.Row) -> Divergencia:
+        return Divergencia(
+            id=linha["id"],
+            classificacao=self.obter(linha["c_id"]),
+            correta=linha["correta"],
+            motivo=linha["motivo"],
+            criado_em=datetime.datetime.fromisoformat(linha["criado_em"]),
+            usuario=linha["usuario"],
+            computador=linha["computador"],
+            resolvida_em=_data(linha["resolvida_em"]),
+            resolvida_por=linha["resolvida_por"],
+        )
 
     @_escrita
     def resolver_divergencia(self, id_: int) -> None:

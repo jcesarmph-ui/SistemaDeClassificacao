@@ -55,7 +55,9 @@ class DialogoConfirmacao(QDialog):
     As cores vêm do estilo da janela principal (`#dialogo`, `#excluir`).
     """
 
-    def __init__(self, pai: QWidget | None, titulo: str, texto: str, sim: str):
+    def __init__(
+        self, pai: QWidget | None, titulo: str, texto: str, sim: str, estilo: str = "excluir"
+    ):
         super().__init__(pai, Qt.Dialog | Qt.FramelessWindowHint)
         self.setWindowTitle(titulo)
         self.setModal(True)
@@ -64,7 +66,8 @@ class DialogoConfirmacao(QDialog):
         self.titulo = QLabel(titulo, objectName="titulo_dialogo")
         self.texto = QLabel(texto, wordWrap=True)
         self.texto.setMinimumWidth(460)
-        self.botao_sim = QPushButton(sim, objectName="excluir")
+        # "excluir" = contorno vermelho; "restaurar" = contorno verde
+        self.botao_sim = QPushButton(sim, objectName=estilo)
         self.botao_sim.clicked.connect(self.accept)
         self.botao_cancelar = QPushButton("Cancelar")
         self.botao_cancelar.clicked.connect(self.reject)
@@ -91,6 +94,8 @@ class DialogoConfirmacao(QDialog):
         fora.addWidget(moldura)
 
 
-def confirmar(pai: QWidget | None, titulo: str, texto: str, sim: str) -> bool:
+def confirmar(
+    pai: QWidget | None, titulo: str, texto: str, sim: str, estilo: str = "excluir"
+) -> bool:
     """Mostra o `DialogoConfirmacao` e espera a resposta: True só se clicar em `sim`."""
-    return DialogoConfirmacao(pai, titulo, texto, sim).exec() == QDialog.Accepted
+    return DialogoConfirmacao(pai, titulo, texto, sim, estilo).exec() == QDialog.Accepted

@@ -310,3 +310,65 @@ def test_confirmacao_no_visual_do_programa(janela_com_historico):
     assert dialogo.botao_sim.objectName() == "excluir"  # contorno vermelho
     dialogo.botao_sim.click()
     assert dialogo.result() == QtWidgets.QDialog.Accepted
+
+
+# --- Divergências ---------------------------------------------------------------------------
+
+
+def test_janela_de_divergencia_mostra_erro_e_so_fecha_quando_grava(janela_com_historico):
+    from classificador.interface.abas_divergencias import DialogoDivergencia
+
+    janela = janela_com_historico
+    salvar_volume(janela, "V-1")
+    [registro] = janela.historico.listar()
+    gravar = lambda c, m: janela.historico.registrar_divergencia(registro.id, c, m)  # noqa: E731
+    dialogo = DialogoDivergencia(janela, registro, gravar)
+    dialogo.salvar()  # campos vazios → erro em vermelho, janela continua aberta
+    assert "Informe qual era a classificação correta" in dialogo.erro.text()
+    assert "Informe o motivo" in dialogo.erro.text()
+    assert dialogo.result() != QtWidgets.QDialog.Accepted
+    dialogo.correta.setText("BBB")
+    dialogo.motivo.setPlainText("LE lido errado")
+    dialogo.salvar()
+    assert dialogo.result() == QtWidgets.QDialog.Accepted
+    assert janela.historico.divergencia_pendente(registro.id).correta == "BBB"
+
+
+def test_registrar_resolver_divergencia_pelas_abas(janela_com_historico):
+    janela = janela_com_historico
+    salvar_volume(janela, "V-1")
+    historico, divergencias = janela.historico_aba, janela.divergencias_aba
+    historico.atualizar()
+    historico.tabela.selectRow(0)
+    assert historico.botao_divergencia.isEnabled()
+
+    def gravar(registro):
+        janela.historico.registrar_divergencia(registro.id, "BBB", "LE lido errado")
+        return True
+
+    historico.pedir_divergencia = gravar
+    historico.registrar_divergencia()
+    assert "Divergência registrada" in historico.situacao.text()
+    assert not historico.botao_divergencia.isEnabled()  # só uma pendente por registro
+    assert "Divergência pendente" in historico.detalhes.text()
+
+    assert divergencias.tabela.rowCount() == 1  # a aba se atualizou sozinha
+    assert divergencias.tabela.item(0, 3).text() == "BBB"
+    divergencias.tabela.selectRow(0)
+    assert "LE lido errado" in divergencias.detalhes.text()
+    perguntas = responde(divergencias, True)
+    divergencias.resolver()
+    assert "depois que o programa foi corrigido" in perguntas[0][1]
+    assert divergencias.tabela.rowCount() == 0
+    assert historico.botao_divergencia.isEnabled()  # resolvida → pode registrar outra
+    divergencias.resolvidas.setChecked(True)
+    assert divergencias.tabela.rowCount() == 1
+    assert divergencias.botao_resolver.isHidden()
+
+
+def test_aba_divergencias_explica_para_que_serve(janela_com_historico):
+    from classificador.interface.abas_divergencias import PARA_QUE_SERVE
+
+    textos = [r.text() for r in janela_com_historico.divergencias_aba.findChildren(
+        QtWidgets.QLabel)]
+    assert PARA_QUE_SERVE in textos
