@@ -58,8 +58,8 @@
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
   excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
-  `PainelRegistros` usado nas duas abas; decisões do usuário em 2026-11-04: **lista 2/3 | detalhes
-  1/3**, colunas só **Data/hora, Volume, Resultado**, **confirmação nas duas exclusões**; abrir a
+  `PainelRegistros` usado nas duas abas; decisões do usuário em 2026-11-04: **lista 2/5 | detalhes
+  3/5** (era 2/3 | 1/3; usuário pediu equilibrar em 2026-11-04 — coluna do resultado larga demais e detalhes com rolagem; valores digitados em 2 colunas), colunas só **Data/hora, Volume, Resultado**, **confirmação nas duas exclusões**; abrir a
   aba relê o banco; sem histórico só a aba Classificar fica ativa; botões **Excluir** com contorno e letra
   **vermelhos**, **Restaurar** com contorno **verde** — escolha do usuário); 4) aba Divergências (registrar no
   Histórico: correta + motivo; lista de pendentes; marcar resolvida) ✅ (`interface/abas_divergencias.py`: janela própria

@@ -34,6 +34,8 @@ from classificador.historico.repositorio import (
     RepositorioHistorico,
 )
 from classificador.interface.abas_historico import (
+    PROPORCAO_DETALHES,
+    PROPORCAO_LISTA,
     detalhes_html,
     mostrar_situacao,
     nova_tabela,
@@ -115,7 +117,7 @@ class DialogoDivergencia(QDialog):
 
 
 class PainelDivergencias(QWidget):
-    """Lista de divergências (2/3) | detalhes com o registro completo (1/3)."""
+    """Lista de divergências (2/5) | detalhes com o registro completo (3/5)."""
 
     mudou = Signal()  # uma divergência foi resolvida: o Histórico deve se atualizar
 
@@ -168,8 +170,8 @@ class PainelDivergencias(QWidget):
 
         faixa = QHBoxLayout(self)
         faixa.setContentsMargins(0, 0, 0, 0)
-        faixa.addWidget(lista, 2)
-        faixa.addWidget(detalhes, 1)
+        faixa.addWidget(lista, PROPORCAO_LISTA)  # 2/5 | 3/5, igual ao Histórico
+        faixa.addWidget(detalhes, PROPORCAO_DETALHES)
         self.atualizar()
 
     def atualizar(self) -> None:
