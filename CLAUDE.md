@@ -185,9 +185,16 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - **Aviso por histórico (machine learning, Fase 8):** quando houver registros suficientes, comparar com
   classificações parecidas já salvas e avisar se algum valor está fora do comum (outlier). **Só alerta —
   nunca muda a classificação**, que é sempre por regra da norma (explicável e determinística).
-  - **Divergências no ML** (conversa de 2026-11-04, decidir na Fase 8): registros com divergência
-    usam a **classificação correta** informada (não aprender com o erro); ideia de aviso extra
-    "parecido com o volume X, que teve divergência".
+  - **Divergências no ML — decidido pelo usuário em 2026-11-04:** as divergências são o centro do
+    aprendizado. **"Aprender e avisar"**: ao registrar uma divergência (inclusive nos testes de
+    confiabilidade que o usuário fará), o programa aprende **na hora, sem mudar código**; numa
+    classificação **parecida**, mostra aviso **amarelo** ("Em um caso parecido (volume X), a
+    classificação correta foi Y. Motivo: … Confira."). **O resultado continua sendo o da norma**
+    (o ML nunca troca o resultado — opções "trocar" e "botão usar esta" foram recusadas); a regra é
+    corrigida por nós com teste. Registros com divergência usam a **classificação correta** (não
+    aprender com o erro).
+  - **Explicar o "backend" do ML ao usuário** na Fase 8, passo a passo: de onde vêm os dados, como
+    mede "parecido", como aprende com as divergências e por que avisa.
   - **Demonstração pedida pelo usuário (2026-11-04):** ao fim da Fase 8 (ou quando der), simular
     um histórico grande **fictício** (muitas classificações + várias divergências), deixar o ML
     "aprender" e mostrar **fotos (prints) de tudo em que o ML ajuda** — como ele avisa que algo pode
