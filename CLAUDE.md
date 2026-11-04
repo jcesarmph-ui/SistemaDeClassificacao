@@ -17,7 +17,8 @@
   excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
   `PainelRegistros` usado nas duas abas; decisões do usuário em 2026-11-04: **lista 2/3 | detalhes
   1/3**, colunas só **Data/hora, Volume, Resultado**, **confirmação nas duas exclusões**; abrir a
-  aba relê o banco; sem histórico só a aba Classificar fica ativa); 4) aba Divergências (registrar no
+  aba relê o banco; sem histórico só a aba Classificar fica ativa; botões **Excluir** com contorno e letra
+  **vermelhos**, **Restaurar** com contorno **verde** — escolha do usuário); 4) aba Divergências (registrar no
   Histórico: correta + motivo; lista de pendentes; marcar resolvida); 5) ADR 0010, README (foto,
   roteiro), PR.
 - **SEM trava de edição neste programa** (decisão do usuário, 2026-11-03 — **exceção** ao padrão do

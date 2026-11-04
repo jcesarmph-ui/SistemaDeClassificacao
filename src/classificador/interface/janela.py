@@ -103,6 +103,9 @@ QTableWidget {{ background: {campo}; alternate-background-color: {caixa};
 QHeaderView::section {{ background: {caixa}; color: {titulo}; font-weight: bold;
                         border: none; border-bottom: 1px solid {borda}; padding: 6px; }}
 QScrollArea, QScrollArea > QWidget > QWidget {{ background: transparent; }}
+#excluir {{ color: {erro}; border: 1px solid {erro}; }}
+#restaurar {{ color: {certo}; border: 1px solid {certo}; }}
+#excluir:disabled, #restaurar:disabled {{ color: #616161; border: 1px solid {campo_borda}; }}
 """
 
 _CORES_TOLERANCIA = {

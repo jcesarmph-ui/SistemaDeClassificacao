@@ -90,14 +90,14 @@ class PainelRegistros(QWidget):
 
         self.situacao = QLabel(wordWrap=True)  # erro (vermelho) ou "✔ Restaurado…" (verde)
         if lixeira:
-            self.botao_restaurar = QPushButton("Restaurar")
+            self.botao_restaurar = QPushButton("Restaurar", objectName="restaurar")
             self.botao_restaurar.setToolTip("Devolve o registro ao Histórico")
             self.botao_restaurar.clicked.connect(self.restaurar)
-            self.botao_excluir = QPushButton("Excluir permanentemente")
+            self.botao_excluir = QPushButton("Excluir permanentemente", objectName="excluir")
             self.botao_excluir.setToolTip("Apaga de vez: não dá para desfazer")
             botoes = [self.botao_restaurar, self.botao_excluir]
         else:
-            self.botao_excluir = QPushButton("Excluir")
+            self.botao_excluir = QPushButton("Excluir", objectName="excluir")
             self.botao_excluir.setToolTip("Manda para a Lixeira (dá para restaurar depois)")
             botoes = [self.botao_excluir]
         self.botao_excluir.clicked.connect(self.excluir)
