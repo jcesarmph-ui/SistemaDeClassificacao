@@ -11,6 +11,11 @@
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 6 concluídas** (PR #7 da Fase 6 com merge em
   2026-11-04). **Fase 7 – Executável EM ANDAMENTO** (branch `fase-7-executavel`, versão `0.7.0`).
+- **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
+  2) receita do PyInstaller (ícone, sem console, normas fora do `.exe`); 3) gerar e testar numa pasta
+  que simula a rede; 4) pasta de entrega + como atualizar; 5) ADR 0011, README, PR.
+  Decisão do usuário (2026-11-04): **pasta do programa** (`ClassificacaoMateriais.exe` + `_internal/`
+  + `dados/`), não um `.exe` único (abre mais rápido, antivírus implica menos).
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
   excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
