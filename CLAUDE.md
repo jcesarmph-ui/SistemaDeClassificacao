@@ -12,13 +12,22 @@
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 6 concluídas** (PR #7 da Fase 6 com merge em
   2026-11-04). **Fase 7 – Executável EM ANDAMENTO** (branch `fase-7-executavel`, versão `0.7.0`).
 - **Fase 7 — plano (etapas):** 1) `dados/` ao lado do `.exe` (`pasta_dados_padrao` com `sys.frozen`) ✅;
-  2) receita do PyInstaller ✅ (`ClassificacaoMateriais.spec` na raiz, **fora do Git público** — cópia
-  no repositório privado `claude-config/projetos/Classificacao_Automatica/`; ícone, sem console,
-  `upx=False`, tira opengl32sw/Quick/Qml/Pdf/traduções: 131 → 87 MB); 3) gerar e testar numa pasta
-  que simula a rede ✅ (2026-11-04: abriu com o título da versão 0.7.0, criou `historico.db` e
-  `backup/` em `dados/` ao lado do `.exe`); 4) pasta de entrega + como atualizar; 5) ADR 0011, README, PR.
-  Decisão do usuário (2026-11-04): **pasta do programa** (`ClassificacaoMateriais.exe` + `_internal/`
-  + `dados/`), não um `.exe` único (abre mais rápido, antivírus implica menos).
+  2) empacotamento ✅; 3) teste numa pasta que simula a rede ✅; 4) pasta de entrega ✅ (falta o
+  usuário copiar para a rede e testar em 2 PCs); 5) ADR 0011, README, PR.
+- **Entrega igual à da calibração** (decisão do usuário, 2026-11-04: "deixa a pasta pronta e eu
+  copio"): **lançador** `src/classificador/lancador.py` ("Classificação de Materiais.exe", ~25 MB,
+  sem PySide6) copia `programa/` para `%LOCALAPPDATA%\MG Centro de Servicos\Classificacao\<versão>`
+  uma vez por versão (janelinha "Preparando…") e abre de lá (~1–2 s), com `CLASSIFICADOR_DADOS` =
+  `dados/` **da rede**; oculta `_internal`, `programa`, `dados` (na rede só se vê o `.exe`).
+  **Atualizar = trocar `programa/`** (nunca copiar `dados/` por cima: perde o histórico).
+- Gerar: `.venv/Scripts/python empacotamento/gerar_exe.py` (programa ~79 MB, sem
+  opengl32sw/Quick/Qml/Pdf/traduções; `versao.txt` = versão + data/hora) e depois
+  `empacotamento/montar_entrega.py` → `dist/entrega/` (dados só com normas, tolerâncias, folha,
+  correlatas, logo e ícone; **histórico começa vazio** — decisão do usuário; recusa se houver `.db`).
+  **`empacotamento/` fora do GitHub público** (`.gitignore`), cópia no privado
+  `claude-config/projetos/Classificacao_Automatica/empacotamento/`; a receita `.spec` foi trocada
+  por esses scripts. Teste (2026-11-04): 1ª abertura 1,6 s, 2ª 1,0 s, histórico criado na rede.
+  Caminho mais longo da cópia local ≈ 187 caracteres (limite do Windows: 260).
 - **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
   3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
   excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
