@@ -9,9 +9,34 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 4 concluídas.**
-  **Fase 5 – Interface PySide6 concluída** (branch `fase-5-interface`, PR aberto, aguardando merge).
-  Última sessão: 2026-11-03.
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 5 concluídas** (PR #6 da Fase 5 com merge).
+  **Fase 6 – Histórico EM ANDAMENTO** (branch `fase-6-historico`, versão `0.6.0`, enviada ao GitHub,
+  PR aberto em 2026-11-04 — **falta o usuário aprovar o merge**). Etapas 1–5 concluídas. Depois do merge: Fase 7 (`.exe`, versão `0.7.0`).
+- **Fase 6 — plano (etapas):** 1) banco + repositório ✅; 2) Volume + Salvar na tela ✅;
+  3) abas Classificar | Histórico | Divergências | Lixeira — Histórico com pesquisa por texto livre,
+  excluir; Lixeira com restaurar / excluir permanentemente ✅ (`interface/abas_historico.py`,
+  `PainelRegistros` usado nas duas abas; decisões do usuário em 2026-11-04: **lista 2/3 | detalhes
+  1/3**, colunas só **Data/hora, Volume, Resultado**, **confirmação nas duas exclusões**; abrir a
+  aba relê o banco; sem histórico só a aba Classificar fica ativa; botões **Excluir** com contorno e letra
+  **vermelhos**, **Restaurar** com contorno **verde** — escolha do usuário); 4) aba Divergências (registrar no
+  Histórico: correta + motivo; lista de pendentes; marcar resolvida) ✅ (`interface/abas_divergencias.py`: janela própria
+  `DialogoDivergencia`, aba lista | detalhes com Pendentes/Resolvidas e nota cinza "Para que serve";
+  **só uma divergência pendente por registro** — regra no repositório; resolver pede confirmação); 5) ADR 0010, README (fotos
+  `historico.png` e `divergencias.png`, dados e usuário fictícios), PR ✅.
+- **SEM trava de edição neste programa** (decisão do usuário, 2026-11-03 — **exceção** ao padrão do
+  `CLAUDE.md` global): duas pessoas podem usar ao mesmo tempo e as duas salvam classificações; um
+  não interfere no outro (cada salvamento é um registro novo; SQLite com `busy_timeout` e
+  transações curtas dá conta). Não criar modo edição/consulta nem a tabela `trava_edicao`.
+- **Fase 6 — feito:** `historico/esquema.py` (`conectar`: journal DELETE, `busy_timeout`, FK;
+  `PRAGMA user_version` = 1; tabelas `classificacao` e `divergencia`), `historico/backup.py` (diário,
+  30 cópias), `historico/repositorio.py` (`RepositorioHistorico.abrir(pasta)`, `salvar`, `obter`,
+  `listar(texto, lixeira)`, `excluir`, `restaurar`, `excluir_permanentemente`,
+  `registrar_divergencia`, `listar_divergencias`, `resolver_divergencia`; `modo_consulta` recusa
+  gravação; banco ocupado → `ErroDeValidacao`). Janela: `volume` + `botao_salvar`,
+  `situacao_salvar` (verde/vermelho); `app.py` abre o histórico. Botões desligados em cinza.
+  Escolhas feitas sem perguntar (informadas ao usuário, sem objeção até agora): divergências de
+  registro na Lixeira somem da lista e voltam ao restaurar; registro salvo não é editável;
+  "Limpar valores" mantém o volume, "Nova classificação" apaga.
 - **Fase 5 — 2026-10-28 (ajustes pedidos pelo usuário, todos commitados e enviados):**
   - Layout refeito em **faixas simétricas** (`janela.py`): cabeçalho (logo | título centralizado |
     versão); entradas em 3 caixas de mesma altura (Material + Espessura e tolerância | Mecânicas |
@@ -32,14 +57,14 @@
   parte o 0006), README **sem "Como executar"** (só mostruário) e com foto da tela
   (`docs/imagens/tela-principal.png`: valores fictícios, **sem o logo** — escolha do usuário),
   `interface/componentes.py` (`FiltroRodaDoMouse`: roda só rola a tela + mãozinha nos clicáveis).
-  PR da Fase 5 aberto; **falta o usuário aprovar o merge**. Depois: Fase 6 em `0.6.0`, incluindo a
-  **trava de edição** (modo edição/consulta, padrão do `CLAUDE.md` global).
+  PR da Fase 5 aberto; **falta o usuário aprovar o merge**. Depois: Fase 6 em `0.6.0` (a trava de
+  edição foi **descartada** pelo usuário em 2026-11-03).
 - Para refazer a foto: script com `dataclasses.replace(servico, logo=None)`, rótulo do logo vazio,
   `WA_DontShowOnScreen`, `resize(1920, 1010)`, `grab()` (GI ZN, camada 275, valores inventados).
 - **Outro projeto (2026-10-28):** sistema de calibração clonado em
   `C:\Users\rodrigo.lima\Projetos\SistemaCalibracao` com `CLAUDE.md` próprio (ainda sem commit) —
-  migração Streamlit → PySide6 no padrão deste projeto; trabalhado em **outro terminal**. Não mexer
-  nele a partir daqui.
+  migração Streamlit → PySide6 no padrão deste projeto; trabalhado em **outro terminal**.
+  **Concluído** (usuário, 2026-11-03). Não mexer nele a partir daqui.
 - **Fase 5 — feito até agora** (etapas 1–6 do plano): `interface/entrada.py` (`ler_numero`,
   `montar_amostra`, `ErroEntrada`), `interface/servico.py` (`Servico.carregar`, `classificar`,
   `pesquisar`, autocompletar, `fabricante()` pelo prefixo; acrescenta grupos para graus sem
@@ -160,6 +185,20 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - **Aviso por histórico (machine learning, Fase 8):** quando houver registros suficientes, comparar com
   classificações parecidas já salvas e avisar se algum valor está fora do comum (outlier). **Só alerta —
   nunca muda a classificação**, que é sempre por regra da norma (explicável e determinística).
+  - **Divergências no ML — decidido pelo usuário em 2026-11-04:** as divergências são o centro do
+    aprendizado. **"Aprender e avisar"**: ao registrar uma divergência (inclusive nos testes de
+    confiabilidade que o usuário fará), o programa aprende **na hora, sem mudar código**; numa
+    classificação **parecida**, mostra aviso **amarelo** ("Em um caso parecido (volume X), a
+    classificação correta foi Y. Motivo: … Confira."). **O resultado continua sendo o da norma**
+    (o ML nunca troca o resultado — opções "trocar" e "botão usar esta" foram recusadas); a regra é
+    corrigida por nós com teste. Registros com divergência usam a **classificação correta** (não
+    aprender com o erro).
+  - **Explicar o "backend" do ML ao usuário** na Fase 8, passo a passo: de onde vêm os dados, como
+    mede "parecido", como aprende com as divergências e por que avisa.
+  - **Demonstração pedida pelo usuário (2026-11-04):** ao fim da Fase 8 (ou quando der), simular
+    um histórico grande **fictício** (muitas classificações + várias divergências), deixar o ML
+    "aprender" e mostrar **fotos (prints) de tudo em que o ML ajuda** — como ele avisa que algo pode
+    estar errado. Nunca usar dados reais da empresa nessa simulação.
 - **Casos reais** (certificados já classificados pela empresa) ficam em `dados/casos/` e viram testes
   locais (nunca no Git nem em arquivo versionado). 1º caso: certificado GI em `normas_claude/` (PDF
   "CQ …"), classificado pela empresa como ZAR-250 — confirma ZC fora, ZE reprovado por LE e queda
@@ -199,6 +238,17 @@ as normas ABNT, além de verificar tolerância de espessura e mostrar normas cor
 - Botões: CLASSIFICAR, nova classificação, limpar valores, pesquisa reversa.
 
 ### Histórico e lixeira
+- **Decidido em 2026-11-03 (início da Fase 6):**
+  - Salvar **só pelo botão "Salvar"** depois de CLASSIFICAR (testes/simulações não entram no
+    histórico, que é a base do ML da Fase 8).
+  - Cada registro guarda: valores digitados, acabamento, camada, resultado completo (como saiu na
+    hora), **volume** (o campo se chama "Volume", não "bobina" — usuário, 2026-11-03), data/hora, usuário do Windows e PC.
+  - Pesquisa do histórico: **uma caixa de texto livre** que procura em tudo (resultado, volume…).
+  - Divergência: **classificação correta + motivo, os dois obrigatórios**; lista de divergências
+    para revisão, marcadas como resolvidas depois da correção.
+  - Tela: **Volume + Salvar na faixa de botões** (`[Nova] [Limpar] [CLASSIFICAR] Volume [__] [Salvar]`);
+    Salvar só ativo depois de classificar; **volume obrigatório** (vazio → erro vermelho nos avisos).
+  - **4 abas:** Classificar | Histórico | Divergências | Lixeira.
 - Aba de **histórico**: salvar classificações e pesquisar antigas.
 - **Excluir** move para a aba **Lixeira** (exclusão lógica). Na lixeira o registro aparece igual ao do
   histórico e pode ser **restaurado** de volta ou **excluído permanentemente**.

@@ -1,8 +1,9 @@
 """Janela principal (PySide6): só desenha a tela e liga os botões ao `Servico`.
 
 Nenhuma regra de norma aqui — tudo vem pronto do motor (via `Servico`).
-Layout em faixas: cabeçalho; entradas (material + espessura | mecânicas | químicas); botões;
-resultado | pesquisa reversa. Tema escuro.
+Cabeçalho em cima e 4 abas: Classificar | Histórico | Divergências | Lixeira. A aba Classificar
+é em faixas: entradas (material + espessura | mecânicas | químicas); botões; resultado | pesquisa
+reversa. Tema escuro.
 """
 
 from html import escape
@@ -20,6 +21,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QSizePolicy,
+    QTabWidget,
     QToolTip,
     QVBoxLayout,
     QWidget,
@@ -28,10 +30,18 @@ from PySide6.QtWidgets import (
 from classificador import __version__
 from classificador.dominio.amostra import Acabamento
 from classificador.dominio.propriedades import Propriedade
+from classificador.historico.repositorio import (
+    ErroDeValidacao,
+    NovaClassificacao,
+    RepositorioHistorico,
+)
+from classificador.interface.abas_divergencias import PainelDivergencias
+from classificador.interface.abas_historico import PainelRegistros
 from classificador.interface.componentes import instalar_filtro_roda
 from classificador.interface.entrada import ErroEntrada
 from classificador.interface.servico import Servico, fabricante
 from classificador.motor.reversa import ResultadoPesquisa
+from classificador.motor.saida import Saida
 from classificador.motor.sequencia import ErroClassificacao
 
 MECANICAS = [
@@ -69,6 +79,7 @@ QLineEdit:disabled {{ background: {caixa}; color: #616161; }}
 QComboBox QAbstractItemView {{ background: {campo}; selection-background-color: {selecao}; }}
 QPushButton {{ background: {campo}; border: 1px solid {borda}; border-radius: 6px; padding: 10px; }}
 QPushButton:hover {{ background: {caixa}; }}
+QPushButton:disabled {{ color: #616161; border: 1px solid {campo_borda}; }}
 QToolTip {{ background: {campo}; color: #f0f0f0; border: 1px solid {borda}; }}
 #titulo {{ font-size: 22pt; font-weight: bold; letter-spacing: 3px; color: {titulo}; }}
 #classificar {{ background: {botao}; color: #ffffff; border: none; font-size: 20pt;
@@ -79,6 +90,34 @@ QToolTip {{ background: {campo}; color: #f0f0f0; border: 1px solid {borda}; }}
 #dica {{ color: #9e9e9e; font-style: italic; }}
 #avisos {{ color: {aviso}; }}
 #erro {{ color: {erro}; }}
+#salvo {{ color: {certo}; }}
+QTabWidget::pane {{ border: 1px solid {borda}; border-radius: 6px; top: -1px; }}
+QTabBar::tab {{ background: {campo}; border: 1px solid {campo_borda}; border-bottom: none;
+               border-top-left-radius: 6px; border-top-right-radius: 6px;
+               padding: 8px 28px; margin-right: 4px; color: #9e9e9e; }}
+QTabBar::tab:selected {{ background: {caixa}; border: 1px solid {borda}; border-bottom: none;
+                        color: {titulo}; font-weight: bold; }}
+QTabBar::tab:disabled {{ color: #616161; }}
+QTableWidget {{ background: {campo}; alternate-background-color: {caixa};
+                border: 1px solid {campo_borda}; gridline-color: {campo_borda};
+                selection-background-color: {selecao}; selection-color: #ffffff; }}
+QHeaderView::section {{ background: {caixa}; color: {titulo}; font-weight: bold;
+                        border: none; border-bottom: 1px solid {borda}; padding: 6px; }}
+QScrollArea, QScrollArea > QWidget > QWidget {{ background: transparent; }}
+#excluir {{ color: {erro}; border: 1px solid {erro}; }}
+#restaurar {{ color: {certo}; border: 1px solid {certo}; }}
+#dialogo {{ background: {caixa}; border: 1px solid {borda}; }}
+#simbolo_aviso {{ color: {aviso}; font-size: 30pt; padding-right: 8px; }}
+#titulo_dialogo {{ font-size: 15pt; font-weight: bold; color: {titulo}; }}
+#dialogo QPushButton {{ padding: 8px 24px; }}
+QPlainTextEdit {{ background: {campo}; border: 1px solid {campo_borda}; border-radius: 4px;
+                  padding: 4px; color: #ffffff; selection-background-color: {selecao}; }}
+QPlainTextEdit:focus {{ border: 1px solid {borda}; }}
+QRadioButton {{ spacing: 8px; }}
+QRadioButton::indicator {{ width: 14px; height: 14px; border-radius: 8px;
+                          border: 2px solid {campo_borda}; background: {campo}; }}
+QRadioButton::indicator:checked {{ border: 2px solid {borda}; background: {titulo}; }}
+#excluir:disabled, #restaurar:disabled {{ color: #616161; border: 1px solid {campo_borda}; }}
 """
 
 _CORES_TOLERANCIA = {
@@ -89,10 +128,16 @@ _CORES_TOLERANCIA = {
 
 
 class JanelaPrincipal(QMainWindow):
-    def __init__(self, servico: Servico) -> None:
+    def __init__(
+        self, servico: Servico, historico: RepositorioHistorico | None = None
+    ) -> None:
         super().__init__()
         instalar_filtro_roda()  # roda do mouse só rola a tela (nunca troca o acabamento)
         self.servico = servico
+        self.historico = historico
+        # O que foi classificado por último (acabamento, textos digitados, saída): é isso que o
+        # Salvar grava. Volta a None quando algo é digitado de novo — aí precisa reclassificar.
+        self._classificado: tuple[str, dict[str, str], Saida] | None = None
         self.campos: dict[str, QLineEdit] = {}  # nome do campo → caixa de texto
         self.dicas: dict[str, QLabel] = {}  # nome do campo → faixa exigida (pesquisa reversa)
         self._resultados_pesquisa: list[ResultadoPesquisa] = []
@@ -112,11 +157,14 @@ class JanelaPrincipal(QMainWindow):
         saida.addWidget(self._caixa_resultado(), 2)
         saida.addWidget(self._caixa_pesquisa(), 1)
 
+        aba_classificar = QVBoxLayout()
+        aba_classificar.addLayout(entradas, 2)
+        aba_classificar.addLayout(self._botoes())
+        aba_classificar.addLayout(saida, 1)
+
         tela = QVBoxLayout()
         tela.addLayout(self._cabecalho())
-        tela.addLayout(entradas, 2)
-        tela.addLayout(self._botoes())
-        tela.addLayout(saida, 1)
+        tela.addWidget(self._abas(self._embrulhar(aba_classificar)), 1)
         central = QWidget(objectName="central")
         central.setLayout(tela)
         self.setCentralWidget(central)
@@ -124,7 +172,13 @@ class JanelaPrincipal(QMainWindow):
         self._ordem = list(self.campos.values())  # ordem do Enter → próximo campo
         for campo in self._ordem:
             campo.returnPressed.connect(self._enter_no_campo)
+            campo.textEdited.connect(self._entrada_mudou)
+        self.acabamento.currentTextChanged.connect(self._entrada_mudou)
         self.limpar_resultado()
+        # Calcula o tamanho das abas já agora: sem isso o Qt só mede a caixa de abas depois de
+        # mostrar a janela, e o showMaximized() se perde (a janela abria pequena, 964×835).
+        self.ensurePolished()
+        central.layout().activate()
 
     # --- Montagem da tela -------------------------------------------------------------------
 
@@ -145,6 +199,37 @@ class JanelaPrincipal(QMainWindow):
         grade.setColumnStretch(0, 1)
         grade.setColumnStretch(2, 1)  # coluna vazia do mesmo tamanho → título no centro
         return grade
+
+    def _abas(self, classificar: QWidget) -> QTabWidget:
+        """Classificar | Histórico | Divergências | Lixeira (sem histórico: só Classificar)."""
+        self.historico_aba = PainelRegistros(self.historico)
+        self.lixeira_aba = PainelRegistros(self.historico, lixeira=True)
+        self.divergencias_aba = PainelDivergencias(self.historico)
+        # O que muda numa aba aparece nas outras (ex.: excluir no Histórico → Lixeira; registro
+        # na Lixeira some das Divergências; divergência resolvida → some o aviso no Histórico).
+        paineis = [self.historico_aba, self.divergencias_aba, self.lixeira_aba]
+        for origem in paineis:
+            for destino in paineis:
+                if destino is not origem:
+                    origem.mudou.connect(destino.atualizar)
+
+        self.abas = QTabWidget()
+        self.abas.addTab(classificar, "Classificar")
+        self.abas.addTab(self.historico_aba, "Histórico")
+        self.abas.addTab(self.divergencias_aba, "Divergências")
+        self.abas.addTab(self.lixeira_aba, "Lixeira")
+        if self.historico is None:
+            for indice in range(1, self.abas.count()):
+                self.abas.setTabEnabled(indice, False)
+                self.abas.setTabToolTip(indice, "Histórico indisponível")
+        self.abas.currentChanged.connect(self._aba_mudou)
+        return self.abas
+
+    def _aba_mudou(self, _indice: int) -> None:
+        """Ao abrir uma aba, relê o banco (outra pessoa pode ter salvo algo nesse meio-tempo)."""
+        atual = self.abas.currentWidget()
+        if isinstance(atual, (PainelRegistros, PainelDivergencias)):
+            atual.atualizar()
 
     def _coluna_material(self) -> QWidget:
         self.acabamento = QComboBox()
@@ -214,10 +299,20 @@ class JanelaPrincipal(QMainWindow):
         limpar.clicked.connect(self.limpar_valores)
         classificar = QPushButton("CLASSIFICAR", objectName="classificar")
         classificar.clicked.connect(self.classificar)
+        self.volume = QLineEdit(placeholderText="nº do volume")
+        self.volume.setToolTip("Número do volume (obrigatório para salvar no histórico)")
+        self.volume.returnPressed.connect(self.salvar)
+        self.volume.textEdited.connect(self._limpar_situacao_salvar)
+        self.botao_salvar = QPushButton("Salvar")
+        self.botao_salvar.setToolTip("Salva esta classificação no histórico")
+        self.botao_salvar.clicked.connect(self.salvar)
         faixa = QHBoxLayout()
         faixa.addWidget(nova, 1)
         faixa.addWidget(limpar, 1)
-        faixa.addWidget(classificar, 4)
+        faixa.addWidget(classificar, 3)
+        faixa.addWidget(QLabel("Volume"))
+        faixa.addWidget(self.volume, 1)
+        faixa.addWidget(self.botao_salvar, 1)
         return faixa
 
     def _caixa_resultado(self) -> QGroupBox:
@@ -228,6 +323,7 @@ class JanelaPrincipal(QMainWindow):
         self.correlatas.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
         self.correlatas.linkHovered.connect(self._mostrar_fabricante)
         self.avisos = QLabel(wordWrap=True, objectName="avisos")
+        self.situacao_salvar = QLabel(wordWrap=True)  # "✔ Salvo…" (verde) ou erro (vermelho)
 
         grupo = QGroupBox("Resultado")
         caixa = QVBoxLayout(grupo)
@@ -235,6 +331,7 @@ class JanelaPrincipal(QMainWindow):
         caixa.addWidget(self.norma)
         caixa.addWidget(self.correlatas)
         caixa.addWidget(self.avisos)
+        caixa.addWidget(self.situacao_salvar)
         caixa.addStretch()
         return grupo
 
@@ -300,6 +397,9 @@ class JanelaPrincipal(QMainWindow):
             self._repintar(self.avisos)
             return
 
+        self._classificado = (self.acabamento.currentText(), textos, saida)
+        self._atualizar_salvar()
+        self._mostrar_situacao_salvar(None, "")
         self.resultado.setText(saida.resultado or "—")
         self._marcar_resultado(saida.resultado is not None)
         self.norma.setText(saida.norma or "")
@@ -362,7 +462,38 @@ class JanelaPrincipal(QMainWindow):
             linhas += [escape(a) for a in exigido.avisos]
         self.info_pesquisa.setText("<br>".join(linhas))
 
+    def salvar(self) -> None:
+        """Grava no histórico o que foi classificado por último, com o volume."""
+        if self.historico is None or self._classificado is None:
+            return
+        acabamento, textos, saida = self._classificado
+        tolerancia = saida.tolerancia
+        nova = NovaClassificacao(
+            volume=self.volume.text(),
+            acabamento=acabamento,
+            valores=textos,
+            resultado=saida.resultado,
+            norma=saida.norma,
+            correlatas=list(saida.correlatas),
+            avisos=list(saida.avisos),
+            tolerancia=tolerancia.texto if tolerancia else None,
+            tolerancia_dentro=tolerancia.dentro if tolerancia else None,
+        )
+        try:
+            numero = self.historico.salvar(nova)
+        except ErroDeValidacao as erro:
+            self._mostrar_situacao_salvar("erro", "\n".join(f"✖ {m}" for m in erro.mensagens))
+            if not self.volume.text().strip():
+                self.volume.setFocus()
+            return
+        self._classificado = None  # já salvo: não grava duas vezes o mesmo
+        self._atualizar_salvar()
+        self._mostrar_situacao_salvar(
+            "salvo", f"✔ Salvo no histórico (nº {numero}) — volume {self.volume.text().strip()}"
+        )
+
     def nova_classificacao(self) -> None:
+        self.volume.clear()
         for campo in self.campos.values():
             campo.clear()
         self.acabamento.setCurrentIndex(0)
@@ -382,6 +513,9 @@ class JanelaPrincipal(QMainWindow):
         self.limpar_resultado()
 
     def limpar_resultado(self) -> None:
+        self._classificado = None
+        self._atualizar_salvar()
+        self._mostrar_situacao_salvar(None, "")
         self.resultado.clear()
         self._marcar_resultado(False)
         self.norma.clear()
@@ -412,6 +546,34 @@ class JanelaPrincipal(QMainWindow):
             "EG": "Por face, ex.: 50 → 50/50. Vazio ou zero = sem revestimento.",
         }
         self.dica_camada.setText(dicas[revestimento])
+
+    def _entrada_mudou(self, *_) -> None:
+        """Digitou depois de classificar: o resultado na tela não vale mais para salvar."""
+        if self._classificado is not None:
+            self._classificado = None
+            self._atualizar_salvar()
+
+    def _atualizar_salvar(self) -> None:
+        pode = self.historico is not None and self._classificado is not None
+        if pode and not self._classificado[2].resultado:
+            pode = False  # sem resultado não há o que salvar
+        self.botao_salvar.setEnabled(pode)
+        if self.historico is None:
+            dica = "Histórico indisponível"
+        elif pode:
+            dica = "Salva esta classificação no histórico"
+        else:
+            dica = "Classifique para poder salvar"
+        self.botao_salvar.setToolTip(dica)
+
+    def _mostrar_situacao_salvar(self, tipo: str | None, texto: str) -> None:
+        self.situacao_salvar.setObjectName(tipo or "")
+        self.situacao_salvar.setText(texto)
+        self._repintar(self.situacao_salvar)
+
+    def _limpar_situacao_salvar(self, *_) -> None:
+        if self.situacao_salvar.objectName() == "erro":
+            self._mostrar_situacao_salvar(None, "")
 
     def _marcar_resultado(self, classificado: bool) -> None:
         """Contorno verde quando há classificação ("deu certo"); neutro se vazio ou erro."""
