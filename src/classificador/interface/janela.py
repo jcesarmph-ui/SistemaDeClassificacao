@@ -105,6 +105,10 @@ QHeaderView::section {{ background: {caixa}; color: {titulo}; font-weight: bold;
 QScrollArea, QScrollArea > QWidget > QWidget {{ background: transparent; }}
 #excluir {{ color: {erro}; border: 1px solid {erro}; }}
 #restaurar {{ color: {certo}; border: 1px solid {certo}; }}
+#dialogo {{ background: {caixa}; border: 1px solid {borda}; }}
+#simbolo_aviso {{ color: {aviso}; font-size: 30pt; padding-right: 8px; }}
+#titulo_dialogo {{ font-size: 15pt; font-weight: bold; color: {titulo}; }}
+#dialogo QPushButton {{ padding: 8px 24px; }}
 #excluir:disabled, #restaurar:disabled {{ color: #616161; border: 1px solid {campo_borda}; }}
 """
 

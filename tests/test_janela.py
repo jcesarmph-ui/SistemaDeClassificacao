@@ -300,3 +300,13 @@ def test_excluir_permanentemente_pergunta_e_apaga_de_vez(janela_com_historico):
     assert "não pode ser desfeito" in perguntas[0][1]
     assert janela.historico.obter(registro.id) is None
     assert lixeira.tabela.rowCount() == 0
+
+
+def test_confirmacao_no_visual_do_programa(janela_com_historico):
+    from classificador.interface.componentes import DialogoConfirmacao
+
+    dialogo = DialogoConfirmacao(janela_com_historico, "Confirmar exclusão", "Tem certeza?", "Sim")
+    assert dialogo.botao_cancelar.isDefault()  # Enter sem querer = cancelar
+    assert dialogo.botao_sim.objectName() == "excluir"  # contorno vermelho
+    dialogo.botao_sim.click()
+    assert dialogo.result() == QtWidgets.QDialog.Accepted

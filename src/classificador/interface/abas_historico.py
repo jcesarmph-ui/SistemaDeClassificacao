@@ -18,7 +18,6 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QPushButton,
     QScrollArea,
     QTableWidget,
@@ -33,6 +32,7 @@ from classificador.historico.repositorio import (
     Registro,
     RepositorioHistorico,
 )
+from classificador.interface.componentes import confirmar
 
 COLUNAS = ["Data/hora", "Volume", "Resultado"]
 
@@ -57,7 +57,9 @@ class PainelRegistros(QWidget):
         self.lixeira = lixeira
         self._registros: list[Registro] = []
         # Pergunta "tem certeza?"; os testes trocam por uma função que responde sozinha.
-        self.confirmar: Callable[[str, str, str], bool] = self._perguntar
+        self.confirmar: Callable[[str, str, str], bool] = (
+            lambda titulo, texto, sim: confirmar(self, titulo, texto, sim)
+        )
 
         self.pesquisa = QLineEdit(
             placeholderText="Pesquisar (volume, resultado, acabamento, data, usuário…)"
@@ -220,13 +222,6 @@ class PainelRegistros(QWidget):
         self.situacao.setText(texto)
         self.situacao.style().unpolish(self.situacao)
         self.situacao.style().polish(self.situacao)
-
-    def _perguntar(self, titulo: str, texto: str, sim: str) -> bool:
-        caixa = QMessageBox(QMessageBox.Warning, titulo, texto, parent=self)
-        botao_sim = caixa.addButton(sim, QMessageBox.AcceptRole)
-        caixa.addButton("Cancelar", QMessageBox.RejectRole)
-        caixa.exec()
-        return caixa.clickedButton() is botao_sim
 
 
 def detalhes_html(r: Registro) -> str:
