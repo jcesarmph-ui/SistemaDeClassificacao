@@ -28,14 +28,21 @@
 <p align="center">
   Aplicação desktop da <b>MG Centro de Serviços</b> que classifica aços planos — laminados a frio, a quente e
   zincados — a partir das propriedades mecânicas e químicas, indicando o grau conforme as normas ABNT.
+  Hoje <b>em uso na empresa</b> (versão 1.0.0), com histórico compartilhado na rede e avisos de
+  <b>machine learning</b> aprendidos com o próprio histórico.
 </p>
 
 <p align="center">
   <a href="#-visão-geral">Visão Geral</a> •
+  <a href="#-em-números">Em números</a> •
+  <a href="#-telas">Telas</a> •
   <a href="#-funcionalidades">Funcionalidades</a> •
   <a href="#-como-a-classificação-funciona">Como funciona</a> •
   <a href="#️-arquitetura">Arquitetura</a> •
-  <a href="#-roteiro">Roteiro</a>
+  <a href="#-modelo-de-dados">Modelo de dados</a> •
+  <a href="#️-como-foi-desenvolvido">Desenvolvimento</a> •
+  <a href="#-história-das-fases">História</a> •
+  <a href="#-estrutura-do-repositório">Estrutura</a>
 </p>
 
 ---
@@ -56,53 +63,115 @@ classificação no formato usado no dia a dia, por exemplo:
 | Zinco-ferro (GA) | `ZE - ZF100` |
 | Eletrolítico (EG) | `EEP G3 EG 50/50` |
 
-<details open>
-<summary><b>🖥️ Tela principal</b></summary>
+| ❌ Problema | 💡 Solução | ✅ Resultado |
+|---|---|---|
+| Cada certificado comparado **à mão** com as tabelas de várias normas, com notas de rodapé que mudam os limites pela espessura e pelo revestimento. | **Motor de regras** que testa todos os graus da norma certa para o acabamento e aplica as notas automaticamente. | Classificação em **~0,1 ms**, sempre no **grau mais nobre** atendido, com a norma usada. |
+| Um grau perdido por um único valor passava despercebido; campos em branco também. | **Avisos** de "quase passou" e de valores não informados junto do resultado. | Quem classifica vê **por que** o material não subiu de grau e o que faltou digitar. |
+| Tolerância de espessura e normas equivalentes (montadoras) consultadas em outras tabelas. | **Tolerância** (NBR 11888 / NBR 7013) e **normas correlatas** na mesma tela, mais a **pesquisa reversa**. | Dentro/fora em verde/vermelho, com o intervalo; qualquer norma vira a lista de valores exigidos. |
+| Erro de digitação que a norma aceita (ex.: LR 29 em vez de 290) e erros que já aconteceram antes. | **Histórico** compartilhado + **divergências** + **machine learning** que compara com o que já foi salvo. | Aviso amarelo de valor fora do comum ou de caso parecido com uma divergência — **sem nunca mudar o resultado**. |
+| Uso por mais de um computador, sem servidor nem TI. | Programa e banco SQLite numa **pasta comum da rede**, com lançador que copia o programa para cada PC. | Abre em **1–2 s** pela rede; atualizar = trocar uma pasta. |
+
+```mermaid
+mindmap
+  root((Classificação de Materiais))
+    Classificar
+      Grau mais nobre
+      Notas de rodapé
+      Resultado + camada
+      Quase passou
+      Valores não informados
+    Normas
+      NBR 5915-2
+      NBR 5906
+      NBR 7008-2 e 7008-3
+      Correlatas de montadoras
+      Pesquisa reversa
+    Tolerância
+      NBR 11888
+      NBR 7013
+      Dentro ou fora
+    Histórico
+      Salvar com volume
+      Pesquisa por texto livre
+      Lixeira
+      Divergências
+    Machine learning
+      Fora do comum
+      Caso parecido
+      Só avisa
+    Rede
+      Lançador com cópia local
+      Backup diário
+      Duas pessoas ao mesmo tempo
+```
+
+### 🎯 Objetivos
+
+| | Objetivo |
+|---|---|
+| ⚙️ | Automatizar a comparação dos certificados com as normas ABNT. |
+| 🏅 | Indicar sempre o grau mais nobre atendido, no formato usado no dia a dia. |
+| ⚠️ | Explicar o resultado: o que rebaixou o grau, o que faltou e quais limites mudaram. |
+| 📏 | Verificar a tolerância de espessura na mesma tela. |
+| 🗂️ | Guardar um histórico único e pesquisável para toda a equipe. |
+| 🔁 | Transformar cada erro encontrado em correção e caso de teste (melhoria contínua). |
+| 🤖 | Usar o histórico para avisar o que parece errado, sem tirar da norma a decisão. |
+
+## 📊 Em números
+
+| | Número | O que significa |
+|---|---|---|
+| 🧪 | **291 testes automáticos** (+ 37 locais) | Motor, normas, tolerância, histórico, ML e tela testados com uma norma fictícia; os 37 locais usam as normas reais e ficam fora do GitHub. |
+| 🐍 | **~4.000 linhas** de código + **~2.800** de testes | Programa em camadas: a regra de negócio não conhece a tela. |
+| 🔀 | **10 pull requests** em **9 fases** (0 a 8) | Cada fase numa branch própria, revisada e aprovada antes de juntar. |
+| 🏷️ | **1 versão entregue** (`v1.0.0`) | Versionamento semântico, versão visível na tela; `0.x` durante o desenvolvimento. |
+| 📝 | **12 decisões de arquitetura** (ADRs) | Do formato das normas em YAML ao machine learning. |
+| 📚 | **4 normas de classificação, 22 graus** + **2 de tolerância** | Transcritas em YAML e conferidas linha a linha pelo autor. |
+| ⚡ | **~0,1 ms** para classificar · **~60 ms** para carregar as normas | Medido no próprio projeto. |
+| 🚀 | **1–2 s** para abrir pela rede | Lançador com cópia local (1ª abertura 1,6 s, seguintes 1,0 s). |
+| 🤖 | **0 alarmes falsos** em 340 classificações | Demonstração com histórico fictício: o aviso de "fora do comum" não disparou nas classificações normais. |
+
+## 📸 Telas
+
+> Imagens geradas com um **histórico 100% fictício** (volumes, pessoas, computadores, datas e
+> valores inventados), sem nenhuma informação real.
 
 <p align="center">
-  <img src="docs/imagens/tela-principal.png" alt="Tela principal: zincado GI classificado como ZEE G2 - Z275" width="100%"/>
+  <img src="docs/telas/01_classificar.png" alt="Tela Classificar: zincado GI classificado como ZEE G2 - Z275" width="100%"/>
+  <br/><em>Classificar: resultado com a camada (contorno verde), norma usada, normas correlatas e
+  tolerância dentro (verde). O aviso amarelo vem do machine learning: um caso parecido já teve
+  divergência registrada.</em>
 </p>
 
-<sub>Valores fictícios. Vermelho só no botão principal e em erros, amarelo em avisos e verde no que
-está certo (tolerância dentro e contorno do resultado).</sub>
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/telas/02_pesquisa_reversa.png" alt="Pesquisa reversa da norma DC04"/>
+      <br/><em>Pesquisa reversa: digitada uma correlata (DC04), aparecem o grau NBR equivalente e,
+      ao lado de cada campo, a faixa exigida.</em>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/telas/03_historico.png" alt="Aba Histórico: lista de classificações salvas e detalhes do registro"/>
+      <br/><em>Histórico: lista (data/hora, volume, resultado) e, ao lado, o registro completo como
+      saiu na hora — com avisos, tolerância e valores digitados.</em>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/telas/04_divergencias.png" alt="Aba Divergências: classificação correta, motivo e o registro original"/>
+      <br/><em>Divergências: cada uma mostra a classificação correta, o motivo e o registro
+      original, até ser marcada como resolvida.</em>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/telas/05_ml_fora_do_comum.png" alt="LR 29 digitado no lugar de 290: a norma aceita, o ML avisa que está fora do comum"/>
+      <br/><em>Machine learning: digitaram LR 29 em vez de 290. A norma só limita o máximo do LR
+      e aceita, mas o ML compara com as classificações salvas do mesmo grau e avisa.</em>
+    </td>
+  </tr>
+</table>
 
-</details>
-
-<details>
-<summary><b>🤖 Machine learning — erro que a norma não pega</b></summary>
-
-<p align="center">
-  <img src="docs/imagens/ml-fora-do-comum.png" alt="LR 29 digitado no lugar de 290: a norma aceita, o ML avisa que está fora do comum" width="100%"/>
-</p>
-
-<sub>Histórico e valores fictícios. Digitaram LR 29 em vez de 290: a norma só limita o máximo do LR
-e aceita (ZEE G4), mas o ML compara com as classificações salvas do mesmo grau e avisa.</sub>
-
-</details>
-
-<details>
-<summary><b>🗂️ Histórico</b></summary>
-
-<p align="center">
-  <img src="docs/imagens/historico.png" alt="Aba Histórico: lista de classificações salvas e detalhes do registro" width="100%"/>
-</p>
-
-<sub>Dados fictícios. Lista (data/hora, volume, resultado) e, ao lado, o registro completo como saiu
-na hora — com avisos, tolerância e valores digitados.</sub>
-
-</details>
-
-<details>
-<summary><b>🔁 Divergências</b></summary>
-
-<p align="center">
-  <img src="docs/imagens/divergencias.png" alt="Aba Divergências: classificação correta, motivo e o registro original" width="100%"/>
-</p>
-
-<sub>Dados fictícios. Cada divergência mostra a classificação correta, o motivo e o registro
-original, até ser marcada como resolvida.</sub>
-
-</details>
+<sub>Vermelho só no botão principal e em erros, amarelo em avisos e verde no que está certo
+(tolerância dentro e contorno do resultado).</sub>
 
 ## ✨ Funcionalidades
 
@@ -268,6 +337,43 @@ flowchart LR
 
 </details>
 
+| Tecnologia | Aplicação no projeto |
+|---|---|
+| Python | Motor de regras, validação e lógica da aplicação. |
+| PySide6 (Qt) | Interface desktop em tela cheia, com abas e tooltips. |
+| SQLite | Histórico, lixeira e divergências numa pasta de rede (journal tradicional, backup diário). |
+| scikit-learn + NumPy | Machine learning: casos parecidos com divergências e valores fora do comum. |
+| YAML + Pydantic | Base de normas legível e validada ao carregar. |
+| Pytest + Ruff | Testes automáticos e qualidade do código. |
+| PyInstaller | Executável para Windows, com lançador que copia o programa para o PC e abre rápido. |
+| Git + GitHub | Controle de versão e documentação. |
+| Claude Code | Desenvolvimento assistido por IA: regras definidas e cada etapa aprovada pelo autor. |
+
+<details>
+<summary><b>📝 Decisões de arquitetura (ADRs)</b></summary>
+
+| ADR | Decisão |
+|---|---|
+| [0001](docs/decisoes/0001-python-pyside6.md) | Python + PySide6 para o programa desktop |
+| [0002](docs/decisoes/0002-sqlite-historico.md) | SQLite para o histórico (com lixeira) |
+| [0003](docs/decisoes/0003-repositorio-publico-dados-fora-do-git.md) | Repositório público com dados das normas fora do Git |
+| [0004](docs/decisoes/0004-normas-em-yaml.md) | Base de normas em arquivos YAML |
+| [0005](docs/decisoes/0005-formato-yaml-normas.md) | Formato detalhado do YAML e regras de interpretação |
+| [0006](docs/decisoes/0006-motor-de-classificacao.md) | Motor de classificação: etapas e regras |
+| [0007](docs/decisoes/0007-notas-por-motivo-e-correlatas.md) | Notas por motivo/acabamento e normas correlatas |
+| [0008](docs/decisoes/0008-tolerancia-de-espessura.md) | Tolerância de espessura (NBR 11888 e NBR 7013) |
+| [0009](docs/decisoes/0009-interface-e-resultado-sem-grau.md) | Interface (layout em faixas, cores, versão) e resultado sem grau (ZC de último recurso) |
+| [0010](docs/decisoes/0010-historico-lixeira-e-divergencias.md) | Histórico, lixeira e divergências (SQLite em rede, abas, melhoria contínua) |
+| [0011](docs/decisoes/0011-executavel-e-entrega-na-rede.md) | Executável e entrega na pasta da rede (lançador com cópia local) |
+| [0012](docs/decisoes/0012-machine-learning-avisos-do-historico.md) | Machine learning: avisos aprendidos do histórico (nunca muda o resultado) |
+
+</details>
+
+## 💾 Modelo de dados
+
+Dois tipos de dado: as **normas**, em arquivos YAML (dados, não código), e o **histórico**, num
+banco SQLite na pasta da rede.
+
 <details>
 <summary><b>🧩 Modelo de dados de uma norma</b></summary>
 
@@ -326,35 +432,153 @@ nbr-exemplo.yaml, linha 8 (graus → 1 → limites → LE): mínimo (280) maior 
 
 </details>
 
-| Tecnologia | Aplicação no projeto |
+<details>
+<summary><b>🗄️ Banco do histórico (SQLite)</b></summary>
+
+```mermaid
+erDiagram
+    CLASSIFICACAO ||--o{ DIVERGENCIA : "pode ter"
+    CLASSIFICACAO {
+        int id PK
+        text criado_em
+        text usuario "usuário do Windows"
+        text computador
+        text versao_programa
+        text volume "obrigatório"
+        text acabamento
+        json valores "campo da tela → texto digitado"
+        text resultado "ex.: ZEE G2 - Z275"
+        text norma
+        json correlatas
+        json avisos
+        text tolerancia
+        int tolerancia_dentro "1 dentro, 0 fora"
+        text excluido_em "preenchido = na Lixeira"
+        text excluido_por
+    }
+    DIVERGENCIA {
+        int id PK
+        int classificacao_id FK
+        text correta
+        text motivo
+        text criado_em
+        text usuario
+        text computador
+        text resolvida_em "preenchido = já corrigida"
+        text resolvida_por
+    }
+```
+
+- O registro guarda o resultado **como saiu na hora** (com avisos e tolerância) e é só leitura.
+- **Exclusão lógica:** excluir só preenche `excluido_em`; a Lixeira restaura ou exclui de vez.
+- O machine learning lê esse banco: registros com divergência entram com a **classificação correta**.
+
+</details>
+
+## 🛠️ Como foi desenvolvido
+
+| Prática | Como foi aplicada |
 |---|---|
-| Python | Motor de regras, validação e lógica da aplicação. |
-| PySide6 (Qt) | Interface desktop em tela cheia, com abas e tooltips. |
-| SQLite | Histórico, lixeira e divergências numa pasta de rede (journal tradicional, backup diário). |
-| scikit-learn + NumPy | Machine learning: casos parecidos com divergências e valores fora do comum. |
-| YAML + Pydantic | Base de normas legível e validada ao carregar. |
-| Pytest + Ruff | Testes automáticos e qualidade do código. |
-| PyInstaller | Executável para Windows, com lançador que copia o programa para o PC e abre rápido. |
-| Git + GitHub | Controle de versão e documentação. |
-| Claude Code | Desenvolvimento assistido por IA, guiado por `CLAUDE.md` e ADRs. |
+| 🧭 **Fases com entrega** | Roteiro em 9 fases; cada uma numa **branch** com **pull request**, juntada só depois de aprovada. |
+| 📋 **Normas conferidas pelo autor** | Cada norma transcrita para YAML foi impressa no formato das tabelas ABNT e conferida linha a linha antes de entrar no programa. |
+| 🧪 **Testes primeiro no motor** | Motor de classificação escrito com testes antes do código, usando uma norma fictícia; casos reais rodam só localmente. |
+| 📸 **Aprovação por foto** | Cada mudança de tela gerou "fotos" da janela (sem abri-la) para o autor aprovar antes de seguir. |
+| 📝 **Decisões registradas** | Escolhas de arquitetura e regras de interpretação das normas em ADRs (`docs/decisoes/`). |
+| 🏷️ **Versionamento semântico** | `0.x` durante o desenvolvimento (uma versão por fase), `1.0.0` na entrada em uso, tag Git por versão. |
+| 🔒 **Dados protegidos** | Normas transcritas, casos reais e histórico ficam fora do repositório público; testes e fotos usam dados fictícios. |
+| 🤖 **IA como ferramenta** | Desenvolvimento com Claude Code: o autor define as regras de negócio, revisa e aprova cada etapa. |
+
+### 🗺️ Roteiro
+
+- [x] **Fase 0** — Fundação: repositório, ADRs, ambiente Python, permissões do Claude Code
+- [x] **Fase 1** — Modelo de dados, formato YAML validado e NBR 5915-2 transcrita e conferida
+- [x] **Fase 2** — Motor de classificação (com testes primeiro): sequência por acabamento,
+  "quase passou", valores faltando, saída formatada e pesquisa reversa
+- [x] **Fase 3** — NBR 5906, 7008-2 e 7008-3 transcritas e conferidas; normas correlatas e pesquisa
+  reversa por qualquer norma
+- [x] **Fase 4** — Tolerância de espessura: NBR 11888 (Tab. 11) e NBR 7013 (Tab. 1–4) transcritas e
+  conferidas; dentro/fora com intervalo e norma
+- [x] **Fase 5** — Interface PySide6: tela em faixas simétricas, tema escuro com cores de significado
+  fixo, classificação, tolerância, correlatas e pesquisa reversa na tela
+- [x] **Fase 6** — Histórico em SQLite na rede (backup diário), abas Histórico, Divergências e
+  Lixeira, pesquisa por texto livre e registro de divergências (melhoria contínua)
+- [x] **Fase 7** — Executável para Windows na pasta da rede: lançador com cópia local (abre em
+  1–2 s), dados ao lado do programa e teste com dois PCs salvando ao mesmo tempo
+- [x] **Fase 8** — Machine learning: avisos de valores fora do comum e de casos parecidos com
+  divergências já registradas (aprende na hora, nunca muda o resultado)
+- [x] **Versão `1.0.0`** — primeira versão em uso na empresa (novembro de 2026)
+
+## 📜 História das fases
+
+O programa foi construído do zero, uma fase por vez, cada uma entregue e aprovada antes da
+seguinte. Abaixo, o que cada fase trouxe.
 
 <details>
-<summary><b>📝 Decisões de arquitetura (ADRs)</b></summary>
+<summary><b>🧱 Fases 0 e 1 — Fundação e formato das normas</b></summary>
 
-| ADR | Decisão |
-|---|---|
-| [0001](docs/decisoes/0001-python-pyside6.md) | Python + PySide6 para o programa desktop |
-| [0002](docs/decisoes/0002-sqlite-historico.md) | SQLite para o histórico (com lixeira) |
-| [0003](docs/decisoes/0003-repositorio-publico-dados-fora-do-git.md) | Repositório público com dados das normas fora do Git |
-| [0004](docs/decisoes/0004-normas-em-yaml.md) | Base de normas em arquivos YAML |
-| [0005](docs/decisoes/0005-formato-yaml-normas.md) | Formato detalhado do YAML e regras de interpretação |
-| [0006](docs/decisoes/0006-motor-de-classificacao.md) | Motor de classificação: etapas e regras |
-| [0007](docs/decisoes/0007-notas-por-motivo-e-correlatas.md) | Notas por motivo/acabamento e normas correlatas |
-| [0008](docs/decisoes/0008-tolerancia-de-espessura.md) | Tolerância de espessura (NBR 11888 e NBR 7013) |
-| [0009](docs/decisoes/0009-interface-e-resultado-sem-grau.md) | Interface (layout em faixas, cores, versão) e resultado sem grau (ZC de último recurso) |
-| [0010](docs/decisoes/0010-historico-lixeira-e-divergencias.md) | Histórico, lixeira e divergências (SQLite em rede, abas, melhoria contínua) |
-| [0011](docs/decisoes/0011-executavel-e-entrega-na-rede.md) | Executável e entrega na pasta da rede (lançador com cópia local) |
-| [0012](docs/decisoes/0012-machine-learning-avisos-do-historico.md) | Machine learning: avisos aprendidos do histórico (nunca muda o resultado) |
+- Repositório público com os dados das normas **fora do Git** (direitos autorais), ADRs desde o
+  primeiro dia e ambiente Python com testes e verificação de código.
+- Formato YAML das normas com validação ao carregar (erro aponta arquivo, linha e campo) e um
+  comando que imprime a norma no formato das tabelas ABNT para conferência.
+- NBR 5915-2 transcrita como piloto e conferida pelo autor.
+
+</details>
+
+<details>
+<summary><b>⚙️ Fase 2 — Motor de classificação</b></summary>
+
+- Sequência de tabelas por acabamento, grau mais nobre pela ordem das linhas da norma e notas de
+  rodapé declarativas (espessura, zinco-ferro).
+- Avisos de "quase passou" e de valores não informados; resultado sem grau (`1006/08`, ZC) quando
+  nenhum grau atende.
+- Pesquisa reversa: os mesmos limites do classificador, no caminho inverso.
+
+</details>
+
+<details>
+<summary><b>📚 Fases 3 e 4 — Demais normas, correlatas e tolerância</b></summary>
+
+- NBR 5906, 7008-2 e 7008-3 transcritas e conferidas; normas correlatas de montadoras e normas
+  europeias unidas de duas fontes.
+- Tolerância de espessura pela NBR 11888 (sem revestimento) e NBR 7013 (zincados), com o acréscimo
+  do revestimento ≥ Z275.
+
+</details>
+
+<details>
+<summary><b>🖥️ Fase 5 — Interface</b></summary>
+
+- Tela em faixas simétricas, sempre maximizada, tema escuro com cores de significado fixo
+  (vermelho = ação principal e erro, amarelo = aviso, verde = certo).
+- Erros de digitação na área de avisos, sem janelas de alerta; roda do mouse só rola a tela.
+
+</details>
+
+<details>
+<summary><b>🗂️ Fase 6 — Histórico, lixeira e divergências</b></summary>
+
+- Banco SQLite preparado para pasta de rede (journal tradicional, espera quando ocupado, backup
+  diário com as últimas 30 cópias).
+- Abas Histórico, Divergências e Lixeira; pesquisa por texto livre; registro de divergências com
+  classificação correta e motivo.
+
+</details>
+
+<details>
+<summary><b>🚀 Fase 7 — Executável e entrega na rede</b></summary>
+
+- Executável com PyInstaller e lançador que copia o programa para cada PC uma vez por versão
+  (abre em 1–2 s), com normas e histórico na rede.
+- Testado com dois computadores salvando ao mesmo tempo.
+
+</details>
+
+<details>
+<summary><b>🤖 Fase 8 e versão 1.0.0 — Machine learning e entrada em uso</b></summary>
+
+- Avisos de valor fora do comum (estatística robusta por grau) e de caso parecido com uma
+  divergência (vizinhos mais próximos com scikit-learn); aprende na hora e nunca muda o resultado.
+- Demonstração com histórico fictício e versão `1.0.0` em uso na empresa.
 
 </details>
 
@@ -374,7 +598,7 @@ SistemaDeClassificacao/
 ├── tests/               # testes automáticos
 │   └── dados/           # norma, folha, correlatas e tolerância fictícias usadas nos testes
 ├── docs/decisoes/       # registros de decisões de arquitetura (ADRs)
-├── docs/imagens/        # fotos da tela (dados fictícios)
+├── docs/telas/          # fotos da tela (dados fictícios)
 ├── dados/               # NÃO versionado
 │   ├── normas/          # normas transcritas (YAML)
 │   ├── tolerancias/     # NBR 11888 e NBR 7013 transcritas (YAML)
@@ -387,24 +611,19 @@ SistemaDeClassificacao/
 └── README.md
 ```
 
-## 🗺️ Roteiro
+## 🏅 Aplicações e Competências Demonstradas
 
-- [x] **Fase 0** — Fundação: repositório, ADRs, ambiente Python, permissões do Claude Code
-- [x] **Fase 1** — Modelo de dados, formato YAML validado e NBR 5915-2 transcrita e conferida
-- [x] **Fase 2** — Motor de classificação (com testes primeiro): sequência por acabamento,
-  "quase passou", valores faltando, saída formatada e pesquisa reversa
-- [x] **Fase 3** — NBR 5906, 7008-2 e 7008-3 transcritas e conferidas; normas correlatas e pesquisa
-  reversa por qualquer norma
-- [x] **Fase 4** — Tolerância de espessura: NBR 11888 (Tab. 11) e NBR 7013 (Tab. 1–4) transcritas e
-  conferidas; dentro/fora com intervalo e norma
-- [x] **Fase 5** — Interface PySide6: tela em faixas simétricas, tema escuro com cores de significado
-  fixo, classificação, tolerância, correlatas e pesquisa reversa na tela
-- [x] **Fase 6** — Histórico em SQLite na rede (backup diário), abas Histórico, Divergências e
-  Lixeira, pesquisa por texto livre e registro de divergências (melhoria contínua)
-- [x] **Fase 7** — Executável para Windows na pasta da rede: lançador com cópia local (abre em
-  1–2 s), dados ao lado do programa e teste com dois PCs salvando ao mesmo tempo
-- [x] **Fase 8** — Machine learning: avisos de valores fora do comum e de casos parecidos com
-  divergências já registradas (aprende na hora, nunca muda o resultado)
+| | Competência |
+|---|---|
+| 🐍 | Desenvolvimento de aplicações desktop em Python com PySide6. |
+| ⚙️ | Motor de regras de negócio declarativo, com as normas como dados (YAML validado). |
+| 🔬 | Interpretação de normas técnicas ABNT de aços planos (mecânica, química, tolerâncias). |
+| 🤖 | Machine learning aplicado com responsabilidade: só alerta, explica o porquê e nunca decide. |
+| 🗃️ | Persistência em SQLite numa pasta de rede, com exclusão lógica e backup diário. |
+| 🚀 | Empacotamento e distribuição sem servidor (executável + lançador com cópia local). |
+| 🧪 | Testes automatizados e arquitetura em camadas, com regras independentes da tela. |
+| 🔁 | Melhoria contínua: cada erro registrado vira correção e caso de teste. |
+| 🤝 | Uso de IA (Claude Code) como ferramenta de desenvolvimento, com o autor no controle das regras. |
 
 ## ⚖️ Direitos autorais
 
