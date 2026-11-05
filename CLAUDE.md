@@ -22,6 +22,13 @@
   2. Fotos no README (seção "📸 Telas", banco fictício, sem logo/nome da MG) + selo "Claude Code" e
      linha na tabela de tecnologias: "Desenvolvimento assistido por IA: regras definidas e cada
      etapa aprovada pelo autor." Branch + PR.
+  **Feito (2026-11-05):** 1) Release `classificacao-v1.0.0-2026-11-05` (zip 95 MB, testado: histórico
+  vazio criado) ✅; 2+3) README reorganizado para portfólio + 5 fotos em `docs/telas/` (script
+  `dados/fotos/foto_portfolio.py`, fora do Git: 244 classificações fictícias, 4 divergências) —
+  comparação aprovada pelo usuário e apagada; **PR #11 aberto, falta o merge**. Fotos: plataforma
+  normal do Windows + `WA_DontShowOnScreen` (o `offscreen` não tem fontes → quadradinhos).
+  **Pendente perguntar:** corrigir na 1.0.1 o ponto duplicado no aviso do ML quando o motivo da
+  divergência termina com "." (`aprendizado/semelhanca.py`: `Motivo: {e.motivo}. Confira.`).
 - **Tamanho com o ML:** programa passou de 79 MB para **193 MB** (scipy ~67 MB com libs, numpy
   ~28 MB, sklearn 13 MB). 1ª abertura de cada versão em cada PC demora mais (cópia); as seguintes
   não mudam. Cortar partes do scipy foi descartado (risco de quebrar em uso).
