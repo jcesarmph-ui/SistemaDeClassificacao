@@ -10,21 +10,18 @@
 
 ## Estado atual
 - Arquitetura **decidida** (2026-10-27). **Fases 0 a 8 concluídas** (PR #8 da Fase 7 e PR #9 da
-  Fase 8 com merge em 2026-11-04). **Versão 1.0.0 EM ANDAMENTO** (branch `versao-1.0.0`):
-  `__version__` = 1.0.0, selos do README "em uso" + "versão 1.0.0", entrega gerada
-  (`dist/entrega`, versão `1.0.0_20261104-165017`). **Falta:** usuário trocar **só a pasta
-  `programa`** na rede (nunca `dados/`) e testar; PR da 1.0.0; depois do merge, tag `v1.0.0` no main.
-- **Última sessão: 2026-11-04** — usuário saiu ("vou sair agora") **antes** de trocar a pasta na
-  rede e pediu: **"me lembre dessas instruções na próxima vez"**. **Ao voltar, a PRIMEIRA coisa é
-  repetir estas instruções** e perguntar se já fez:
-  1. ninguém com o programa aberto;
-  2. abrir a entrega: `! explorer "C:\Users\rodrigo.lima\Projetos\Classificação_Automática\dist\entrega"`;
-  3. Explorador (entrega e rede): **Exibir → Mostrar → Itens ocultos**;
-  4. na rede, **renomear** `programa` → `programa_antigo` (caminho de volta);
-  5. copiar `programa` da entrega para a rede; **não mexer em `dados`** (histórico);
-  6. abrir pelo "Classificação de Materiais.exe" da rede ("Preparando…" demora mais: 193 MB) e
-     conferir **versão 1.0.0** no canto, **histórico antigo** na aba Histórico, classificar e salvar;
-  7. deu certo → apagar `programa_antigo`; eu abro o PR da 1.0.0 e, após o merge, tag `v1.0.0`.
+  Fase 8 com merge em 2026-11-04). **Versão 1.0.0 na rede desde 2026-11-05** (usuário trocou a
+  pasta `programa` e testou: "funcionou"; `versao.txt` da rede = `1.0.0_20261104-165017`). PR da
+  1.0.0 aberto (branch `versao-1.0.0`); **depois do merge, tag `v1.0.0` no main**.
+  Na rede ainda pode estar `programa_antigo` (usuário apaga). Caminho da rede: só na memória local.
+- **Portfólio (pedido de 2026-11-05, igual ao SistemaCalibracao — ver `CLAUDE.md` global):**
+  1. Cópia do programa **zerada** (sem histórico — usuário: "o programa zerado igual como ele foi
+     implementado na empresa") num `.zip` em Release do repositório **privado**
+     `jcesarmph-ui/programas-executaveis` (era `calibracao-programa`; **renomeado** para guardar
+     todos os programas — decisão do usuário). Release `classificacao-v1.0.0-2026-11-05`.
+  2. Fotos no README (seção "📸 Telas", banco fictício, sem logo/nome da MG) + selo "Claude Code" e
+     linha na tabela de tecnologias: "Desenvolvimento assistido por IA: regras definidas e cada
+     etapa aprovada pelo autor." Branch + PR.
 - **Tamanho com o ML:** programa passou de 79 MB para **193 MB** (scipy ~67 MB com libs, numpy
   ~28 MB, sklearn 13 MB). 1ª abertura de cada versão em cada PC demora mais (cópia); as seguintes
   não mudam. Cortar partes do scipy foi descartado (risco de quebrar em uso).
