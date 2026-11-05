@@ -19,8 +19,8 @@
   <img src="https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=claude&logoColor=white" alt="Claude Code"/>
 </p>
 <p align="center">
-  <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/fase-8_machine_learning-blue?style=flat-square" alt="Fase"/>
+  <img src="https://img.shields.io/badge/status-em_uso_na_empresa-brightgreen?style=flat-square" alt="Status"/>
+  <img src="https://img.shields.io/badge/versão-1.0.0-blue?style=flat-square" alt="Versão"/>
   <img src="https://img.shields.io/badge/normas-ABNT-009739?style=flat-square" alt="Normas ABNT"/>
   <img src="https://img.shields.io/badge/idioma-pt--BR-green?style=flat-square" alt="Idioma"/>
 </p>

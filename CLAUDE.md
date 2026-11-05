@@ -9,10 +9,28 @@
 - **Perguntar sempre que houver dúvida** sobre regra de norma ou comportamento — nunca supor.
 
 ## Estado atual
-- Arquitetura **decidida** (2026-10-27). **Fases 0 a 7 concluídas** (PR #8 da Fase 7 com merge em
-  2026-11-04; programa em uso na rede, teste com 2 PCs salvando juntos deu certo). A **1.0.0 ficou
-  para depois** (usuário quis ir direto ao ML). **Fase 8 – Machine learning EM ANDAMENTO** (branch
-  `fase-8-machine-learning`, versão `0.8.0`).
+- Arquitetura **decidida** (2026-10-27). **Fases 0 a 8 concluídas** (PR #8 da Fase 7 e PR #9 da
+  Fase 8 com merge em 2026-11-04). **Versão 1.0.0 na rede desde 2026-11-05** (usuário trocou a
+  pasta `programa` e testou: "funcionou"; `versao.txt` da rede = `1.0.0_20261104-165017`). PR da
+  1.0.0 aberto (branch `versao-1.0.0`); **depois do merge, tag `v1.0.0` no main**.
+  Na rede ainda pode estar `programa_antigo` (usuário apaga). Caminho da rede: só na memória local.
+- **Portfólio (pedido de 2026-11-05, igual ao SistemaCalibracao — ver `CLAUDE.md` global):**
+  1. Cópia do programa **zerada** (sem histórico — usuário: "o programa zerado igual como ele foi
+     implementado na empresa") num `.zip` em Release do repositório **privado**
+     `jcesarmph-ui/programas-executaveis` (era `calibracao-programa`; **renomeado** para guardar
+     todos os programas — decisão do usuário). Release `classificacao-v1.0.0-2026-11-05`.
+  2. Fotos no README (seção "📸 Telas", banco fictício, sem logo/nome da MG) + selo "Claude Code" e
+     linha na tabela de tecnologias: "Desenvolvimento assistido por IA: regras definidas e cada
+     etapa aprovada pelo autor." Branch + PR.
+- **Tamanho com o ML:** programa passou de 79 MB para **193 MB** (scipy ~67 MB com libs, numpy
+  ~28 MB, sklearn 13 MB). 1ª abertura de cada versão em cada PC demora mais (cópia); as seguintes
+  não mudam. Cortar partes do scipy foi descartado (risco de quebrar em uso).
+- **Lição do empacotamento (2026-11-04):** o gerador tirava o `unittest`; o scipy precisa dele
+  (`numpy.testing`) → o `.exe` não abria ("Unhandled exception in script"). Corrigido no
+  `gerar_exe.py` (cópia no claude-config). **Testar o `.exe` antes de entregar:** abrir com
+  `QT_QPA_PLATFORM=offscreen` + `CLASSIFICADOR_DADOS` numa pasta temporária e conferir se o
+  `historico.db` foi criado ("processo continua aberto" não serve: a janela de erro também fica
+  aberta — e aparece na tela do usuário).
 - **Fase 8 — decisões do usuário (2026-11-04):**
   - **Biblioteca scikit-learn** (escolha do usuário, mesmo sabendo que o `.exe` cresce ~40–60 MB e
     cada aviso é mais difícil de explicar; alternativa recusada: Python puro). Medir o tamanho na
