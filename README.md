@@ -126,7 +126,7 @@ mindmap
 | 🔀 | **10 pull requests** em **9 fases** (0 a 8) | Cada fase numa branch própria, revisada e aprovada antes de juntar. |
 | 🏷️ | **1 versão entregue** (`v1.0.0`) | Versionamento semântico, versão visível na tela; `0.x` durante o desenvolvimento. |
 | 📝 | **12 decisões de arquitetura** (ADRs) | Do formato das normas em YAML ao machine learning. |
-| 📚 | **4 normas de classificação, 22 graus** + **2 de tolerância** | Transcritas em YAML e conferidas linha a linha pelo autor. |
+| 📚 | **4 normas de classificação, 22 graus** + **2 de tolerância** | Transcritas em YAML e conferidas linha a linha. |
 | ⚡ | **~0,1 ms** para classificar · **~60 ms** para carregar as normas | Medido no próprio projeto. |
 | 🚀 | **1–2 s** para abrir pela rede | Lançador com cópia local (1ª abertura 1,6 s, seguintes 1,0 s). |
 | 🤖 | **0 alarmes falsos** em 340 classificações | Demonstração com histórico fictício: o aviso de "fora do comum" não disparou nas classificações normais. |
@@ -153,7 +153,7 @@ mindmap
     <td width="50%" align="center">
       <img src="docs/telas/03_historico.png" alt="Aba Histórico: lista de classificações salvas e detalhes do registro"/>
       <br/><em>Histórico: lista (data/hora, volume, resultado) e, ao lado, o registro completo como
-      saiu na hora — com avisos, tolerância e valores digitados.</em>
+      foi obtido no momento — com avisos, tolerância e valores digitados.</em>
     </td>
   </tr>
   <tr>
@@ -194,7 +194,7 @@ mindmap
   1–2 segundos porque cada PC guarda uma cópia local do programa.
 - 🤖 **Machine learning** — aprende com o histórico e com as divergências e **avisa** quando um
   valor está fora do comum para o grau (ex.: erro de digitação que a norma aceita) ou quando o
-  material é parecido com um caso que já teve divergência. Aprende na hora, sem mudar código; só
+  material é parecido com um caso que já teve divergência. Aprende em tempo real, sem mudar código; só
   alerta — a classificação continua sempre pela regra da norma.
 
 <details>
@@ -269,7 +269,7 @@ flowchart LR
     C -->|não| D[Registrar divergência<br/>correta + motivo]
     D --> E[Corrigir norma/regra<br/>+ caso de teste]
     E --> F[Nova versão<br/>marcada como resolvida]
-    D -.->|aprende na hora| G[🤖 ML avisa em<br/>casos parecidos]
+    D -.->|aprende imediatamente| G[🤖 ML avisa em<br/>casos parecidos]
 ```
 
 <details>
@@ -469,7 +469,7 @@ erDiagram
     }
 ```
 
-- O registro guarda o resultado **como saiu na hora** (com avisos e tolerância) e é só leitura.
+- O registro guarda o resultado **como foi obtido no momento** (com avisos e tolerância) e é só leitura.
 - **Exclusão lógica:** excluir só preenche `excluido_em`; a Lixeira restaura ou exclui de vez.
 - O machine learning lê esse banco: registros com divergência entram com a **classificação correta**.
 
@@ -480,9 +480,9 @@ erDiagram
 | Prática | Como foi aplicada |
 |---|---|
 | 🧭 **Fases com entrega** | Roteiro em 9 fases; cada uma numa **branch** com **pull request**, juntada só depois de aprovada. |
-| 📋 **Normas conferidas pelo autor** | Cada norma transcrita para YAML foi impressa no formato das tabelas ABNT e conferida linha a linha antes de entrar no programa. |
+| 📋 **Normas conferidas linha a linha** | Cada norma transcrita para YAML foi impressa no formato das tabelas ABNT e conferida linha a linha antes de entrar no programa. |
 | 🧪 **Testes primeiro no motor** | Motor de classificação escrito com testes antes do código, usando uma norma fictícia; casos reais rodam só localmente. |
-| 📸 **Aprovação por foto** | Cada mudança de tela gerou "fotos" da janela (sem abri-la) para o autor aprovar antes de seguir. |
+| 📸 **Aprovação por foto** | Cada mudança de tela gerou "fotos" da janela (sem abri-la) para aprovação antes de seguir. |
 | 📝 **Decisões registradas** | Escolhas de arquitetura e regras de interpretação das normas em ADRs (`docs/decisoes/`). |
 | 🏷️ **Versionamento semântico** | `0.x` durante o desenvolvimento (uma versão por fase), `1.0.0` na entrada em uso, tag Git por versão. |
 | 🔒 **Dados protegidos** | Normas transcritas, casos reais e histórico ficam fora do repositório público; testes e fotos usam dados fictícios. |
@@ -505,7 +505,7 @@ erDiagram
 - [x] **Fase 7** — Executável para Windows na pasta da rede: lançador com cópia local (abre em
   1–2 s), dados ao lado do programa e teste com dois PCs salvando ao mesmo tempo
 - [x] **Fase 8** — Machine learning: avisos de valores fora do comum e de casos parecidos com
-  divergências já registradas (aprende na hora, nunca muda o resultado)
+  divergências já registradas (aprende imediatamente, nunca muda o resultado)
 - [x] **Versão `1.0.0`** — primeira versão em uso na empresa (novembro de 2026)
 
 ## 📜 História das fases
@@ -520,7 +520,7 @@ seguinte. Abaixo, o que cada fase trouxe.
   primeiro dia e ambiente Python com testes e verificação de código.
 - Formato YAML das normas com validação ao carregar (erro aponta arquivo, linha e campo) e um
   comando que imprime a norma no formato das tabelas ABNT para conferência.
-- NBR 5915-2 transcrita como piloto e conferida pelo autor.
+- NBR 5915-2 transcrita como piloto e conferida linha a linha.
 
 </details>
 
@@ -577,7 +577,7 @@ seguinte. Abaixo, o que cada fase trouxe.
 <summary><b>🤖 Fase 8 e versão 1.0.0 — Machine learning e entrada em uso</b></summary>
 
 - Avisos de valor fora do comum (estatística robusta por grau) e de caso parecido com uma
-  divergência (vizinhos mais próximos com scikit-learn); aprende na hora e nunca muda o resultado.
+  divergência (vizinhos mais próximos com scikit-learn); aprende imediatamente e nunca muda o resultado.
 - Demonstração com histórico fictício e versão `1.0.0` em uso na empresa.
 
 </details>
