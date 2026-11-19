@@ -153,7 +153,7 @@ mindmap
     <td width="50%" align="center">
       <img src="docs/telas/03_historico.png" alt="Aba Histórico: lista de classificações salvas e detalhes do registro"/>
       <br/><em>Histórico: lista (data/hora, volume, resultado) e, ao lado, o registro completo como
-      saiu na hora — com avisos, tolerância e valores digitados.</em>
+      foi obtido no momento — com avisos, tolerância e valores digitados.</em>
     </td>
   </tr>
   <tr>
@@ -194,7 +194,7 @@ mindmap
   1–2 segundos porque cada PC guarda uma cópia local do programa.
 - 🤖 **Machine learning** — aprende com o histórico e com as divergências e **avisa** quando um
   valor está fora do comum para o grau (ex.: erro de digitação que a norma aceita) ou quando o
-  material é parecido com um caso que já teve divergência. Aprende na hora, sem mudar código; só
+  material é parecido com um caso que já teve divergência. Aprende em tempo real, sem mudar código; só
   alerta — a classificação continua sempre pela regra da norma.
 
 <details>
@@ -269,7 +269,7 @@ flowchart LR
     C -->|não| D[Registrar divergência<br/>correta + motivo]
     D --> E[Corrigir norma/regra<br/>+ caso de teste]
     E --> F[Nova versão<br/>marcada como resolvida]
-    D -.->|aprende na hora| G[🤖 ML avisa em<br/>casos parecidos]
+    D -.->|aprende imediatamente| G[🤖 ML avisa em<br/>casos parecidos]
 ```
 
 <details>
@@ -469,7 +469,7 @@ erDiagram
     }
 ```
 
-- O registro guarda o resultado **como saiu na hora** (com avisos e tolerância) e é só leitura.
+- O registro guarda o resultado **como foi obtido no momento** (com avisos e tolerância) e é só leitura.
 - **Exclusão lógica:** excluir só preenche `excluido_em`; a Lixeira restaura ou exclui de vez.
 - O machine learning lê esse banco: registros com divergência entram com a **classificação correta**.
 
@@ -505,7 +505,7 @@ erDiagram
 - [x] **Fase 7** — Executável para Windows na pasta da rede: lançador com cópia local (abre em
   1–2 s), dados ao lado do programa e teste com dois PCs salvando ao mesmo tempo
 - [x] **Fase 8** — Machine learning: avisos de valores fora do comum e de casos parecidos com
-  divergências já registradas (aprende na hora, nunca muda o resultado)
+  divergências já registradas (aprende imediatamente, nunca muda o resultado)
 - [x] **Versão `1.0.0`** — primeira versão em uso na empresa (novembro de 2026)
 
 ## 📜 História das fases
@@ -577,7 +577,7 @@ seguinte. Abaixo, o que cada fase trouxe.
 <summary><b>🤖 Fase 8 e versão 1.0.0 — Machine learning e entrada em uso</b></summary>
 
 - Avisos de valor fora do comum (estatística robusta por grau) e de caso parecido com uma
-  divergência (vizinhos mais próximos com scikit-learn); aprende na hora e nunca muda o resultado.
+  divergência (vizinhos mais próximos com scikit-learn); aprende imediatamente e nunca muda o resultado.
 - Demonstração com histórico fictício e versão `1.0.0` em uso na empresa.
 
 </details>
