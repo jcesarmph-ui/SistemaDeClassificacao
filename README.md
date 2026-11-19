@@ -126,7 +126,7 @@ mindmap
 | 🔀 | **10 pull requests** em **9 fases** (0 a 8) | Cada fase numa branch própria, revisada e aprovada antes de juntar. |
 | 🏷️ | **1 versão entregue** (`v1.0.0`) | Versionamento semântico, versão visível na tela; `0.x` durante o desenvolvimento. |
 | 📝 | **12 decisões de arquitetura** (ADRs) | Do formato das normas em YAML ao machine learning. |
-| 📚 | **4 normas de classificação, 22 graus** + **2 de tolerância** | Transcritas em YAML e conferidas linha a linha pelo autor. |
+| 📚 | **4 normas de classificação, 22 graus** + **2 de tolerância** | Transcritas em YAML e conferidas linha a linha. |
 | ⚡ | **~0,1 ms** para classificar · **~60 ms** para carregar as normas | Medido no próprio projeto. |
 | 🚀 | **1–2 s** para abrir pela rede | Lançador com cópia local (1ª abertura 1,6 s, seguintes 1,0 s). |
 | 🤖 | **0 alarmes falsos** em 340 classificações | Demonstração com histórico fictício: o aviso de "fora do comum" não disparou nas classificações normais. |
@@ -480,9 +480,9 @@ erDiagram
 | Prática | Como foi aplicada |
 |---|---|
 | 🧭 **Fases com entrega** | Roteiro em 9 fases; cada uma numa **branch** com **pull request**, juntada só depois de aprovada. |
-| 📋 **Normas conferidas pelo autor** | Cada norma transcrita para YAML foi impressa no formato das tabelas ABNT e conferida linha a linha antes de entrar no programa. |
+| 📋 **Normas conferidas linha a linha** | Cada norma transcrita para YAML foi impressa no formato das tabelas ABNT e conferida linha a linha antes de entrar no programa. |
 | 🧪 **Testes primeiro no motor** | Motor de classificação escrito com testes antes do código, usando uma norma fictícia; casos reais rodam só localmente. |
-| 📸 **Aprovação por foto** | Cada mudança de tela gerou "fotos" da janela (sem abri-la) para o autor aprovar antes de seguir. |
+| 📸 **Aprovação por foto** | Cada mudança de tela gerou "fotos" da janela (sem abri-la) para aprovação antes de seguir. |
 | 📝 **Decisões registradas** | Escolhas de arquitetura e regras de interpretação das normas em ADRs (`docs/decisoes/`). |
 | 🏷️ **Versionamento semântico** | `0.x` durante o desenvolvimento (uma versão por fase), `1.0.0` na entrada em uso, tag Git por versão. |
 | 🔒 **Dados protegidos** | Normas transcritas, casos reais e histórico ficam fora do repositório público; testes e fotos usam dados fictícios. |
@@ -520,7 +520,7 @@ seguinte. Abaixo, o que cada fase trouxe.
   primeiro dia e ambiente Python com testes e verificação de código.
 - Formato YAML das normas com validação ao carregar (erro aponta arquivo, linha e campo) e um
   comando que imprime a norma no formato das tabelas ABNT para conferência.
-- NBR 5915-2 transcrita como piloto e conferida pelo autor.
+- NBR 5915-2 transcrita como piloto e conferida linha a linha.
 
 </details>
 
